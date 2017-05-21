@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockCompensateDetail">
+
+	<sql id="tableName" >
+		c_stock_compensate_detail
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	t.id id ,
+	t.compensate_serialno compensateSerialno ,
+	t.materialcode materialcode ,
+	t.total_s totalS ,
+	t.total_m totalM ,
+	t.price price ,
+	t.unit unit,
+	bt.typeId typeId,
+    bt.name fname, 
+    b.covert_ratio covertratio, 
+    bt.account_flag accountflag,
+	b.name name     FROM 
+    <include refid="tableName"/> t
+    left join b_material_info b on t.materialcode=b.code
+    left join b_material_type bt on b.typeId=bt.typeId
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockCompensateDetail" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,compensate_serialno,materialcode,total_s,total_m,price,unit)
+		VALUES
+		(#{id} ,#{compensateSerialno} ,#{materialcode} ,#{totalS} ,#{totalM} ,#{price} ,#{unit} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,compensate_serialno,materialcode,total_s,total_m,price,unit)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.compensateSerialno} ,#{item.materialcode} ,#{item.totalS} ,#{item.totalM} ,#{item.price} ,#{item.unit} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE compensate_serialno = #{compensateSerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockCompensateDetail">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockCompensateDetail" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where compensate_serialno = #{compensateSerialno}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != '' and id != null">AND id = #{id}</if>
+  	<if test="compensateSerialno != '' and compensateSerialno != null">AND compensate_serialno = #{compensateSerialno}</if>
+  	<if test="materialcode != '' and materialcode != null">AND materialcode = #{materialcode}</if>
+  	<if test="totalS != null">AND total_s = #{totalS}</if>
+  	<if test="totalM != null">AND total_m = #{totalM}</if>
+  	<if test="price != null">AND price = #{price}</if>
+  	<if test="unit != '' and unit != null">AND unit = #{unit}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockCompensateDetail"
+		parameterType="com.lq.lss.model.CStockCompensateDetail">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="compensateSerialno != null">compensate_serialno = #{compensateSerialno},</if>
+		  	<if test="materialcode != null">materialcode = #{materialcode},</if>
+		  	<if test="totalS != null">total_s = #{totalS},</if>
+		  	<if test="totalM != null">total_m = #{totalM},</if>
+		  	<if test="price != null">price = #{price},</if>
+		  	<if test="unit != null">unit = #{unit}</if>
+			</set>
+		WHERE id = #{id}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockCompensateDetail">
+		<include refid="update_sql"/>
+	</update>	
+		
+	<select id="findByHtcode" parameterType="java.lang.String" resultType="com.lq.lss.model.CompensateDetail">
+		 
+		select t. htCode htCode,  ht.com_name comName,ht.lessee_cus_code mchCode,t.materialCode materialcode, 
+		b.name name, sum(amt*change_type) totalS,FORMAT(sum(amt*change_type*b.compensate_ratio),2) as amt ,
+		b.compensate_flag  unit,
+		bt.typeId typeId,
+	    bt.name fname, 
+	    b.covert_ratio covertratio, 
+	    bt.account_flag accountflag
+		
+		from c_stock_flow t 
+
+
+		left join c_bus_ht ht on t.htCode=ht.htcode
+
+		left join b_material_info b on t.materialCode=b.code
+		
+		left join b_material_type bt on b.typeId=bt.typeId
+
+		where t.htCode= #{htCode}  
+	
+		and order_type in (27,13,14)
+
+		group by t.materialCode
+		
+  	</select>
+  	
+  	
+  	
+  	<select id="findByCompensateSerialno" parameterType="java.lang.String" resultType="com.lq.lss.dto.CStockCompensateDetailDto">
+		<include refid="selectColumns"/>   
+		WHERE compensate_serialno = #{compensateSerialno}
+  	</select>
+
+</mapper>

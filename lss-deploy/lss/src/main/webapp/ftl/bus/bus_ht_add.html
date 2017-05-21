@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>新增合同</title> <#include "../include_head.html">
+
+<style type="text/css">
+ .tab_div_cla{padding: 20px 60px 20px 60px}
+ .color_cla{color: red;}
+</style>
+</head>
+
+<body>
+	<div class="easyui-layout" data-options="fit:true" style="padding: top:10px;">
+	    <div data-options="region:'north'" style="height:35px;">
+	    		<div style="text-align: left; padding: 3px">
+						<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="save()">保 存</a>
+					    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeForm('新增合同')">关 闭</a>
+			    </div>
+	    </div>
+		<div data-options="region:'center'">
+		
+			<div class="easyui-panel" title="租赁合同"  style="width:auto;height:auto;">
+				<div style="padding: 10px 60px 20px 60px">
+					<form id="fm" method="post">
+					    
+						<div id="ht_tab" class="easyui-tabs"
+							style="width: 800px; height: 360px" data-options="tabPosition:'bottom'">
+							
+							<div title="工程资料" id="tab_div_1" class="tab_div_cla">
+								   <div class="fitem">
+										<label class="color_cla">合同编号:</label> <input name="htcode" id="htcode" readonly="readonly" class="easyui-textbox" data-options="required:true">
+										<label class="color_cla">签订日期:</label> <input name="createtime" id="createtime" class="easyui-datetimebox" data-options="required:true">
+									</div>
+									<div class="fitem">
+										<label class="color_cla">项目开始日期:</label>  <input name="beginDate" id="beginDate" class="easyui-datebox" data-options="required:true">
+										<label class="color_cla">项目结束日期:</label>    <input name="endDate" id="endDate" class="easyui-datebox" data-options="required:true"> 
+									</div>
+									<div class="fitem">
+									    <label class="color_cla">项目名称:</label> <input name="projectName" id="projectName" class="easyui-textbox" data-options="required:true">
+										<label class="color_cla">项目地址:</label> <input name="projectAdress" id="projectAdress" class="easyui-textbox" data-options="required:true">
+									</div>
+									<div class="fitem">
+									   <label class="color_cla">项目保证金:</label> <input name="projectDeposit" id="projectDeposit" class="easyui-numberbox" data-options="required:true">
+									   <label class="color_cla">公司名称:</label> <input name="comName" id="comName" class="easyui-textbox" data-options="required:true">
+									</div>
+									<div class="fitem">
+										<label class="color_cla">公司地址:</label> <input name="comAddress" id="comAddress"	class="easyui-textbox" data-options="required:true"> 
+										<label class="color_cla">公司联系人:</label> <input name="comLinkman" id="comLinkman" class="easyui-textbox" data-options="required:true">
+										
+									</div>
+									<div class="fitem">
+									    <label class="color_cla">联系方式:</label> <input name="comTel" id="comTel"	class="easyui-numberbox" data-options="required:true"> 
+										<label class="color_cla">公司类型:</label> <select class="easyui-combobox" id="comType" name="comType" style="width:153px;" data-options="required:true,panelHeight:'auto',editable:false">
+											                          <option value="1">内部</option>
+											                          <option value="2">外部</option>
+											                          <option value="3">大客户</option>
+							                                   </select>
+									</div>
+									
+									
+									<div class="fitem">
+										<label class="color_cla">合计租期:</label>  <input name="totalDays" id="totalDays" class="easyui-numberbox" readonly="readonly" data-options="required:true">
+										<label class="color_cla">合同类型:</label> <select class="easyui-combobox" onchange="showMsg()" id="htType" name="htType" style="width:153px;"
+										data-options="required:true,panelHeight:'auto',editable:false,onChange:showMsg">
+										                              <option value="2">租出</option>
+											                          <option value="1">转租</option>
+							                                   </select><span id="span_msg"></span>
+									</div>
+									<script type="text/javascript">
+									         
+									</script>
+							</div>
+							<div title="杂费" id="tab_div_2" class="tab_div_cla">
+							        
+									
+									<div class="fitem">
+										<label  class="color_cla">上车费:</label> <input name="getonFee" id="getonFee" value="0" class="easyui-numberbox" data-options="precision:2" required="true">(元／吨)
+										<label  class="color_cla">下车费:</label> <input name="getoffFee" id="getoffFee" value="0" class="easyui-numberbox" data-options="precision:2" required="true">(元／吨) 
+									</div>
+									<div class="fitem">
+										<label class="color_cla">运输费:</label> <input name="transportFee" id="transportFee" value="0" class="easyui-numberbox" data-options="precision:2" required="true">(元／吨)
+										<label class="color_cla">押金:</label> <input name="deposit" id="deposit"	value="0" class="easyui-numberbox" data-options="precision:2" required="true">(按租约价值百分比算)
+									</div>
+									<div class="fitem">
+										<label class="color_cla">滞纳金:</label> <input name="lateFee" id="lateFee" value="0" class="easyui-numberbox" data-options="precision:2" required="true">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										<label class="color_cla">袋费:</label> <input name="bagFee" id="bagFee" value="0" class="easyui-numberbox" data-options="precision:2" required="true">(元／只)
+										
+									</div>
+									<div class="fitem">
+										<label class="color_cla">滞纳金开起日期:</label> <input name="lateBegdate" id="lateBegdate" value="0" class="easyui-numberbox"  required="true">
+									</div>
+									
+									<div class="fitem">
+										<label class="color_cla">装卸费归属:</label> <select class="easyui-combobox" id="zxfeeBelong" name="zxfeeBelong" style="width:153px;" data-options="required:true,panelHeight:'auto',editable:false">
+											                          <option value="1">乙方出，甲方不代收</option>
+											                          <option value="2">乙方出，甲方代收</option>
+											                          <option value="3">甲方出</option>
+							                                    </select>
+										<label class="color_cla">运费归属:</label> <select class="easyui-combobox" id="transportfeeBelong" name="transportfeeBelong" style="width:153px;" data-options="required:true,panelHeight:'auto',editable:false">
+											                          <option value="1">乙方出，甲方不代收</option>
+											                          <option value="2">乙方出，甲方代收</option>
+											                          <option value="3">甲方出</option>
+							                                    </select>
+									</div>
+									<div class="fitem">
+										<label class="color_cla">杂费归属:</label> <select class="easyui-combobox" id="otherfeeBelong" name="otherfeeBelong" style="width:153px;" data-options="required:true,panelHeight:'auto',editable:false">
+											                          <option value="1">乙方出，甲方不代收</option>
+											                          <option value="2">乙方出，甲方代收</option>
+											                          <option value="3">甲方出</option>
+							                                    </select>
+										<label class="color_cla">结算方式:</label> <select class="easyui-combobox" id="settlementType" name="settlementType" style="width:153px;" data-options="required:true,panelHeight:'auto',editable:false">
+											                          <option value="1">算头不算尾</option>
+											                          <option value="2">算尾不算头</option>
+											                          <option value="3">算头算尾</option>
+											                          <option value="4">头尾都不算</option>
+							                                    </select>
+									</div>
+							</div>
+							<div title="租、修、赔偿标准" id="tab_div_3" class="tab_div_cla">
+							
+							     <div class="fitem" >
+								     <div id="tbUp" style="height: auto">
+										<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="acceptUp()">保存</a> 
+										<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="appendUp()">增加</a> 
+										<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="removeUp()">移除</a> 
+									</div>
+									<table id="dgItem" class="easyui-datagrid"	style="width: 690px; height: 200px;float: left;"
+										data-options="
+										singleSelect: true,
+										toolbar: '#tbUp',
+										showFooter: true,
+										onClickCell: onClickCell">
+										<thead>
+											<tr>
+												<th data-options="field:'materialId',width:150,hidden:true">物资简码</th>
+												<th data-options="field:'typeid',width:150,align:'left'">物资名称</th>
+												<th data-options="field:'rentalDay',width:100,align:'left',editor:{type:'numberbox',options:{precision:2}}">日租金</th>
+												<th data-options="field:'quantity',width:100,align:'left',editor:{type:'numberbox',options:{precision:2}}">约租量</th>
+												<th data-options="field:'unit1',width:100,align:'left',editor:{type:'numberbox',options:{precision:2}}">单位价值</th>
+												<th data-options="field:'unit',width:50,align:'left'">单位</th>
+												<th data-options="field:'totalAmt',width:100,align:'left',editor:{type:'numberbox',options:{precision:2}}">每吨数量</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+								<div class="fitem" style="float: left;" >
+								     <div id="tbDown" style="height: auto">
+										<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="acceptDown()">保存</a> 
+									    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="appendDown()">增加</a>
+									    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="removeDown()">移除</a>  
+									</div>
+									<table id="dgItemDown" class="easyui-datagrid"	style="width: 690px; height: 200px;float: left;"
+										data-options="
+										singleSelect: true,
+										toolbar: '#tbDown',
+										showFooter: true,
+										onClickCell: onClickCellDown">
+										<thead>
+											<tr>
+												<th data-options="field:'typeid',width:150,hidden:true">物资简码</th>
+												<th data-options="field:'name',width:150,align:'left'">物资名称</th>
+												<th data-options="field:'feeName',width:120,align:'left'">收费类型</th>
+												<th data-options="field:'feePercant',width:120,align:'left',editor:{type:'numberbox'}">单价</th>
+												<th data-options="field:'feeUnit',width:120,align:'left'">单位</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+								
+								
+								
+							</div>
+							
+						
+							<div title="承租人资料" id="tab_div_4" class="tab_div_cla">
+								
+									<div class="fitem">
+										<label  class="color_cla">承租单位:</label> <input name="lesseeCusCode" id="fromCustomerCode" class="easyui-combogrid" data-options="required:true,editable:false"> 
+										<label>联系人:</label> <input name="linkman" id="linkman" readonly="readonly" class="easyui-textbox">
+									</div>
+									<div class="fitem">
+										<label>电话:</label> <input name="custel" id="custel" readonly="readonly" class="easyui-textbox">
+										<label>单位地址:</label> <input name="cusaddress" id="cusaddress" readonly="readonly" class="easyui-textbox">
+									</div>
+									<div class="fitem">
+										<label>开户银行:</label> <input name="bankinfo" id="bankinfo"	readonly="readonly" class="easyui-textbox">
+										<label>账号:</label> <input name="accountno" id="accountno" readonly="readonly" class="easyui-textbox">
+									</div>
+								
+							</div>
+							<div title="担保人资料" id="tab_div_5" class="tab_div_cla">
+								    <div class="fitem">
+										<label>担保单位:</label> <input name="assureCusCode" id="assureCustomerCode" class="easyui-combogrid" data-options="editable:false"> 
+										<label>联系人:</label> <input name="assureLinkman" id="assureLinkman" readonly="readonly" class="easyui-textbox">
+									</div>
+									<div class="fitem">
+										<label>电话:</label> <input name="assureCustel" id="assureCustel" readonly="readonly" class="easyui-textbox">
+										<label>单位地址:</label> <input name="assureCusaddress" id="assureCusaddress" readonly="readonly" class="easyui-textbox">
+									</div>
+									<div class="fitem">
+										<label>开户银行:</label> <input name="assureBankinfo" id="assureBankinfo"	readonly="readonly" class="easyui-textbox">
+										<label>账号:</label> <input name="assureAccountno" id="assureAccountno" readonly="readonly" class="easyui-textbox">
+									</div>
+							</div>
+<!-- 								<div title="其它" id="tab_div_6" class="tab_div_cla"> -->
+									
+<!-- 								</div> -->
+					      
+						</div>
+					  </form>
+
+				</div>
+			</div>
+		</div>
+	   
+	</div>
+  <#include "bus_ht_js.html">
+  <script type="text/javascript">
+        
+       
+		$(document).ready(function() {
+			var dateNow = getNowFormatDate();
+			var _no="HT"+generateNum();
+		    $('#htcode').textbox('setValue',_no);
+		    var dateYmd=dateNow.substring(0,10);
+		    
+		    //$('#createtime').datetimebox('setValue', dateNow);
+		    //$('#beginDate').datebox('setValue', dateYmd);
+		    //$('#endDate').datebox('setValue', dateYmd);
+
+		    
+		    initMaterial();
+		    
+		});
+		
+		
+		function save() {
+			var saveUrl=addBaseAction+'?method=savaHt';
+			
+			$('#fm').form('submit', {
+				 url:saveUrl,
+				 onSubmit : function(param) {
+					var rows = $('#dgItem').datagrid('getRows');
+				    var itemData = JSON.stringify(rows);
+				    var rows2 = $('#dgItemDown').datagrid('getRows');
+				    var itemData2 = JSON.stringify(rows2);
+					param.dataList = itemData;
+					param.dataList2 = itemData2;
+					if(!checkSubmitParam()){
+						return $(this).form('validate');
+					}
+				    
+					return $(this).form('validate');
+				},
+				success : function(result) {
+					var result = eval('(' + result + ')');
+					if (!result.success) {
+						$.messager.alert('失败提示', result.errorMsg);
+					} else {
+						$.messager.alert('提示信息', '保存成功！','info' ,function () {
+							createNewTab('中心租赁合同管理',0);
+							window.parent.$('#tabs').tabs('close', '新增合同');
+						});
+					}
+				}
+			});
+		}
+		
+	    
+		</script>
+</body>
+</html>

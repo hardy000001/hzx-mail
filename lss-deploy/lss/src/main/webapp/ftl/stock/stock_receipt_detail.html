@@ -1,0 +1,64 @@
+   <form id="dgitemFm" method="post" novalidate>
+   
+            <#if repairList??>
+	            <div class="fitem" style="width: 30%">
+	             <#list repairList as obj>
+	                 <input name="f_${obj.id!''}" id="f_${obj.id!''}" data-options="precision:2,buttonAlign:'left',buttonText:'${obj.name!''}'" prompt="" class="easyui-numberbox">
+	             </#list>
+	            </div>
+	        </#if>
+<!-- 	        <#if repairList?? & repairList?size gt 0> -->
+<!-- 	        <div class="fitem"> -->
+<!-- 			    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveItem(${index!''})">确定</a> -->
+<!-- 			    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" onclick="clearDgItemFm(${index!''});">重置</a> -->
+<!-- 	        </div> -->
+<!-- 	        </#if> -->
+						
+	</form>
+    
+    <script type="text/javascript">
+    
+    var receiptAction = "<@sp.ctx />/user/stock/stockReceipt.htm"
+    
+    function saveItem(index,_row){
+    	
+        $('#dgItem').datagrid('collapseRow',index);
+        $('#dgItem').datagrid('updateRow',{
+            index: index,
+            row: _row
+        });
+        
+    }
+    
+    /**
+     *前端获取form表单中的数据
+     **/
+    function getFormData(index){
+    	 var formMap = {};
+    	 var formObj=$('#dgItem').datagrid('getRowDetail',index).find('form');
+		 var params = (formObj.find(":input"));
+		 
+		 for(var i=0;i<params.size();i++){
+			 formMap[$(params.get(i)).attr("name")] = $(params.get(i)).val();
+		 }
+		 return formMap;
+    }
+    function clearDgItemFm(index){
+    	$('#dgItem').datagrid('getRowDetail',index).find('form').form('clear');
+    }
+    /**
+     *元素不重复
+     **/
+    function uniqueArr(arr){
+	    var result = [], hash = {};
+	    for (var i = 0, elem; (elem = arr[i]) != null; i++) {
+	        if (!hash[elem]) {
+	            result.push(elem);
+	            hash[elem] = true;
+	        }
+	    }
+	    return result;
+    }
+	
+    </script>
+	

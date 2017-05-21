@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockDetailInfo">
+
+	<sql id="tableName" >
+		c_stock_info
+	</sql>
+	
+	
+	<sql id="selectColumns">
+	select
+	t.id id ,
+	t.deptid deptid ,
+	t.mchcode mchCode,
+	m.mchname mchcodename,
+	d.name deptname,
+	t.materialcode materialcode ,
+    b.`name` materialname,
+	sum(t.total_s) totalS ,
+	t.unit unit ,
+	sum(t.total_s*b.covert_ratio) CTotal,
+    b.convert_flag as cunit,
+	sum(t.total_m) totalM ,
+	sum(t.total_t) totalT ,
+	t.modifytime modifytime    
+	      
+	FROM 
+    <include refid="tableName"/> t
+
+  	</sql>
+  	
+
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockInfo" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(mchcode,id,deptid,materialcode,total_s,unit,total_m,total_t,modifytime)
+		VALUES
+		(#{mchcode} ,#{id} ,#{deptid} ,#{materialcode} ,#{totalS} ,#{unit} ,#{totalM} ,#{totalT} ,#{modifytime} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(mchcode,id,deptid,materialcode,total_s,unit,total_m,total_t,modifytime)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.mchcode} ,#{item.id} ,#{item.deptid} ,#{item.materialcode} ,#{item.totalS} ,#{item.unit} ,#{item.totalM} ,#{item.totalT} ,#{item.modifytime} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE mchcode = #{mchcode}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockInfo">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockInfo" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where mchcode = #{mchcode}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1 AND ishave='1'
+  	<if test="mchcode != null">AND t.mchcode = #{mchcode}</if>
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="deptid != null">AND deptid = #{deptid}</if>
+  	<if test="materialcode != '' and materialcode != null">AND materialcode = #{materialcode}</if>
+  	<if test="quantity != null">AND total_s = #{totalS}</if>
+  	<if test="unit != '' and unit != null">AND unit = #{unit}</if>
+  	<if test="totalM != null">AND total_m = #{totalM}</if>
+  	<if test="totalT != null">AND total_t = #{totalT}</if>
+  	<if test="modifytime != null">AND modifytime = #{modifytime}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockDetailInfo"
+	
+		parameterType="com.lq.lss.model.CStockInfo">
+		
+		<include refid="selectColumns"/> 
+		
+        INNER join b_material_info b
+        
+        on t.materialCode=b.code
+        
+        LEFT JOIN admin_dept d ON t.deptId=d.dept_id
+        INNER JOIN mch_cus_view m ON (m.mchCode=t.mchCode AND m.deptid=t.deptid)
+        
+        <include refid="pageConditions"/> 
+        
+        GROUP BY t.deptId,t.materialCode
+        
+
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+		
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		(select t.* from c_stock_info t 
+		<include refid="pageConditions"/>  
+		
+		GROUP BY t.deptId,t.materialCode 
+		)  t
+		
+
+	</select>
+	
+	
+	
+	
+	<sql id="update_sql_batch">
+		UPDATE 
+		<include refid="tableName"/> 
+		  modifytime = #{item.modifytime} 
+			
+         WHERE mchcode = #{item.mchcode} and 
+		 materialcode = #{item.materialcode} and
+		 deptid = #{item.deptid}
+		 
+	</sql>
+	
+
+	
+	
+
+	<update id="update" parameterType="com.lq.lss.model.CStockInfo">
+		<include refid="update_sql"/>
+	</update>	
+	
+		
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+	
+	</sql>
+	
+	
+	<select id="findStockSum" resultType="com.lq.lss.model.CStockInfo"  parameterType="com.lq.lss.model.CStockInfo">
+	        select
+			mchcode mchcode ,
+			id id ,
+			deptid deptid ,
+			materialcode materialcode ,
+			total_s totalS ,
+			unit unit ,
+			total_m totalM ,
+			total_t totalT ,
+			modifytime modifytime ,
+			ishave ishave     FROM 
+		    <include refid="tableName"/> t   
+		    WHERE mchcode = #{mchcode}  and deptid = #{deptid}
+    </select>
+	
+	
+	
+	
+	
+		
+	
+
+</mapper>

@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>修改调拨客户</title> <#include "../include_head.html">
+
+<style type="text/css">
+ .tab_div_cla{padding: 20px 60px 20px 60px}
+ .color_cla{color: red;}
+</style>
+</head>
+
+<body>
+	<div class="easyui-layout" data-options="fit:true" style="padding: top:10px;">
+	    <div data-options="region:'north'" style="height:35px;">
+	    		<div style="text-align: left; padding: 3px">
+						<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="save()">保 存</a>
+					    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeForm('修改调拨客户')">关 闭</a>
+			    </div>
+	    </div>
+		<div data-options="region:'center'">
+		
+			<div class="easyui-panel" title="租赁合同"  style="width:auto;height:auto;">
+				<div style="padding: 10px 60px 20px 60px">
+					<form id="fm" method="post" novalidate  enctype="multipart/form-data">
+					    
+						<div id="ht_tab" class="easyui-tabs"
+							style="width: 800px; height: 360px" data-options="tabPosition:'bottom'">
+							
+							<div title="调拨客户资料" id="tab_div_1" class="tab_div_cla">
+								   <div class="fitem" hidden="true">
+										<label>id:</label> <input name="id" class="easyui-validatebox">
+										<label>cuscode:</label> <input name="cuscode" class="easyui-validatebox">
+									</div>
+									<div class="fitem">
+										<label>客户名称:</label> 
+										<input name="cusname" id="cusname" class="easyui-textbox"  required="true">
+									</div>
+									<div class="fitem" style="display: none">
+										<label>入驻结算规则:</label> 
+										<select id="gz" class="easyui-combobox" name="cusrule" style="width:153px;" panelHeight="auto">   
+										    <#list mchRuleList as obj>
+										        <option value="${obj.id!''}" >${obj.id!''}</option>
+										    </#list>   
+						                </select>  
+									</div>
+									<div class="fitem">
+										<label>客户类型:</label> 
+										<select class="easyui-combobox" name="custype" id="custype" style="width:153px;" data-options="required:true,panelHeight:'auto',editable:false">
+						                          <option value="1">调拨客户</option>
+										</select>
+									</div>
+									<div class="fitem">
+										<label>联系人:</label> <input name="linkman"  class="easyui-textbox">
+									</div>
+									<div class="fitem">
+										<label>客户联系电话:</label> <input name="custel"  class="easyui-textbox">
+									</div>
+									<div class="fitem">
+										<label>客户地址:</label> <input name="cusaddress" class="easyui-textbox" >
+									</div>
+									<div class="fitem">
+										<label>营业执照:</label> <input name="cuslicenceFile" id="cuslicenceFile" class="easyui-filebox" data-options="buttonText: '选择文件'">
+									</div>
+									<div class="fitem">
+										<label>合同文件:</label> <input name="contracturlFile" id="contracturlFile" class="easyui-filebox" data-options="buttonText: '选择文件'">
+									</div>
+									<div class="fitem">
+										<label>开户银行名称:</label> <input name="bankinfo"  class="easyui-textbox" >
+									</div>
+									<div class="fitem">
+										<label>开户名 :</label> <input name="bankaccount" class="easyui-textbox" >
+									</div>
+									<div class="fitem">
+										<label>银行开户账号:</label> <input name="accountno" class="easyui-textbox" >
+									</div>
+							</div>
+							<div title="调拨价格信息" id="tab_div_3" class="tab_div_cla">
+							
+							     <div class="fitem" >
+								     <div id="tbUp" style="height: auto">
+										<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="acceptUp()">保存</a> 
+										<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="appendUp()">增加</a> 
+										<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="removeUp()">移除</a> 
+									</div>
+									<table id="dgItem" class="easyui-datagrid"	style="width: 690px; height: 280px;float: left;"
+										data-options="
+										singleSelect: true,
+										toolbar: '#tbUp',
+										showFooter: true,
+										onClickCell: onClickCell">
+										<thead>
+											<tr>
+												<th data-options="field:'materialId',width:150,hidden:true">物资简码</th>
+												<th data-options="field:'typeid',width:150,align:'left'">物资名称</th>
+												<th data-options="field:'rentalDay',width:100,align:'left',editor:{type:'numberbox',options:{precision:2}}">日租金</th>
+												<th data-options="field:'quantity',width:100,align:'left',editor:{type:'numberbox',options:{precision:2}}">约租量</th>
+												<th data-options="field:'unit1',width:100,align:'left',editor:{type:'numberbox',options:{precision:2}}">单位价值</th>
+												<th data-options="field:'unit',width:50,align:'left'">单位</th>
+												<th data-options="field:'totalAmt',width:100,align:'left',editor:{type:'numberbox',options:{precision:2}}">每吨数量</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+								<div class="fitem" style="float: left;display: none" >
+								     <div id="tbDown" style="height: auto">
+										<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="acceptDown()">保存</a> 
+									    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="appendDown()">增加</a>
+									    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="removeDown()">移除</a>  
+									</div>
+									<table id="dgItemDown" class="easyui-datagrid"	style="width: 690px; height: 200px;float: left;"
+										data-options="
+										singleSelect: true,
+										toolbar: '#tbDown',
+										showFooter: true,
+										onClickCell: onClickCellDown">
+										<thead>
+											<tr>
+												<th data-options="field:'typeid',width:150,hidden:true">物资简码</th>
+												<th data-options="field:'name',width:150,align:'left'">物资名称</th>
+												<th data-options="field:'feeName',width:120,align:'left'">收费类型</th>
+												<th data-options="field:'feePercant',width:120,align:'left',editor:{type:'numberbox'}">单价</th>
+												<th data-options="field:'feeUnit',width:120,align:'left'">单位</th>
+											</tr>
+										</thead>
+									</table>
+								</div>
+								
+								
+								
+							</div>
+							
+					      
+						</div>
+					  </form>
+
+				</div>
+			</div>
+		</div>
+	   
+	</div>
+  <#include "customer_rentinfo_js.html">
+  <script type="text/javascript">
+        
+       
+		$(document).ready(function() {
+			
+		    initMaterial();
+		    fillForm();
+		    
+		    
+		});
+		
+		
+		function fillForm(){
+			
+			var cuscode="${cuscode!''}"
+			var loginName="${loginName!''}"
+			var loadUrl=updateBaseAction+'?method=getCustomer'+"&id="+cuscode+"&loginName="+loginName;
+			
+			$('#fm').form('load',loadUrl);
+			
+		}
+		var isClick=true;
+		function save() {
+			if(!isClick){
+	        	return;
+	        }
+	        isClick=false;
+			var updateUrl=updateBaseAction+'?method=updateInfo';
+			
+			$('#fm').form('submit', {
+				 url:updateUrl,
+				 onSubmit : function(param) {
+					    var rows = $('#dgItem').datagrid('getRows');
+					    var itemData = JSON.stringify(rows);
+						param.dataList = itemData;
+			 			if(!checkSubmitParam()){
+			 				return $(this).form('validate');
+			 			}
+					    
+						return $(this).form('validate');
+				},
+				success : function(result) {
+					var result = eval('(' + result + ')');
+					if (!result.success) {
+						$.messager.alert('失败提示', result.errorMsg);
+					} else {
+						$.messager.alert('提示信息', '保存成功！','info' ,function () {
+							createNewTab('调拨客户信息维护',0);
+							window.parent.$('#tabs').tabs('close', '修该调拨客户');
+						});
+					}
+					isClick=true;
+				}
+			});
+			isClick=true;
+		}
+	    
+		</script>
+</body>
+</html>

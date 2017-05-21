@@ -1,0 +1,19 @@
+
+<div id="toolbar">
+		<@shiro.hasPermission name="${add}">
+	    <a id="add_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addDg()">新增</a>
+	    </@shiro.hasPermission>
+	    <@shiro.hasPermission name="${update}">
+	    <a id="edit_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editDg()">修改</a>
+	    </@shiro.hasPermission>
+	    <@shiro.hasPermission name="${del}">
+	    <a id="del_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyDg()">删除</a>
+  		</@shiro.hasPermission>
+  		<a id="view_detail"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="viewDetail_()">查看</a>
+  		<a id="size1w"    href="javascript:void(0)"  class="easyui-linkbutton"iconCls="icon-height-resize" plain="true"  onclick="rowResize(1)" >1X</a>
+  		<a id="size2w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(2)" >2X</a>
+  		<a id="size3w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(3)" >3X</a>
+  		<a id="size4w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(4)" >4X</a>
+  		<a id="size5w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(5)" >5X</a>
+  </div>
+

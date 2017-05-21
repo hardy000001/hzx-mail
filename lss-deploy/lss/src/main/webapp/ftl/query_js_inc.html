@@ -1,0 +1,19 @@
+ <script type="text/javascript">
+	 function query(){
+			 var queryMap = {};
+			 var params = ($("#queryFm").find(":input"));
+			 for(var i=0;i<params.size();i++){
+				if($(params.get(i)).val()){
+					queryMap[$(params.get(i)).attr("name")] = $(params.get(i)).val();
+				}
+			 }
+		  	$('#dg').datagrid({
+				queryParams:queryMap,
+				onLoadError:function(msg){
+					alert(msg);
+				}
+		});  
+		// $('#dg').datagrid('reload');
+	}
+	
+ </script>

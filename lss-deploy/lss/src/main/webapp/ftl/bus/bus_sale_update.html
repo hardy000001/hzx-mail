@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>编辑销售申请单</title> <#include "../include_head.html">
+</head>
+<body>
+	<div class="easyui-layout" data-options="fit:true" style="padding: top:10px;">
+	    <div data-options="region:'north'" style="height:35px;">
+	    		<div style="text-align: left; padding: 3px">
+						<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="save()">保 存</a>
+					    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeForm('编辑销售申请单')">关 闭</a>
+			    </div>
+	    </div>
+		<div data-options="region:'center'">
+			<div class="easyui-panel" title="基本信息" style="width:auto;height:auto;">
+				<div style="padding: 10px 60px 20px 60px">
+					<form id="fm" method="post">
+						<div class="fitem">
+							<label>销售流水号:</label> <input name="saleSerialno" value="${busSale.saleSerialno!''}" id="saleSerialno" readonly="readonly" class="easyui-textbox" required="true">
+							<label>申请日期:</label> <input name="createtime" id="createtime" class="Wdate" value="${busSale.createtime?string('yyyy-MM-dd HH:mm:ss')}" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})">
+						</div>
+						<div class="fitem">
+						    <label>购买商:</label>  <input name="toMchcode" id="customerCode" value="${busSale.toMchcode!''}" class="easyui-combogrid" required="true">
+						    <label>操作员:</label> <input name="createoper" id="createoper" value="${busSale.loginName!''}" readonly="readonly" class="easyui-textbox">
+						</div>
+						<div class="fitem">
+							<label>销售客户:</label> <input name="customer" id="customer" value="${busSale.customer!''}" class="easyui-textbox" required="true">
+							<label>客户联系方式:</label> <input name="tel" id="tel" value="${busSale.tel!''}"	class="easyui-numberbox" > 
+						</div>
+						<div class="fitem">
+							<label>审核员:</label> <input value="${busSale.operName!''}" readonly="readonly" class="easyui-textbox">
+							<label>状态:</label>  <select name="status" id="status" class="easyui-combobox" style="width:153px;" panelHeight="auto" readonly="readonly">
+							                           <option value="0">正常</option>
+							                           <option value="1">审核中</option>
+							                           <option value="2">审核未通过</option>
+							                           <option value="9">已禁用</option>
+							                     </select>
+						</div>
+						<div class="fitem">
+							<label>总金额:</label> <input name="totalAmt" id="totalAmt" value="${busSale.totalAmt!''}" class="easyui-textbox" readonly="readonly">
+							
+						</div>
+						<script type="text/javascript">
+						     $("#status").val('${busSale.status!'1'}');
+						</script>
+						
+						<div class="fitem">
+							<label>备注:</label> <input name="others" id="others"  value="${busSale.others!''}" class="easyui-textbox" data-options="multiline:true" style="width: 600px; height: 40px">
+						</div>
+						<div class="fitem" style="float: left;" >
+						     <div id="tb" style="height: auto">
+								<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="accept()">保存</a> 
+							</div>
+							<div id="tbb" style="height: auto">
+								<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="accept()">保存</a> 
+							</div>
+							<table id="dgItem" class="easyui-datagrid"	style="width: 780px; height: auto;float: left;"
+								data-options="
+								singleSelect: true,
+								toolbar: '#tb',
+								footer: '#tbb',
+								showFooter: true,
+								onLoadSuccess:onLoadSuccess,
+								onClickCell: onClickCell">
+								<thead>
+									<tr>
+										<th data-options="field:'itemid',width:50,align:'left'">序号</th>
+										<th data-options="field:'materialId',width:110,align:'left'">物资简码</th>
+										<th data-options="field:'name',width:125,align:'left'">物资名称</th>
+										<th data-options="field:'price',width:100,align:'left',editor:{type:'numberbox',options:{precision:2}}">单价</th>
+										<th data-options="field:'quantity',width:80,align:'left',editor:{type:'numberbox'}">数量</th>
+										<th data-options="field:'unit',width:50,align:'left'">单位</th>
+										<th data-options="field:'totalAmt',width:100,align:'left'">金额</th>
+										<th data-options="field:'totalM',width:100">小计</th>
+										<th data-options="field:'typeId',hidden:true">父ID</th>
+										<th data-options="field:'fname',hidden:true">父名</th>
+										<th data-options="field:'covertRatio',hidden:true">系数</th>
+										<th data-options="field:'convertFlag',width:60,hidden:false">换算单位</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+						
+						
+						
+						<input name="id" id="id" type="hidden"> <input
+							name="typeid" id="typeid" type="hidden"> <input
+							name="flag" id="flag" type="hidden">
+					</form>
+
+				</div>
+			</div>
+		</div>
+	    <div data-options="region:'west',title:'材料选择'" style="width:220px;">
+	        <ul id="kongbai" name="kongbai" ></ul>
+	        <ul id="ttCls" name="ttCls" ></ul>
+	    </div>
+	</div>
+	
+  <#include "bus_sale_js.html">
+  <script type="text/javascript">
+  
+	
+	    var updateBaseAction = "<@sp.ctx />/user/bus/busSaleUpdate.htm";
+	    
+		$(document).ready(function() {
+			var dateNow = getNowFormatDate();
+			var tsfNo = dateNow.replace(' ',"").replace(':',"").replace('-',"")  +  Math.floor(Math.random()*9999+1);
+			tsfNo = tsfNo.replace(':',"").replace('-',"");
+		    // $('#saleSerialno').textbox('setValue',tsfNo);
+		    //$('#createtime').val(dateNow);
+		});
+	
+		var isOnClick=false;
+	   	$('#ttCls').tree({
+	   		url: parent.materialAction + "?method=getMaterialListNew",
+	   		checkbox:true,
+	   		method:'post',
+	   		onLoadSuccess:function(){
+	   			defaultChecked();
+	   		},
+		 	onDblClick: function(node){
+		 	   $('#ttCls').tree('collapse', node.target);
+		 	},
+		 	onCheck:function(node, checked){
+		 		getChecked(isOnClick);
+		 		
+		 	}
+	   	}); 
+	   	
+	   	function defaultChecked(){
+	   		var cId
+	   		<#list detailList as obj>
+	   		  cId=${obj.materialId}
+	   		  var node = $('#ttCls').tree('find', cId);
+		   	  node.filed5=${obj.quantity!'0'}+","+${obj.totalAmt!'0'}+","+${obj.price!'0'}
+			  <#if !obj_has_next>
+			       isOnClick=true;
+			  </#if>
+	   		  $('#ttCls').tree('check', node.target);
+	   		  $('#ttCls').tree('expandTo', node.target);
+	   		</#list>
+	   		loadData();
+	   	}
+	   	
+	   	
+	   	function getChecked(isOnClick){
+	   		if(!isOnClick){
+	   			return;
+	   		}
+	   	    // 获取旧的数据
+	   		var oldList=$('#dgItem').datagrid('getRows');
+            
+			var nodes = $('#ttCls').tree('getChecked', ['checked','indeterminate']);
+			
+			var newList=[]
+			var r=1;
+			for(var i=0; i< nodes.length; i++){
+				// 添加时材料项目的选中节点
+				if(nodes[i].attributes.nodeType=='1' || nodes[i].attributes.nodeType=='2') {
+					materialId=nodes[i].id
+					var oldData
+					var isExist=false;
+					for ( var j = 0; j < oldList.length; j++) 
+					{
+						oldMaterialId=oldList[j].materialId;
+						if(materialId==oldMaterialId)
+						{
+							oldData=oldList[j];
+							isExist=true;
+							break;
+						}
+					}
+					if(isExist)
+					{
+						oldData.itemid=r++
+						newList.push(oldData);
+					}
+					else
+					{
+						var nodeFiled5=nodes[i].filed5;
+						if(nodeFiled5=='' || nodeFiled5==null){
+							filed5=['','',nodes[i].attributes.price];
+						}else{
+							filed5=nodeFiled5.split(",");
+						}
+						checkData={
+									itemid:r++,
+						   			materialId: nodes[i].id,
+						   			name: nodes[i].text,
+						   			price: filed5[2],
+						   			quantity: filed5[0],
+						   			totalAmt: filed5[1],
+						   			unit:nodes[i].attributes.unit,
+						   			typeId: nodes[i].pid,
+						   			fname:nodes[i].ptext,
+						   			covertRatio:nodes[i].attributes.covertRatio,
+						   			convertFlag:nodes[i].attributes.convertFlag
+					   		      }
+						newList.push(checkData);
+					}
+					
+				}
+			}
+			//统计金额
+			$('#dgItem').datagrid('loadData',newList);
+			moneyCount();
+		}
+	   	
+
+		function save() {
+			var saveUrl=updateBaseAction+'?method=updateApply';
+			$('#fm').form('submit', {
+				 url:saveUrl,
+				 onSubmit : function(param) {
+				    var rows = $('#dgItem').datagrid('getRows');
+				    if (rows.length < 1) {
+						$.messager.alert('提示', "请添加物资项目");
+						return false;
+					}
+				    for (var i = 0; i < rows.length; i++) {
+						if(rows[i].quantity=="undefined" || rows[i].quantity==null  || rows[i].quantity=='' ){
+							$.messager.alert('提示', "请输入数量并保存");
+							return false;
+						}
+					}
+				    var itemData = JSON.stringify(rows);
+					param.dataList = itemData;
+					return $(this).form('validate');
+				},
+				success : function(result) {
+					var result = eval('(' + result + ')');
+					if (!result.success) {
+						$.messager.alert('失败提示', result.errorMsg);
+					} else {
+						$.messager.alert('提示信息', '保存成功！','info' ,function () {
+							createNewTab('销售管理',0);
+							window.parent.$('#tabs').tabs('close', '编辑销售申请单');
+						});
+					}
+				}
+			});
+		}
+	    
+	    
+		
+</script>
+</body>
+</html>

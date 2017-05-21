@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CustomerRentinfo">
+
+	<sql id="tableName" >
+		customer_rentinfo
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	cuscode cuscode ,
+	materialcode materialcode ,
+	unit unit ,
+	rental_day rentalDay ,
+	ton_qantity tonQantity ,
+	quantity quantity     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CustomerRentinfo" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,cuscode,materialcode,unit,rental_day,ton_qantity,quantity)
+		VALUES
+		(#{id} ,#{cuscode} ,#{materialcode} ,#{unit} ,#{rentalDay} ,#{tonQantity} ,#{quantity} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,cuscode,materialcode,unit,rental_day,ton_qantity,quantity)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.cuscode} ,#{item.materialcode} ,#{item.unit} ,#{item.rentalDay} ,#{item.tonQantity} ,#{item.quantity} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE cuscode = #{cuscode}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CustomerRentinfo">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CustomerRentinfo" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where cuscode = #{cuscode}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != '' and id != null">AND id = #{id}</if>
+  	<if test="cuscode != '' and cuscode != null">AND cuscode = #{cuscode}</if>
+  	<if test="materialcode != '' and materialcode != null">AND materialcode = #{materialcode}</if>
+  	<if test="unit != '' and unit != null">AND unit = #{unit}</if>
+  	<if test="rentalDay != null">AND rental_day = #{rentalDay}</if>
+  	<if test="tonQantity != null">AND ton_qantity = #{tonQantity}</if>
+  	<if test="quantity != null">AND quantity = #{quantity}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CustomerRentinfo"
+		parameterType="com.lq.lss.model.CustomerRentinfo">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="cuscode != null">cuscode = #{cuscode},</if>
+		  	<if test="materialcode != null">materialcode = #{materialcode},</if>
+		  	<if test="unit != null">unit = #{unit},</if>
+		  	<if test="rentalDay != null">rental_day = #{rentalDay},</if>
+		  	<if test="tonQantity != null">ton_qantity = #{tonQantity},</if>
+		  	<if test="quantity != null">quantity = #{quantity}</if>
+			</set>
+		WHERE cuscode = #{cuscode}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CustomerRentinfo">
+		<include refid="update_sql"/>
+	</update>	
+		
+	<select id="findRentinfoById" resultType="com.lq.lss.dto.CustomerRentinfoDto" 
+	parameterType="java.lang.String">
+		select
+		t.id id ,
+		t.cuscode cuscode ,
+		t.materialcode materialcode ,
+		t.materialcode typeid,
+		t.unit unit ,
+		t.rental_day rentalDay ,
+		t.ton_qantity tonQantity ,
+		t.quantity quantity,
+		m.name name     FROM 
+        <include refid="tableName"/> t
+        left join b_material_type m on t.materialcode=m.typeId
+		where cuscode = #{cuscode}
+	</select>
+
+</mapper>

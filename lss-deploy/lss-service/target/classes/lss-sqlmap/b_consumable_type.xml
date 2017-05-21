@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="BConsumableType">
+
+	<sql id="tableName" >
+		b_consumable_type
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	typeid typeid ,
+	parentid parentid ,
+	position position ,
+	name name ,
+	price price ,
+	unit unit ,
+	status status     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.BConsumableType" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(typeid,parentid,position,name,price,unit,status)
+		VALUES
+		(#{typeid} ,#{parentid} ,#{position} ,#{name} ,#{price} ,#{unit} ,#{status} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(typeid,parentid,position,name,price,unit,status)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.typeid} ,#{item.parentid} ,#{item.position} ,#{item.name} ,#{item.price} ,#{item.unit} ,#{item.status} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.Integer">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE typeid = #{typeid}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.BConsumableType">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.BConsumableType" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where typeid = #{typeid}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="typeid != null">AND typeid = #{typeid}</if>
+  	<if test="parentid != null">AND parentid = #{parentid}</if>
+  	<if test="position != null">AND position = #{position}</if>
+  	<if test="name != '' and name != null">AND name = #{name}</if>
+  	<if test="price != null">AND price = #{price}</if>
+  	<if test="unit != '' and unit != null">AND unit = #{unit}</if>
+  	<if test="status != '' and status != null">AND status = #{status}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.BConsumableType"
+		parameterType="com.lq.lss.model.BConsumableType">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="parentid != null">parentid = #{parentid},</if>
+		  	<if test="position != null">position = #{position},</if>
+		  	<if test="name != null">name = #{name},</if>
+		  	<if test="price != null">price = #{price},</if>
+		  	<if test="unit != null">unit = #{unit},</if>
+		  	<if test="status != null">status = #{status}</if>
+			</set>
+		WHERE typeid = #{typeid}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.BConsumableType">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+	<select id="findByTypeName" resultType="com.lq.lss.model.BConsumableType"  parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where name = #{name}
+	</select>
+	
+	
+	<select id="findTypeList" resultType="com.lq.lss.model.BConsumableType"  parameterType="com.lq.lss.model.BConsumableType">
+		<include refid="selectColumns"/>   
+		 where 1=1 
+			<if test="typeid != null">AND typeid = #{typeid}</if>
+  	        <if test="parentid != null">AND parentid = #{parentid}</if>
+  	        <if test="name != '' and name != null">AND name like CONCAT('%',#{name},'%') </if>
+	</select>
+	
+</mapper>

@@ -1,0 +1,562 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>新增入库申请单</title> <#include "../include_head.html">
+</head>
+<body>
+	<div class="easyui-layout" data-options="fit:true" style="padding: top:10px;">
+	    <div data-options="region:'north'" style="height:35px;">
+	    		<div style="text-align: left; padding: 3px">
+						<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="save()">保 存</a>
+					    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeForm('入库申请单修改')">关 闭</a>
+			    </div>
+	    </div>
+		<div data-options="region:'center'">
+			<div class="easyui-panel" title="基本信息" style="width:auto;height:auto;">
+				<div style="padding: 10px 60px 20px 60px">
+					<form id="fm" method="post">
+						<div class="fitem">
+							<label>入库流水号:</label> <input name="inSerialno" id="inSerialno" readonly="readonly" class="easyui-textbox" required="true" value="${cStockIn.inSerialno!''}">
+							<label>交易日期:</label> <input name="transDate" id="transDate" class="Wdate" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" required="true" value="${(cStockIn.transDate?string('yyyy-MM-dd'))!''}">
+						</div>
+						<div class="fitem">
+							<label>申请商户名称:</label> <input name="fromMchcode" id="fromMchcode" class="easyui-combogrid" required="true" value="${cStockIn.mchcode!''}"> 
+							<label>装卸费:</label> <input name="zxFee" id="zxFee" class="easyui-numberbox" precision="2" max="100000" min="0" value="${cStockIn.zxFee!''}"  > 
+
+						</div>
+
+						<div class="fitem">
+							<label>车号:</label> <input name="carNo" id="carNo" class="easyui-textbox"  value="${cStockIn.carNo!''}" max="1000000" min="0" >
+							<label>司机:</label> <input name="carDriver" id="carDriver" value="${cStockIn.carDriver!''}" class="easyui-textbox"  max="1000000" min="0" >
+						</div>
+						<div class="fitem">
+							<label>运输费:</label> <input name="transportFee" id="transportFee" class="easyui-numberbox" precision="2" max="100000" min="0" value="${cStockIn.transportFee!''}">
+			
+							<label>杂费:</label> <input name="otherFee" id="otherFee" class="easyui-numberbox" precision="2" max="100000" min="0" value="${cStockIn.otherFee!''}">
+						</div>
+						
+						<div class="fitem">
+						    <label>商户经办人:</label> <input name="outOperator" id="outOperator" class="easyui-textbox" value="${cStockIn.outOperator!''}">
+							<label>入库经办人:</label> <input name="inOperator" id="inOperator" class="easyui-textbox" value="${cStockIn.inOperator!''}">
+							<#if cStockIn.isrepair?? & cStockIn.isrepair=='0'>
+							                                <input type="radio" name="isrepair" value="0" checked="checked">未修
+							                                <input type="radio" name="isrepair" value="1">已修
+							                         <#else>
+							                                <input type="radio" name="isrepair" value="0" >未修
+							                                <input type="radio" name="isrepair" value="1" checked="checked">已修
+							                         </#if>
+							                         
+							                         
+						</div>
+						
+						<div class="fitem">
+							<label>备注:</label> <input name="remark" id="remark" value="${cStockIn.remark!''}"  class="easyui-textbox" data-options="multiline:true" style="width: 600px; height: 40px" value="">
+						</div>
+						<div class="fitem" style="float: left;" >
+						     <div id="tb" style="height: auto">
+								<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="accept()">保存</a> 
+							</div>
+							<div id="tbb" style="height: auto">
+								<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="accept()">保存</a> 
+							</div>
+							<table id="dgItem" class="easyui-datagrid"	style="width: 800px; height: auto;float: left;"
+								data-options="
+								singleSelect: true,
+								toolbar: '#tb',
+								footer: '#tbb',
+								showFooter: true,
+								onClickCell: onClickCell">
+								<thead>
+									<tr>
+										<th data-options="field:'itemid',width:50,align:'left'">序号</th>
+										<th data-options="field:'materialCode',width:200,align:'left'">物资简码</th>
+										<th data-options="field:'name',width:200,align:'left'">物资名称</th>
+										<th data-options="field:'totalS',width:100,align:'left',editor:{type:'numberbox'}">数量</th>
+										<th data-options="field:'unit',width:50,align:'left'">单位</th>
+										<th data-options="field:'totalM',width:100">小计</th>
+										<th data-options="field:'typeId',hidden:true">父ID</th>
+										<th data-options="field:'fname',hidden:true">父名</th>
+										<th data-options="field:'covertRatio',hidden:true">系数</th>
+										<th data-options="field:'convertFlag',hidden:false">换算单位</th>
+										
+										
+										
+										
+										
+										
+									</tr>
+								</thead>
+							</table>
+						</div>
+	
+						<input name="id" id="id" type="hidden"> <input
+							name="typeid" id="typeid" type="hidden"> <input
+							name="flag" id="flag" type="hidden">
+					</form>
+
+				</div>
+			</div>
+		</div>
+	    <div data-options="region:'west',title:'材料选择'" style="width:220px;">
+	        <ul id="kongbai" name="kongbai" ></ul>
+	        <ul id="ttCls" name="ttCls" ></ul>
+	    </div>
+	</div>
+	
+<script type="text/javascript">
+	
+</script>
+	
+	
+  <script type="text/javascript">
+	
+	    var baseAction = "<@sp.ctx />/user/stock/stockInAdd.htm"
+	    	  var materialAction ="<@sp.ctx />/user/sys/materialinfo.htm"
+	    var receiptAction = "<@sp.ctx />/user/stock/stockReceipt.htm"
+		var url;
+	    	  
+	
+	    //初始加载数据
+		$(document).ready(function() {
+			url = baseAction + '?method=save';
+		});
+	    
+	    //关闭窗口
+		function closeForm(subtitle){
+			if(confirm('确认要关闭吗？')){
+				window.parent.$('#tabs').tabs('close', subtitle);
+			}
+			
+		}
+		var isOnClick=false;
+	    //初始化物资数据
+	   	$('#ttCls').tree({
+	   		
+	   		
+	   		url: parent.materialAction + "?method=getMaterialListNew",
+	   		checkbox:true,
+	   		method:'post',
+	   		onLoadSuccess:function(){
+	   			defaultChecked();
+	   			//loadData();
+	   		},
+		 	onDblClick: function(node){
+		 	   $('#ttCls').tree('collapse', node.target);
+		 	},
+		 	onCheck:function(node, checked){
+		 		getChecked(isOnClick);
+		 		
+		 	}
+	   	}); 
+	    
+	    //修改数据加载
+	   	function defaultChecked(){
+	   		var cId
+	   		<#list detailList as obj>
+		   	  cId=${obj.materialCode}
+	   		  var node = $('#ttCls').tree('find', cId);
+	   		  node.filed2=${obj.totalS!'0'}
+	   		  <#if !obj_has_next>
+	   		  isOnClick=true;
+	   		  </#if>
+	   		  $('#ttCls').tree('check', node.target);	
+	   		  $('#ttCls').tree('expandTo', node.target);
+	   		</#list>
+
+	   	}
+
+	    //选中操作
+	   	function getChecked(isOnClick){
+	   		if(!isOnClick){
+	   			return;
+	   		}
+	   	 // 获取旧的数据
+	   		var oldList=$('#dgItem').datagrid('getRows');
+            
+			var nodes = $('#ttCls').tree('getChecked', ['checked','indeterminate']);
+			
+			var newList=[]
+			var r=1;
+			for(var i=0; i< nodes.length; i++){
+				// 添加时材料项目的选中节点
+				if(nodes[i].attributes.nodeType=='1' || nodes[i].attributes.nodeType=='2') {
+					materialId=nodes[i].id
+					var oldData
+					var isExist=false;
+					for ( var j = 0; j < oldList.length; j++) 
+					{
+						oldMaterialId=oldList[j].materialCode;
+						if(materialId==oldMaterialId)
+						{
+							oldData=oldList[j];
+							isExist=true;
+							break;
+						}
+					}
+					if(isExist)
+					{
+						oldData.itemid=r++
+						newList.push(oldData);
+					}
+					else
+					{
+						checkData={
+
+						   			
+									itemid:r++,
+						   			materialCode: nodes[i].id,
+						   			name: nodes[i].text,
+						   			totalS: nodes[i].filed2,
+						   			unit:nodes[i].attributes.unit,
+						   			typeId: nodes[i].pid,
+						   			fname:nodes[i].ptext,
+						   			covertRatio:nodes[i].attributes.covertRatio,
+						   			convertFlag:nodes[i].attributes.convertFlag
+					   		      }
+						<#list detailList as obj>
+						var nId=nodes[i].id;
+						var mCode=${obj.materialCode!''}
+						
+						if(nId==mCode){
+							<#list obj?keys as key>
+					   		<#if key?index_of("f_")!=-1>
+					   		checkData["${key!''}"]="${obj['${key}']!''}"
+				            </#if>
+			                </#list>
+						}
+						</#list>
+						newList.push(checkData);
+					}
+					
+				}
+			}
+			//统计金额
+			$('#dgItem').datagrid('loadData',newList);
+	    	
+			moneyCount();
+		}
+
+	    //商户数据初始化
+	    $('#fromMchcode').combogrid({
+	    	url:'<@sp.ctx />/user/sys/mchBaseinfo.htm?method=getMchInfoList',
+	        idField:'mchcode',
+	        textField:'mchname',
+	        columns:[[
+	                  {field:'mchcode',title:'商户号',width:50},
+	                  {field:'mchname',title:'商户名称',width:100},
+	                 ]],
+	    	mode:'local',
+		    filter:function(q, row){
+		    	var opts = $(this).combogrid('options');
+				// 过滤拼音码，转换大写字母
+			    /* if( row.pyCode.indexOf(q.toUpperCase()) >= 0){
+			    	alert(1);
+					return row.pyCode.indexOf(q.toUpperCase()) >= 0;
+			    } */
+			    // 过滤中文名称
+		        if(row[opts.textField].indexOf(q) >= 0){
+		        	return row[opts.textField].indexOf(q) >= 0;
+		        }
+			}
+	    });
+
+	    //保存事件
+		function save() {
+	    	
+			$('#fm').form('submit', {
+				 url:'<@sp.ctx />/user/stock/stockInUpdate.htm?method=save',
+				 onSubmit : function(param) {
+				    var rows = $('#dgItem').datagrid('getRows');
+				    if (rows.length < 1) {
+						$.messager.alert('Error', "请添加物资项目");
+						return false;
+					}
+				    for (var i = 0; i < rows.length; i++) {
+						if(rows[i].total_s=="undefined" || rows[i].totalS==null  || rows[i].total_s=='' ){
+							$.messager.alert('Error', "请输入数量并保存");
+							return false;
+						}
+					}
+				    
+				    var itemData = JSON.stringify(rows);
+					param.itemData = itemData;
+					return $(this).form('validate');
+				},
+			    success : function(result) {
+						var result = eval('(' + result + ')');
+						if (!result.success) {
+							$.messager.alert('Error', result.errorMsg);
+						} else {
+							$.messager.alert('提示信息', '修改成功！','info' ,function () {
+			
+								window.parent.open1('租赁公司材料入库管理', "<@sp.ctx />/user/stock/stockin.htm");
+								window.parent.$('#tabs').tabs('close', '入库申请单修改');
+								
+							});		
+							
+							
+							
+						}
+					}
+				});
+			}
+					
+		//编辑结束
+		var editIndex = undefined;
+		function endEditing(){
+			if (editIndex == undefined){return true}
+			if ($('#dgItem').datagrid('validateRow', editIndex)){
+				$('#dgItem').datagrid('endEdit', editIndex);
+				editIndex = undefined;
+				return true;
+			} else {
+				return false;
+			}
+		}
+		var currentField='totalS'
+		// 双击编辑行
+		function onClickCell(index, field){
+			if (endEditing()){
+				$('#dgItem').datagrid('selectRow', index).datagrid('beginEdit', index);
+				var ed = $('#dgItem').datagrid('getEditor', {index:index,field:field});
+				if (ed){
+					($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+				}
+				editIndex = index;
+			} else {
+				setTimeout(function(){
+					$('#dgItem').datagrid('selectRow', editIndex);
+				},0);
+			} 
+			//可编辑的属性，使其鼠标焦点定位，不可编辑的是默认定位到数量‘totalS’
+			if(field.indexOf("f_")>=0 || field=='totalS')
+			{
+				currentField=field;
+			}
+		}
+		
+		var indexArr=[];
+		var formArr=[];
+		function accept(){
+			saveForm();
+			if (endEditing()){
+				$('#dgItem').datagrid('acceptChanges');
+				//去重复元素
+				indexArr=indexArr.length>0?uniqueArr(indexArr):indexArr;
+				for ( var i = 0; i < formArr.length; i++) 
+				{
+					var _index=formArr[i].index;
+					saveItem(_index,formArr[i])
+				}
+				indexArr=[];  //清空
+				formArr=[];
+				moneyCount();
+			}
+		}
+		
+        function saveForm(){
+			
+			//去重复元素
+			indexArr=indexArr.length>0?uniqueArr(indexArr):indexArr;
+			
+			for ( var i = 0; i < indexArr.length; i++) 
+			{
+				var _data=getFormData(indexArr[i]);
+				    _data['index']=indexArr[i];
+				formArr.push(_data)
+			}
+			
+		}
+		
+        function moneyCount(){
+			
+			var dataList=$('#dgItem').datagrid('getRows');
+            var newDataList=getNewListData(dataList);
+			$('#dgItem').datagrid('loadData', newDataList);
+	
+		}
+		
+		
+		function updateGridData(index,sum){
+			$('#dgItem').datagrid('updateRow',{
+				index: index,
+				row: {
+					totalM: sum
+				}
+			});
+
+		}
+		
+		
+		  function loadData(){
+		   		
+		   	    var data = $('#dgItem').datagrid('getRows');
+		   	     
+		   	    var dataList={
+		    			rows:[],
+		    			footer:[]
+		    	}
+		   	    
+		    	dataList.rows=data;
+				
+				var typeMap={};  
+		        var len = data.length;  
+		        for(var i=0;i<len;i++){
+			            if(typeMap[data[i].typeId] == undefined){
+			                var list = [];  
+			                list.push(data[i]);  
+			                typeMap[data[i].typeId] = list;  
+			            }else{  
+			            	typeMap[data[i].typeId].push(data[i]);
+			            }  
+		        }
+		        
+		        var tj=0;
+		        
+		        
+		        for(var typeId in typeMap){
+			            var obj = typeMap[typeId];
+			            var totalS=0;
+			            var totalA=0;
+			            footers={"itemid":"合计","materialCode":""}
+			            for(var i = 0;i < obj.length;i++){
+			               	var num=parseInt(obj[i].totalS);
+			               	
+			            	if(!isNaN(num)){
+			            		
+			            		totalS+=num*parseFloat(obj[i].covertRatio);
+			            	}
+			            	
+			            }
+		            	if(isNaN(totalS)){
+		            		totalS=0;
+		            	}
+		            	if(tj>0){
+		            		footers.itemid="";
+		            	}
+		            	tj++;
+		            	footers.materialCode=obj[0].fname+": "+totalS.toFixed(2)+""+obj[0].convertFlag;
+			            dataList.footer.push(footers)
+		        }  
+		    	
+		   		$('#dgItem').datagrid('loadData', dataList);
+		   	}
+			
+		    var dataId="${inSerialno!''}"
+		    //初始化
+	        $('#dgItem').datagrid({
+	        	url:baseAction+'?method=getInStockList&id='+dataId,
+	    	    ctrlSelect:true,
+				view: detailview,
+	    	    onClickCell: onClickCell,
+	    	    loadFilter: function(data){
+			    	return loadFilter(data);
+				},
+				detailFormatter:function(index,row){
+					return '<div id="ddv-' + index + '" style="padding:5px 0"></div>';
+				},
+				onExpandRow: function(index,row){
+					$('#ddv-'+index).panel({
+						border:false,
+						cache:true,
+						href:receiptAction+'?method=receiptDetail&index='+index+"&typeid="+row.typeId,
+						onLoad:function(){
+							indexArr.push(index)
+							$('#dgItem').datagrid('fixDetailRowHeight',index);
+	                        $('#dgItem').datagrid('selectRow',index);
+	                        $('#dgItem').datagrid('getRowDetail',index).find('form').form('load',row);
+						}
+					});
+					$('#dgItem').datagrid('fixDetailRowHeight',index);
+				},
+	    	    columns:[[
+	    	        {field:'itemid',title:'序号',width:50,align:'left'},    
+	    	        {field:'materialCode',title:'物资简码',width:150,align:'left'}, 
+	    	        {field:'name',title:'物资名称',width:150,align:'left'}, 
+	    	        {field:'totalS',title:'数量',width:100,align:'left',editor:{type:'numberbox'}},
+	    	        {field:'unit',title:'单位',width:60,align:'left'},
+	    	        {field:'totalM',title:'小计',width:100,hidden:false},
+	    	        {field:'totalT',hidden:true,width:100,align:'left',title:'总量（吨）'},
+	    	        {field:'typeId',hidden:true,title:'父ID'},
+	    	        {field:'fname',hidden:true,title:'父名'},
+	    	        {field:'covertRatio',hidden:true,title:'系数'},
+	    	        {field:'convertFlag',width:60,hidden:false,title:'换算单位'},
+	    	        <#if repairList??>
+	    	        <#list repairList as obj>
+	    	        {field:'f_${obj.id!''}',title:'${obj.name!''}',width:100},
+	    	        </#list>
+	    	        </#if>
+	    	    ]]    
+	    	});  
+	    	$('#dgItem').datagrid('keyCtr');
+	    	
+	        function loadFilter(data){
+		   		
+	        	var dataList={
+		    			rows:[],
+		    			footer:[]
+		    	}
+	        	data=getNewListData(data);
+	        	dataList.rows=data;
+				var typeMap={};  
+		        var len = data.length;  
+		        for(var i=0;i<len;i++){
+			            if(typeMap[data[i].typeId] == undefined){
+			                var list = [];  
+			                list.push(data[i]);  
+			                typeMap[data[i].typeId] = list;  
+			            }else{  
+			            	typeMap[data[i].typeId].push(data[i]);
+			            }  
+		        }
+		        var tj=0;
+		        for(var typeId in typeMap){
+			            var obj = typeMap[typeId];
+			            var totalS=0;
+			            footers={"itemid":"合计","materialCode":""}
+			            for(var i = 0;i < obj.length;i++){
+			            	var num=parseInt(obj[i].totalS);
+			            	if(!isNaN(num)){
+			            		totalS+=num*parseFloat(obj[i].covertRatio);
+			            	}
+			            }
+		            	if(isNaN(totalS)){
+		            		totalS=0;
+		            	}
+		            	if(tj>0){
+		            		footers.itemid="";
+		            	}
+		            	tj++;
+			            footers.materialCode=obj[0].fname+": "+totalS.toFixed(2)+""+obj[0].convertFlag;
+			            dataList.footer.push(footers)
+		        }  
+		        return  dataList;
+		   	}
+	        function getNewListData(dataList){
+				
+				var newDataList=[]
+				
+				for(var i = 0;i < dataList.length;i++)
+				{
+		            	var num=parseInt(dataList[i].totalS);
+		            	if(!isNaN(num))
+		            	{
+		            		 dataList[i].totalM=(num*parseFloat(dataList[i].covertRatio)).toFixed(2);
+		            	}else{
+		            		 dataList[i].totalM='0.00'
+		            	}
+		            	newDataList.push(dataList[i]);
+	            }
+				
+				return newDataList;
+			}
+		
+		
+		
+		
+		
+</script>
+</body>
+</html>

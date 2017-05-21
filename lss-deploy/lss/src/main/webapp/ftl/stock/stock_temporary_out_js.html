@@ -1,0 +1,602 @@
+
+
+<script type="text/javascript">
+	
+        var baseAction = "<@sp.ctx />/user/stock/stocktemporaryinOut.htm"
+        var materialAction = "<@sp.ctx />/user/bus/busMaterial.htm"
+        var mchBaseinfoAction = "<@sp.ctx />/user/sys/mchBaseinfo.htm"
+        var printAction = "<@sp.ctx />/user/print/stockTemporaryOutPrint.htm"
+        
+        
+        	 var flag=true
+        	    function onLoadSuccess(){
+        	    	if(flag){
+        	    		$('#dgItem').datagrid('keyCtr');
+        	    		flag=false
+        	    	}
+        	    }
+        
+		function createNewTab(title,type) {
+        	
+			var a="${add!'0'}"
+			var b="${upd!'0'}"
+			var c="${del!'0'}"
+			var d="${exp!'0'}"
+			var e="${aud!'0'}"
+			var role="&a="+a+"&b="+b+"&c="+c+"&d="+d+"&e="+e;
+			switch (type) {
+			case 0:
+				window.parent.open1(title, baseAction+"?x="+Math.random()+role);
+				break;
+			case 1:
+				window.parent.open1(title, "<@sp.ctx />/user/stock/stockTemporaryOutAdd.htm?x="+Math.random()+role);
+				window.parent.$('#tabs').tabs('close', '中心提暂存管理');
+				break;
+            case 2:
+            	var row = $('#dg').datagrid('getSelected');
+    			if (row) {
+    				window.parent.open1(title, "<@sp.ctx />/user/stock/stockTemporaryOutUpdate.htm?id="+row.outSerialno+"&loginName="+row.loginName+role);
+    				window.parent.$('#tabs').tabs('close', '中心提暂存管理');
+    			}
+				break;
+			}
+			
+		}	   
+        
+        function closeForm(subtitle){
+			if(confirm('确认要关闭吗？')){
+				window.parent.$('#tabs').tabs('close', subtitle);
+			}
+			
+		}
+        
+        function print() {
+        	var row = $('#dg').datagrid('getSelected');
+			if (!row) {
+				return;
+			}
+    		var dataUrl=printAction+"?method=printInfo&id="+row.outSerialno
+    		$.post(dataUrl,row,function(msg){
+    			$("#print_text_id").html(msg);
+    			previewMytable();
+    		});
+    		
+    	}
+        
+        function previewMytable(){
+        	var fenye = $("#fenye").val(); //获取
+    		var LODOP=getLodop();  
+    		LODOP.PRINT_INIT("打印提暂存单");
+    		var strStyle="<style> table,td,th {border-width: 1px;border-style: solid;border-collapse: collapse}</style>"
+    		LODOP.SET_PRINT_PAGESIZE(1,"241mm","140mm","siliandan");
+    			
+     if(fenye>0)
+     	{
+     	 for (var i=1;i<=fenye;i++){
+     		 
+     		
+        LODOP.ADD_PRINT_TABLE(128,"2%","80%","80%",strStyle+document.getElementById("div"+i).innerHTML);
+      	LODOP.SET_PRINT_STYLEA(0,"Vorient",3);
+      		
+      	LODOP.ADD_PRINT_HTM(26,"4%","80%",109,document.getElementById("diva").innerHTML);
+      	LODOP.SET_PRINT_STYLEA(0,"ItemType",1);
+      	LODOP.SET_PRINT_STYLEA(0,"LinkedItem",-1);	
+  	    	
+ 
+  		LODOP.ADD_PRINT_HTM(1,600,300,100,"总页号：<font color='#0000ff' format='ChineseNum'><span tdata='pageNO'>第##页</span>/<span tdata='pageCount'>共##页</span></font>");
+  		LODOP.SET_PRINT_STYLEA(0,"ItemType",1);
+  		
+  		LODOP.SET_PRINT_STYLEA(0,"Horient",1);
+  		//LODOP.ADD_PRINT_TEXT("90%","80%",196,20,"签字：");
+  		LODOP.ADD_PRINT_HTM("95%","10%","50%",200,"<body style='margin-top:0'>商户经办人签字：</body>");
+     	LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     	LODOP.ADD_PRINT_HTM("95%","40%","50%",200,"<body style='margin-top:0'>司机签字：</body>");
+     	LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     	LODOP.ADD_PRINT_HTM("95%","70%","50%",200,"<body style='margin-top:0'>出库经办人签字：</body>");
+      	LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+      	LODOP.ADD_PRINT_HTM("1%","32%","300",200,"<body style='margin-top:0'>枝星储运（上海）有限公司</body>");
+     	LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+      	
+      	
+    	LODOP.ADD_PRINT_HTM("14%","96%","50%",200,"<body style='margin-top:0'><font size=1>①</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("17%","96%","50%",200,"<body style='margin-top:0'><font size=1>存</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("20%","96%","50%",200,"<body style='margin-top:0'><font size=1>根</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("22%","96%","50%",200,"<body style='margin-top:0'><font size=1>︵</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("25%","96%","50%",200,"<body style='margin-top:0'><font size=1>白</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("28%","96%","50%",200,"<body style='margin-top:0'><font size=1></font>︶</body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		
+ 	
+ 		
+ 		
+ 		LODOP.ADD_PRINT_HTM("31%","96%","50%",200,"<body style='margin-top:0'><font size=1>②</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("34%","96%","50%",200,"<body style='margin-top:0'><font size=1>财</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("37%","96%","50%",200,"<body style='margin-top:0'><font size=1>务</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("39%","96%","50%",200,"<body style='margin-top:0'><font size=1>︵</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("42%","96%","50%",200,"<body style='margin-top:0'><font size=1>红</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("45%","96%","50%",200,"<body style='margin-top:0'><font size=1>︶</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		
+ 		LODOP.ADD_PRINT_HTM("48%","96%","50%",200,"<body style='margin-top:0'><font size=1>③</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("51%","96%","50%",200,"<body style='margin-top:0'><font size=1>客</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("54%","96%","50%",200,"<body style='margin-top:0'><font size=1>户</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("56%","96%","50%",200,"<body style='margin-top:0'><font size=1>︵</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("59%","96%","50%",200,"<body style='margin-top:0'><font size=1>蓝</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("62%","96%","50%",200,"<body style='margin-top:0'><font size=1>︶</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		
+ 		
+ 		LODOP.ADD_PRINT_HTM("67%","96%","50%",200,"<body style='margin-top:0'><font size=1>④</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("70%","96%","50%",200,"<body style='margin-top:0'><font size=1>服</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("73%","96%","50%",200,"<body style='margin-top:0'><font size=1>务</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("76%","96%","50%",200,"<body style='margin-top:0'><font size=1>中</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("79%","96%","50%",200,"<body style='margin-top:0'><font size=1>心</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("81%","96%","50%",200,"<body style='margin-top:0'><font size=1>︵</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("84%","96%","50%",200,"<body style='margin-top:0'><font size=1>黄</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+ 		LODOP.ADD_PRINT_HTM("87%","96%","50%",200,"<body style='margin-top:0'><font size=1>︶</font></body>");
+ 		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     	
+      	
+      	LODOP.NewPageA();
+     	 }
+     	}
+     
+    
+ 
+
+    		 
+    		LODOP.PREVIEW();	
+    	};	
+        
+        
+        function editDg() {
+			var row = $('#dg').datagrid('getSelected');
+			
+	        if (row.status == '0') {
+	            $.messager.alert('错误信息', "不能修改已经审核单据");
+	            return false;
+	        }
+
+			if (row) {
+				createNewTab('编辑提暂存申请单',2);
+			}
+			
+		}
+
+		function destroyDg() {
+            var row = $('#dg').datagrid('getSelected');
+			
+	        if (row.status != '1') {
+	            $.messager.alert('错误信息', "不能删除已经审核单据");
+	            return false;
+	        }
+	        
+			if (row) {
+				$.messager.confirm('确定删除', '确定删除选中数据吗?', function(r) {
+					if (r) {
+						$.post(baseAction + '?method=remove', {
+							id : row.outSerialno
+						}, function(result) {
+							if (!result.success) {
+								$.messager.alert('Error', result.errorMsg);
+							} else {
+								$.messager.alert('提示信息', '删除成功！','info' ,function () {
+									
+									$('#dg').datagrid('reload'); // reload the user data
+									$('#view-dlg').dialog('close')
+								});
+							}
+						}, 'json');
+					}
+				});
+			}
+		}
+		
+		//详情查看 
+		var dg_views_init = false;
+	 	var dg_titles_arr  ;
+	 	var dg_props_arr  ;
+	 	function initDgView(){
+	 		dg_titles_arr = [];
+	 		dg_props_arr = [];
+	 		var props = $("th","#dg");
+	 		for(var i=0;i<props.length;i++){
+	 			dg_props_arr.push($(props[i]).attr("field"));
+	 			dg_titles_arr.push($(props[i]).text());
+	 		}
+	 		dg_views_init = true;
+	 	}
+		
+	 	var selectStatus
+		function comm_view(title,audit){
+				var row = $('#dg').datagrid('getSelected');
+				if (!row) {
+					return;
+				}
+				if(! dg_views_init){
+					initDgView();	
+				}
+				
+				$('#view-dlg').dialog('open').dialog('setTitle',title);
+				var newHtml = "";
+				for(var i=0;i<dg_props_arr.length;i++){
+					var ti = dg_titles_arr[i];
+					var va = row[dg_props_arr[i]];
+					if(!va && va!=0){
+						va = "&nbsp;"
+					}
+					var sty = "border-bottom: solid 1px #fff;padding: 4px;margin:0px;" ;
+					if(i%2 == 0){
+						sty += "background-color:#F0F0F0;";
+					}else{
+						sty += "background-color:#ECF5FF;";
+					}
+					
+                    var propertyId=dg_props_arr[i];
+ 					var dataId
+ 					if(propertyId=="outSerialno")
+ 					{
+ 						dataId=va;
+ 						$("#hide_id").val(va);
+ 					}
+ 					
+			    	if(propertyId=="status"){
+			    		selectStatus=va
+			    		va = formatStatus(va,'')
+			    	}
+			        //文本显示
+					newHtml+="<div class=\"fitem\" style=\""+sty+"\"><label style=\"width: 100px;text-align:right\">"+ti+":</label> <label style=\"width: 200px;\">"+va+"</label></div>"
+			
+					
+				}
+				$('#view-dlg-content').html(newHtml);
+				
+				var openStatus=1; //是开户状态
+ 				if(selectStatus!=openStatus){
+ 					$("#btn_view_ok").hide();
+ 					$("#btn_view_no").hide();
+ 					
+ 				}
+ 				if(selectStatus==0)
+ 					{
+ 					$("#btn_view_anti").show();
+ 					}
+ 				
+ 				if(selectStatus==1)
+					{
+					$("#btn_view_anti").hide();
+					}
+				//获取明细
+				loadOutDetailData(dataId);
+			
+		}
+	 	function viewDetail_(){
+			$("#btn_view_ok").hide();
+			$("#btn_view_no").hide();
+			$("#spanCheckboxId").hide();
+			comm_view('详情',false);
+			$("#btn_view_anti").hide();
+		}
+		function auditDg(){
+			$("#btn_view_ok").show();
+			$("#btn_view_no").show();
+			$("#spanCheckboxId").show();
+			comm_view('审核',true);
+			
+		}
+		var dataPara={
+        		outSerialno:'',
+        		status:'',
+        }
+        function saveAudit(status){
+        	
+        	var outSerialno=$("#hide_id").val();
+        	dataPara.status=status;
+        	dataPara.outSerialno=outSerialno;
+        	url = baseAction+'?method=auditInfo';
+        	$.ajax({
+				url: url,
+				type: 'POST',
+				data:dataPara,
+				dataType: 'json',
+				//timeout: 1000,
+				error: function(){
+					$.messager.alert('失败提示', '提交数据失败，请联系管理员。');
+				},
+				success: function(result){
+					
+					if (!result.success) {
+						$.messager.alert('Error', result.errorMsg);
+					} else {
+						$.messager.alert('提示信息', '操作成功！','info' ,function () {
+							
+							$('#dg').datagrid('reload'); // reload the user data
+							$('#view-dlg').dialog('close')
+						});
+					}
+					
+				}
+			});
+        }
+		
+		$('#fromMchcode').combogrid({
+			editable:false,
+			url:'<@sp.ctx />/user/stock/centertransferAdd.htm?method=getCustomerInfos',
+	    	idField:'cuscode',
+	        textField:'cusname',
+	        columns:[[
+	                  {field:'cuscode',title:'商户号',width:50},
+	                  {field:'cusname',title:'商户名称',width:100},
+	                 ]],
+	    	mode:'local',
+		    filter:function(q, row){
+		    	var opts = $(this).combogrid('options');
+				// 过滤拼音码，转换大写字母
+			    /* if( row.pyCode.indexOf(q.toUpperCase()) >= 0){
+			    	alert(1);
+					return row.pyCode.indexOf(q.toUpperCase()) >= 0;
+			    } */
+			    // 过滤中文名称
+		        if(row[opts.textField].indexOf(q) >= 0){
+		        	return row[opts.textField].indexOf(q) >= 0;
+		        }
+			},
+			onLoadSuccess:function(){
+				<#if stockOut??>
+				$('#fromMchcode').combogrid('setValue',${stockOut.mchcode!''});
+				</#if>
+	   		}
+	    });
+		
+		function formatStatus(val, row) {
+			var vResult = "";
+			if (val == '1') {
+				vResult = '<span style="color:dodgerblue;">等待审核</span>';
+			} else if (val == '0') {
+				vResult = '<span style="color:red;">正常</span>';
+			} else if (val == '2') {
+				vResult = '<span style="color:red;">审核未通过</span>';
+				
+			} else if (val == '3') {
+				vResult = '<span style="color:gray;">已禁用</span>';
+			}
+			return vResult;
+		}
+		//加载明细
+        function loadOutDetailData(dataId){
+        	
+        	var detailUrl=baseAction+'?method=getStockOutDetailList&id='+dataId
+        	
+        	$('#dgItem_detail').datagrid({    
+        	    url:detailUrl,    
+        	    ctrlSelect:true,
+        	    showFooter: true,
+        	    loadFilter: function(data){
+			    	return loadFilterData(data);
+				},
+        	    columns:[[
+        	        {field:'materialcode',title:'物资简码',width:140,align:'left'},    
+        	        {field:'name',title:'物资名称',width:140,align:'left'}, 
+        	        {field:'totalS',title:'数量',width:100,align:'left'},
+        	        {field:'unit',title:'单位',width:60,align:'left'},
+        	        {field:'totalM',title:'小计',width:100,align:'left'},
+        	        {field:'convertFlag',title:'换算单位',width:60,align:'left'},
+        	    ]]    
+        	});  
+        	
+        }
+		
+        function loadFilterData(data){
+    		
+	    	var dataList={
+	    			rows:[],
+	    			footer:[]
+	    	}
+	    	dataList.rows=data;
+			
+			var typeMap={};  
+	        var len = data.length;  
+	        for(var i=0;i<len;i++){
+		            if(typeMap[data[i].typeId] == undefined){
+		                var list = [];  
+		                list.push(data[i]);  
+		                typeMap[data[i].typeId] = list;  
+		            }else{  
+		            	typeMap[data[i].typeId].push(data[i]);
+		            }  
+	        }
+	        var tj=0;
+	        for(var typeId in typeMap){
+		            var obj = typeMap[typeId];
+		            var totalS=0;
+		            var totalA=0;
+		            footers={"materialcode":"合计","name":""}
+		            for(var i = 0;i < obj.length;i++){
+		            	var num=parseInt(obj[i].totalS);
+		            	if(!isNaN(num)){
+		            		totalS+=num*parseFloat(obj[i].covertRatio);
+		            	}
+		            }
+		            if(tj>0){
+	            		footers.materialcode="";
+	            	}
+	            	tj++;
+		            footers.name=obj[0].fname+": "+totalS.toFixed(2)+""+obj[0].convertFlag;
+		            dataList.footer.push(footers)
+	        }
+	        
+	    	return  dataList;
+		}
+		
+        function loadData(){
+	   		
+	   	    var data = $('#dgItem').datagrid('getRows');
+	   	     
+	   	    var dataList={
+	    			rows:[],
+	    			footer:[]
+	    	}
+	   	    
+	    	dataList.rows=data;
+			
+			var typeMap={};  
+	        var len = data.length;  
+	        for(var i=0;i<len;i++){
+		            if(typeMap[data[i].typeId] == undefined){
+		                var list = [];  
+		                list.push(data[i]);  
+		                typeMap[data[i].typeId] = list;  
+		            }else{  
+		            	typeMap[data[i].typeId].push(data[i]);
+		            }  
+	        }
+	        
+	        var tj=0;
+	        for(var typeId in typeMap){
+		            var obj = typeMap[typeId];
+		            var totalS=0;
+		            footers={"itemid":"合计","materialcode":""}
+		            for(var i = 0;i < obj.length;i++){
+		            	var num=parseInt(obj[i].totalS);
+		            	if(!isNaN(num)){
+		            		totalS+=num*parseFloat(obj[i].covertRatio);
+		            	}
+		            }
+	            	if(isNaN(totalS)){
+	            		totalS=0;
+	            	}
+	            	if(tj>0){
+	            		footers.itemid="";
+	            	}
+	            	tj++;
+		            footers.materialcode=obj[0].fname+": "+totalS.toFixed(2)+""+obj[0].accountFlag;
+		            dataList.footer.push(footers)
+	        }  
+	   		$('#dgItem').datagrid('loadData', dataList);
+	   	}
+		
+		
+		var editIndex = undefined;
+		function endEditing(){
+			if (editIndex == undefined){return true}
+			if ($('#dgItem').datagrid('validateRow', editIndex)){
+				$('#dgItem').datagrid('endEdit', editIndex);
+				editIndex = undefined;
+				return true;
+			} else {
+				return false;
+			}
+		}
+		var currentField='totalS'
+		// 双击编辑行
+		function onClickCell(index, field){
+			if (endEditing()){
+				$('#dgItem').datagrid('selectRow', index).datagrid('beginEdit', index);
+				var ed = $('#dgItem').datagrid('getEditor', {index:index,field:field});
+				if (ed){
+					($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+				}
+				editIndex = index;
+			} else {
+				setTimeout(function(){
+					$('#dgItem').datagrid('selectRow', editIndex);
+				},0);
+			}
+		}
+		function accept(){
+			if (endEditing()){
+				$('#dgItem').datagrid('acceptChanges');
+				moneyCount();
+			}
+		}
+		
+		function moneyCount(){
+			
+			var dataList=$('#dgItem').datagrid('getRows');
+			var totalM=0;
+			var totalS=0;
+			for ( var i = 0; i < dataList.length; i++) {
+				var _totalS=dataList[i].totalS;
+			    if(!isNaN(_totalS) && _totalS!='')
+			    {
+			    	totalS=totalS+parseInt(_totalS)
+			    }else{
+			    	_totalS=0;
+			    }
+			    sum=dataList[i].covertRatio*_totalS;
+				updateGridData(i,sum.toFixed(2))
+			}
+			$('#totalM').textbox('setValue',totalM.toFixed(2));
+			$('#totalS').textbox('setValue',totalS.toFixed(2));
+			
+			loadData();	
+		}
+		function updateGridData(index,sum){
+			$('#dgItem').datagrid('updateRow',{
+				index: index,
+				row: {
+					totalM: sum
+				}
+			});
+
+		}
+		function rowResize(sizeType){
+			var baseHeight = 150;
+			var newpageSize = sizeType *10; 
+			
+			  $("#dg").datagrid('resize', {
+				   height : baseHeight + (250 * sizeType)
+				  });
+			  $('#dg').datagrid({ 
+  				"pageSize":newpageSize 
+  				}); 
+		}
+		
+		
+		
+function saveAntiAudit(status) {
+			
+			var row = $('#dg').datagrid('getSelected');
+			if (row) {
+						$.post(baseAction + '?method=antiAudit', {
+							outSerialno : row.outSerialno,
+							status:status
+							
+						}, function(result) {
+							if (!result.success) {
+								$.messager.alert('Error', result.errorMsg);
+							} else {
+								$.messager.alert('提示信息', '操作成功！','info' ,function () {
+									
+									$('#dg').datagrid('reload'); // reload the user data
+									$('#view-dlg').dialog('close')
+								});
+							}
+						}, 'json');
+
+			}
+		}
+		
+</script>

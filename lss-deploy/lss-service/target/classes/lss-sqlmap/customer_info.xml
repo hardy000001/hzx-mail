@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CustomerInfo">
+
+	<sql id="tableName" >
+		customer_info
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	t.deptid deptid ,
+	t.id id ,
+	t.cuscode cuscode ,
+	t.cusname cusname ,
+	t.custype custype ,
+	t.cusrule cusrule ,
+	t.linkman linkman ,
+	t.custel custel ,
+	t.cusaddress cusaddress ,
+	t.cuslicence cuslicence ,
+	t.contracturl contracturl ,
+	t.bankinfo bankinfo ,
+	t.bankaccount bankaccount ,
+	t.accountno accountno ,
+	t.status status ,
+	if(t.status=0,10,t.status) s_status,
+	t.modifytime modifytime ,
+	createoper createoper ,
+	createtime createtime,
+	u.login_name loginName     FROM 
+    <include refid="tableName"/> t
+     left join admin_user u on t.createoper=u.user_id
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CustomerInfo" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(deptid,id,cuscode,cusname,custype,cusrule,linkman,custel,cusaddress,cuslicence,contracturl,bankinfo,bankaccount,accountno,status,modifytime,createoper,createtime)
+		VALUES
+		(#{deptid} ,#{id} ,#{cuscode} ,#{cusname} ,#{custype} ,#{cusrule} ,#{linkman} ,#{custel} ,#{cusaddress} ,#{cuslicence} ,#{contracturl} ,#{bankinfo} ,#{bankaccount} ,#{accountno} ,#{status} ,#{modifytime} ,#{createoper} ,#{createtime} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(deptid,id,cuscode,cusname,custype,cusrule,linkman,custel,cusaddress,cuslicence,contracturl,bankinfo,bankaccount,accountno,status,modifytime,createoper,createtime)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.deptid} ,#{item.id} ,#{item.cuscode} ,#{item.cusname} ,#{item.custype} ,#{item.cusrule} ,#{item.linkman} ,#{item.custel} ,#{item.cusaddress} ,#{item.cuslicence} ,#{item.contracturl} ,#{item.bankinfo} ,#{item.bankaccount} ,#{item.accountno} ,#{item.status} ,#{item.modifytime} ,#{item.createoper} ,#{item.createtime} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE cuscode=#{cuscode} and deptid = #{deptid} 
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CustomerInfo">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CustomerInfo" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where cuscode = #{cuscode}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="deptid != '' and deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="id != null">AND t.id = #{id}</if>
+  	<if test="cuscode != '' and cuscode != null">AND t.cuscode = #{cuscode}</if>
+  	<if test="cusname != '' and cusname != null">AND t.cusname = #{cusname}</if>
+  	<if test="custype != '' and custype != null">AND t.custype in ${custype}</if>
+  	<if test="cusrule != null">AND t.cusrule = #{cusrule}</if>
+  	<if test="linkman != '' and linkman != null">AND t.linkman = #{linkman}</if>
+  	<if test="custel != '' and custel != null">AND t.custel = #{custel}</if>
+  	<if test="cusaddress != '' and cusaddress != null">AND t.cusaddress = #{cusaddress}</if>
+  	<if test="cuslicence != '' and cuslicence != null">AND t.cuslicence = #{cuslicence}</if>
+  	<if test="contracturl != '' and contracturl != null">AND t.contracturl = #{contracturl}</if>
+  	<if test="bankinfo != '' and bankinfo != null">AND t.bankinfo = #{bankinfo}</if>
+  	<if test="bankaccount != '' and bankaccount != null">AND t.bankaccount = #{bankaccount}</if>
+  	<if test="accountno != '' and accountno != null">AND t.accountno = #{accountno}</if>
+  	<if test="status != null">AND t.status = #{status}</if>
+  	<if test="modifytime != null">AND t.modifytime = #{modifytime}</if>
+  	<if test="createoper != null">AND t.createoper = #{createoper}</if>
+  	<if test="createtime != null">AND t.createtime = #{createtime}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CustomerInfo"
+		parameterType="com.lq.lss.model.CustomerInfo">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		
+		order by s_status ,createtime desc
+		
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="id != null">id = #{id},</if>
+		  	<if test="cuscode != null">cuscode = #{cuscode},</if>
+		  	<if test="cusname != null">cusname = #{cusname},</if>
+		  	<if test="custype != null">custype = #{custype},</if>
+		  	<if test="cusrule != null">cusrule = #{cusrule},</if>
+		  	<if test="linkman != null">linkman = #{linkman},</if>
+		  	<if test="custel != null">custel = #{custel},</if>
+		  	<if test="cusaddress != null">cusaddress = #{cusaddress},</if>
+		  	<if test="cuslicence != null">cuslicence = #{cuslicence},</if>
+		  	<if test="contracturl != null">contracturl = #{contracturl},</if>
+		  	<if test="bankinfo != null">bankinfo = #{bankinfo},</if>
+		  	<if test="bankaccount != null">bankaccount = #{bankaccount},</if>
+		  	<if test="accountno != null">accountno = #{accountno},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="modifytime != null">modifytime = #{modifytime},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="createtime != null">createtime = #{createtime}</if>
+			</set>
+		WHERE cuscode=#{cuscode} and deptid = #{deptid} 
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CustomerInfo">
+		<include refid="update_sql"/>
+	</update>	
+		
+	<select id="queryMaxCusCodeByDeptId" parameterType="String" resultType="String">
+	    
+	    select max(cuscode) from  <include refid="tableName" />
+	    
+	</select>
+	
+    <select id="queryCustomerInfoById" resultType="com.lq.lss.model.CustomerInfo" 
+	parameterType="map">
+		<include refid="selectColumns"/>   
+		where cuscode = #{cuscode} and deptid=#{deptid}
+	</select>
+	
+	<delete id="deleteByIdAndDeptid" parameterType="map">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE cuscode = #{cuscode} and deptid=#{deptid}
+  	</delete>
+  	
+  	
+    <select id="findCustomerInfoList" parameterType="String" resultType="com.lq.lss.model.CustomerInfo">
+	    
+	    <include refid="selectColumns"/>   
+		WHERE deptid = #{deptId} and t.status='0'
+	    
+	</select>
+	
+	<select id="findCustomerInfoBycustype" parameterType="String" resultType="com.lq.lss.model.CustomerInfo">
+	    
+	    <include refid="selectColumns"/>   
+		WHERE deptid = #{deptId} and custype=1 and t.status='0'
+	    
+	</select>
+	
+	
+	
+</mapper>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="TNotice">
+
+	<sql id="tableName" >
+		t_notice
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	t.nid nid ,
+	t.ntitle ntitle ,
+	t.notice notice ,
+	t.deptid deptid ,
+	t.fromoper fromoper ,
+	t.tooper tooper ,
+	t.status status ,
+	t.adminstatus adminstatus ,
+	t.level level ,
+	t.remark remark ,
+	t.createtime createtime ,
+	t.createoper createoper ,
+	t.modifytime modifytime ,
+	t.modifyoper modifyoper ,
+	t.orderno orderno,
+	t.tomerchant tomerchant,
+	u.real_name fromName,
+	if(length(uu.real_name)>0,uu.real_name,mcv.mchName)toName,
+	uu.login_name loginName,
+	t.type type     FROM 
+    <include refid="tableName"/> t
+    left join admin_user u on t.fromoper=u.user_id
+    left join admin_user uu on t.tooper=uu.user_id
+    left join mch_cus_view mcv on t.tomerchant=mcv.mchcode
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.TNotice" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(nid,ntitle,notice,deptid,fromoper,tooper,status,adminstatus,level,remark,createtime,createoper,modifytime,modifyoper,type,orderno,tomerchant)
+		VALUES
+		(#{nid} ,#{ntitle} ,#{notice} ,#{deptid} ,#{fromoper} ,#{tooper} ,#{status} ,#{adminstatus} ,#{level} ,#{remark} ,#{createtime} ,#{createoper} ,#{modifytime} ,#{modifyoper} ,#{type} ,#{orderno} ,#{tomerchant} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(nid,ntitle,notice,deptid,fromoper,tooper,status,adminstatus,level,remark,createtime,createoper,modifytime,modifyoper,type,orderno,tomerchant)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.nid} ,#{item.ntitle} ,#{item.notice} ,#{item.deptid} ,#{item.fromoper} ,#{item.tooper} ,#{item.status} ,#{item.adminstatus} ,#{item.level} ,#{item.remark} ,#{item.createtime} ,#{item.createoper} ,#{item.modifytime} ,#{item.modifyoper} ,#{item.type} ,#{item.orderno} ,#{item.tomerchant} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE nid = #{nid}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.TNotice">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.TNotice" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where nid = #{nid}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1 
+  	<if test="nid != '' and nid != null">AND nid = #{nid}</if>
+  	<if test="ntitle != '' and ntitle != null">AND ntitle = #{ntitle}</if>
+  	<if test="notice != '' and notice != null">AND notice = #{notice}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="fromoper != null">AND fromoper = #{fromoper}</if>
+  	<if test="tooper != null">AND tooper = #{tooper}</if>
+  	<if test="status != '' and status != null">AND t.status != '2'</if>
+  	<if test="adminstatus != '' and adminstatus != null">AND t.adminstatus = #{adminstatus}</if>
+  	<if test="level != '' and level != null">AND level = #{level}</if>
+  	<if test="remark != '' and remark != null">AND remark = #{remark}</if>
+  	<if test="createtime != null">AND createtime = #{createtime}</if>
+  	<if test="createoper != null">AND createoper = #{createoper}</if>
+  	<if test="modifytime != null">AND modifytime = #{modifytime}</if>
+  	<if test="modifyoper != null">AND modifyoper = #{modifyoper}</if>
+  	<if test="type != '' and type != null">AND type = #{type}</if>
+  	<if test="orderno != '' and orderno != null">AND orderno is null</if>
+	</sql>
+	<sql id="listConditions">
+		WHERE 1=1 AND t.status != '2'
+  	<if test="nid != '' and nid != null">AND nid = #{nid}</if>
+  	<if test="ntitle != '' and ntitle != null">AND ntitle = #{ntitle}</if>
+  	<if test="notice != '' and notice != null">AND notice = #{notice}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="fromoper != null">AND fromoper = #{fromoper}</if>
+  	<if test="tooper != null">AND tooper = #{tooper}</if>
+  	<if test="status != '' and status != null">AND status = #{status}</if>
+  	<if test="level != '' and level != null">AND level = #{level}</if>
+  	<if test="remark != '' and remark != null">AND remark = #{remark}</if>
+  	<if test="createtime != null">AND createtime = #{createtime}</if>
+  	<if test="createoper != null">AND createoper = #{createoper}</if>
+  	<if test="modifytime != null">AND modifytime = #{modifytime}</if>
+  	<if test="modifyoper != null">AND modifyoper = #{modifyoper}</if>
+  	<if test="type != '' and type != null">AND type = #{type}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.TNotice"
+		parameterType="com.lq.lss.model.TNotice">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		
+		order by level desc,createtime desc
+		
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="ntitle != null">ntitle = #{ntitle},</if>
+		  	<if test="notice != null">notice = #{notice},</if>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="fromoper != null">fromoper = #{fromoper},</if>
+		  	<if test="tooper != null">tooper = #{tooper},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="adminstatus != null">adminstatus = #{adminstatus},</if>
+		  	<if test="level != null">level = #{level},</if>
+		  	<if test="remark != null">remark = #{remark},</if>
+		  	<if test="createtime != null">createtime = #{createtime},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="modifytime != null">modifytime = #{modifytime},</if>
+		  	<if test="modifyoper != null">modifyoper = #{modifyoper},</if>
+		  	<if test="orderno != null">orderno = #{orderno},</if>
+		  	<if test="tomerchant != null">tomerchant = #{tomerchant},</if>
+		  	<if test="type != null">type = #{type}</if>
+			</set>
+		WHERE nid = #{nid}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.TNotice">
+		<include refid="update_sql"/>
+	</update>	
+	
+	<select id="queryNoticeList" resultType="com.lq.lss.model.TNotice" 
+	parameterType="com.lq.lss.dto.TNoticeDto">
+		<include refid="selectColumns"/>   
+		<include refid="listConditions"/>
+		order by level desc,createtime desc
+	</select>	
+	
+
+</mapper>

@@ -1,0 +1,275 @@
+*{ margin: 0; padding: 0;box-sizing: border-box;}.flc{float: left;clear: both;}.auto{ margin: auto;}.fl{float: left;}html,body{
+width: 100%;height: 100%;}.text-align{text-align: center;}.wid-all{width: 100%;}.fr{float: right}.cle{clear: both}
+.wrap{
+    width: 100%;
+    height: 100%;
+}
+.all-screen{
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+.phex-head{
+    position:absolute ;
+    top: 10px;
+    left: 0;
+    margin-left: 10px;
+    width: 97%;
+}
+.phex-head{
+    height: 46px;
+    line-height: 46px;
+    border: solid 1px;
+    border-top-color: #D6D6D6;
+    border-left-color: #ACACA9;
+    border-right-color: #A6A6A6;
+    border-bottom-color: #BEBEB6;
+    box-shadow: 0 -1px 1px #C8C8BE,
+    inset 0 1px 1px #E7E7DB,inset 1px 0 1px #FFFFFF, 1px 0 1px #FFFFFF,0 1px 1px #E5E5E5 ;
+}
+.header-left{
+    width: 35%
+}
+.header-right{
+    width: 25%;
+ }
+.header-center{
+    width: 40%
+}
+.header-left span,.header-center span,.header-right span{
+    font-size: 16px;
+}
+.header-left input,.header-center input{
+    font-size: 15px;
+    text-indent: 5px;
+    padding: 1px;
+    width:30%;
+    outline: none;
+    height: 23px;
+}
+.header-right input{
+    font-size: 14px;
+    text-align: center;
+    padding: 2px;
+}
+.phex-cont{
+    position: absolute;
+    top: 60px;
+    left: 0;
+    margin-left: 10px;
+    width: 97%;
+    overflow-y: hidden;
+}
+.cont-left{
+    width: 23%;
+    height: 100%;
+}
+.cont-l-top{
+    width: 100%;
+    height: 50%;
+}
+.l-top-t,.l-bot-t{
+    line-height: 45px;
+    width: 100%;
+    height: 45px;
+    padding-right: 50px;
+    padding-left: 6px;
+    font-size: 16px;
+}
+.l-top-t{
+    border: solid 1px #A1A1A1;
+    box-shadow: inset 0 1px 1px #FFFFFF,inset 1px 0 1px #fff,1px 0 1px #fff,0 1px 1px #fff;
+}
+.l-top-b,.l-bot-b{
+    width: 98%;
+    overflow-y:auto ;
+    position: relative;
+    z-index: 999;
+    top: -3px;
+}
+.total-option{
+    padding-left: 10px;
+    height: 40px;
+    line-height: 40px;
+    width: 96%;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    border-top:solid 1px #fff;
+    border-left:solid 1px #fff;
+    border-right:solid 1px #686868;
+    border-bottom:solid 1px #686868;
+    box-shadow: inset -1px 0 1px #A1A1A1,inset 0 -1px 1px #A1A1A1;
+}
+.cont-l-bot{
+    height: 50%;
+}
+.cont-right{
+    margin-left:2%;
+    width:75% ;
+    height: 100%;
+    border-top: solid 1px #686868;
+    border-left: solid 1px #686868;
+    border-right: solid 1px #E3E3E3;
+    border-bottom: solid 1px #E3E3E3;
+    box-shadow: 0 -1px 2px #A1A1A1,1px 0 1px #fff,inset 0 -1px 1px #fff,-1px 0 1px #A1A1A1;
+    overflow-y: scroll;
+}
+.phex-content{
+    float: left;
+    width: 800px;
+    border: solid 1px #000;
+    border-bottom: none;
+    background-color: #fff;
+    overflow-x:hidden;
+		overflow-y:auto;
+}
+.Print{
+    float: left;
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 760px;
+    border: solid 1px #0000FF;
+}
+.print-header{
+    width: 92%;
+    margin: auto;
+    clear: both;
+    margin-top: 20px;
+}
+.PH-top{
+    float: left;
+    padding-bottom: 10px;
+    border-bottom: solid 2px #000;
+}
+.Ph-top-left{
+    width: 65%;
+    float: left;
+}
+.Ph-top-right{
+    margin-left: 10px;
+}
+.Ph-top-right p{
+    font-size: 15px;
+}
+.PH-bot{
+    float: left;
+    padding: 10px 0;
+}
+.line1{
+    border-bottom: solid 2px #000000;
+    height: 18px;
+    width: 617px;
+}
+.line2{
+    border-bottom: solid 2px #000000;
+    height: 18px;
+    width: 393px;
+}
+.Print-cont{
+    width: 92%;
+    margin: auto;
+    clear: both;
+}
+.cont-head{
+    font-size: 16px ;
+    font-weight: bold;
+    padding-bottom: 5px;
+    margin-left: 1%;
+}
+.print-dashed-head{
+    border: 1px;
+    font-weight: bold;
+    border-style: solid solid dashed solid;
+}
+.print-dashed-head,.print-dashed-cont{
+    font-size:15px ;
+    height: 26px;
+    line-height: 26px;
+    text-indent: 2%;
+}
+.print-dashed-cont{
+    border: 1px;
+    border-style: none solid dashed solid;
+    margin-top: 1px;
+}
+.print-dashed-cont span,.print-dashed-head span {
+    display: block;
+    float: left;
+    height:25px;
+}
+.print-dashed-foot{
+    border: 1px;
+    border-style: none solid solid solid;
+    margin-top: 1px;
+    width: 100%;
+    height: 35px;
+}
+.line3{
+    border-bottom: solid 1px #000;margin-top: 18px;display: block;width: 80px;height: 1px;
+}
+/*眼鼻口孕听力检查table*/
+.Face-examination{
+    margin-top: 20px;
+}
+.ear-examination table,.eye-examination table,.mouth-examination table,.pregnancy-examination table{
+    border: solid 1px #000;
+ }
+.eye-examination table tr:not(:last-child) td{
+    width: 10%;
+}
+.ear-examination table tr:not(:last-child) td{
+    width: 20%;
+}
+.mouth-examination table tr:not(:last-child) td{
+    width: 13.33333%;
+}
+.pregnancy-examination table tr:not(:last-child) td{
+    width: 26.6666%;
+}
+.ear-examination table tr:not(:last-child) td,.eye-examination table tr:not(:last-child) td,
+.mouth-examination table tr:not(:last-child) td,.pregnancy-examination table tr:not(:last-child) td{
+    height: 26px;
+    line-height: 26px;
+    font-size: 14px;
+    border-bottom: solid 1px #000;
+    text-align: left;
+    text-indent: 2px;
+}
+.ear-examination table tr:last-child td,.eye-examination table tr:last-child td,
+.mouth-examination table tr:last-child td,.pregnancy-examination table tr:last-child{
+    height: 30px;
+    text-align: left;
+    text-indent: 5px;
+    padding-bottom: 15px;
+}
+.ear-examination table tr:first-child td:first-child,.eye-examination table tr:first-child td:first-child
+,.mouth-examination table tr:first-child td:first-child,.pregnancy-examination table tr:first-child td:first-child{
+    border-bottom: none;
+    border-right: solid 1px #000;
+    width: 6%;
+    text-align: center;
+}
+.ear-examination table tr:first-child td:last-child,.eye-examination table tr:first-child td:last-child
+,.mouth-examination table tr:first-child td:last-child,.pregnancy-examination table tr:first-child td:last-child{
+    border-bottom: none;
+    border-left: solid 1px #000;
+    width: 14%;
+    text-align: center;
+}
+.mar-top{
+    margin-top: -5px;
+}
+.cont-footer{
+    margin-top: 20px;
+    padding-bottom: 20px;
+    border-top: solid 2px #000;
+    width: 100%;
+}
+li{
+    list-style: none;
+    font-size: 16px ;
+    font-weight: bold;
+    margin-top: 2px;
+}

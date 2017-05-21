@@ -1,0 +1,266 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+     <#include "../include_head.html">
+    </head>
+    <body>
+   <div id="query_panel"  class="easyui-panel" title="查询面板"     
+        style="height:130px;padding:10px;background:#fafafa;"   
+        data-options="iconCls:'icon-search',collapsible:true">
+		<form id="queryFm" method="post" novalidate>
+			<div class="fitem">
+				<label>材料编码:</label> <input name="code" class="easyui-validatebox">
+				<label></label>
+				<label>材料名称:</label> <input name="name" class="easyui-validatebox">
+			</div>
+			<br>
+			<br>
+			<div class="fitem dlg-buttons"  style="text-align: center;">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()" >查询</a>
+			
+			<!-- <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="bachtest()" >批量</a>
+			 -->
+			
+			</div>
+		</form>
+	<!-- 这里的query是通用js,如果有特别的查询可以不引入 -->
+		<#include "../query_js_inc.html">
+	</div>  
+    <table id="dg" title="用户" class="easyui-datagrid" style="height:400px"
+     data-options="url:'<@sp.ctx />/user/sys/materialinfo.htm?method=query'",showGroup:true,scrollbarSize:0
+    toolbar="#toolbar" pagination="true"
+    rownumbers="true" fitColumns="true" singleSelect="true">
+    <thead>
+			<tr>
+		
+			    <th field="id" hidden="hidden">id</th>
+				<th field="code" width="10%">材料编码</th>
+				<th field="name" width="10%">材料名称</th>
+				<th field="typeName" width="10%">材料类别</th>
+				<th field="typeid" hidden="hidden">材料类别</th>
+				<th field="price" width="10%">材料单价</th>
+				<th field="accountFlag" width="10%">记账单位</th>
+				<th field="convertFlag" width="10%">换算单位</th>
+				<th field="covertRatio" width="10%">换算系数</th>
+				<th field="compensateFlag" width="10%">赔偿单位</th>
+				<th field="compensateRatio" width="10%">赔偿系数</th>
+				<th field="transferFlag" width="10%">调拨单位</th>
+				<th field="transferPrice" width="10%">调拨单价</th>
+				<th field="expressFlag" width="10%">运费单位</th>
+				<th field="expressRatio" width="10%">运费系数</th>
+				<th field="expressPrice" width="10%">运费单价</th>
+				<th field="zxPrice" width="10%">装卸费单价</th>
+				<th field="pyCode" width="10%">拼音简码</th>
+				<th field="status" formatter="formatStatus" width="10%">状态</th>
+			
+				
+			</tr>
+    </thead>
+    </table>
+    
+    	<#include "../role_detail_inc.html">
+
+	<div id="dlg" class="easyui-dialog"
+		style="width: 400px; height: 550px; padding: 10px 20px" closed="true"
+		buttons="#dlg-buttons">
+		<div class="ftitle">物资信息</div>
+		<form id="fm" method="post" novalidate>
+			<div class="fitem" hidden="hidden">
+				<label>id:</label> <input name="id" class="easyui-validatebox">
+			</div>
+			<div class="fitem">
+				<label>材料编码:</label> <input name="code" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+			<div class="fitem">
+				<label>材料名称:</label> <input name="name" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+			<div class="fitem">
+				<label>材料类别:</label> <input name="typeid" id="typeid" class="easyui-combotree" >
+			</div>	
+
+					
+			<div class="fitem">
+				<label>材料单价:</label> <input name="price" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+			<div class="fitem">
+				<label>记账单位:</label> <input name="accountFlag" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+			<div class="fitem">
+				<label>换算单位:</label> <input name="convertFlag" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>					
+			<div class="fitem">
+				<label>换算系数:</label> <input name="covertRatio" style="width: 150px;"class="easyui-validatebox" required="true">
+			</div>			
+			<div class="fitem">
+				<label>赔偿单位:</label> <input name="compensateFlag" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+			<div class="fitem">
+				<label>赔偿系数:</label> <input name="compensateRatio" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+			
+			<div class="fitem">
+				<label>调拨单位:</label> <input name="transferFlag" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+			<div class="fitem">
+				<label>调拨单价:</label> <input name="transferPrice" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>		
+		
+			
+			<div class="fitem">
+				<label>运费单位:</label> <input name="expressFlag" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+			<div class="fitem">
+				<label>运费系数:</label> <input name="expressRatio" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+			<div class="fitem">
+				<label>运费单价:</label> <input name="expressPrice" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>		
+			<div class="fitem">
+				<label>装卸费单价:</label> <input name="zxPrice" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+			<div class="fitem">
+				<label>拼音简码:</label> <input name="pyCode" style="width: 150px;" class="easyui-validatebox" required="true">
+			</div>			
+		<div class="fitem">
+	    <label>状态:</label>
+	    
+	    <input name="status" type="radio" value="0" checked="checked"  >正常
+	    
+	    
+	    <input name="status" type="radio" value="9" >禁止
+	    </div>			
+		</form>
+	</div>
+    
+   
+    <div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+    </div>
+    <script type="text/javascript">
+    
+    var matyAction = "<@sp.ctx />/user/sys/matertype.htm"
+    var baseAction = "<@sp.ctx />/user/sys/materialinfo.htm"
+    var deptAction = "<@sp.ctx />/user/adminDept.htm"
+    var url;
+    
+    function addDg(){
+
+    	
+        
+     	  $('#typeid').combotree({
+     		  url: matyAction +'?method=getBmaterialtypeList&type=2',
+              width:'150px'
+              		
+          });
+  
+    	  
+	    $('#dlg').dialog('open').dialog('setTitle','新增物资信息');
+	    $('#fm').form('clear');
+	    url = baseAction+'?method=save&_ajax';
+    }
+    
+    function editDg(){
+    	
+    	
+        
+   	  $('#typeid').combotree({
+   		  url: matyAction +'?method=getBmaterialtypeList&type=2',
+            width:'150px'
+            		
+        });
+    	
+	    var row = $('#dg').treegrid('getSelected');
+	   
+	    if (row){
+	    	 $('#fm').form('clear');
+		    $('#dlg').dialog('open').dialog('setTitle','修改物资信息');
+		    $('#fm').form('load',row);
+		    url = baseAction+'?method=update';
+	    }
+    }
+    
+    
+    function save(){
+    	
+    $('#fm').form('submit',{
+    "url": url,
+    onSubmit: function(){
+   	 return $(this).form('validate');
+    },
+    success: function(result){
+    var result = eval('('+result+')');
+        if (result.errorMsg){
+    	  $.messager.alert('Error',
+    			     result.errorMsg
+    		   );
+    } else {
+	    $('#dlg').dialog('close'); // close the dialog
+	    $('#dg').datagrid('reload'); // reload the user data
+    }
+    }
+    });
+    }
+    
+    //删除数据
+    function destroyDg(){
+    	var row = $('#dg').datagrid('getSelected');
+	    if (row){
+	   		 $.messager.confirm('确定删除','确定删除选中数据吗?',function(r){
+	    if (r){
+	    	$.post(baseAction+'?method=remove',{id:row.code},function(result){
+	    if (result.success){
+	    	$('#dg').datagrid('reload'); // reload the user data
+	    } else {
+	    	  $.messager.alert('Error',
+	    			     result.errorMsg
+	    		   );
+    }
+    },'json');
+    }
+    });
+    }
+    }
+    
+	$(function(){
+		$("#fm .fitem").width(300);
+
+	});
+	//设置状态
+	 function formatStatus(val, row) {
+		    var vResult = "";
+		    if (val == '9') {
+		        vResult = '<span style="color:red;">禁止</span>';
+		    }
+		    else{
+		        vResult = '<span style="color:green;">正常</span>';
+		    }
+		   
+		    return vResult;
+		}
+	
+	
+		
+		function bachtest() {
+		
+						$.post(baseAction + '?method=bachcreat', {
+							inSerialno : ""
+							
+						}, function(result) {
+							if (result.success) {
+							
+							} else {
+								$.messager.alert('Error', result.errorMsg);
+							}
+						}, 'json');
+
+		}
+		
+	
+	 
+    </script>
+   
+    </body>
+    </html>

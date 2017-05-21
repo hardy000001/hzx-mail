@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>新增盘点申请单</title> <#include "../include_head.html">
+</head>
+<body>
+	<div class="easyui-layout" data-options="fit:true" style="padding: top:10px;">
+	    <div data-options="region:'north'" style="height:35px;">
+	    		<div style="text-align: left; padding: 3px">
+						<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="save()">保 存</a>
+					    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeForm('新增盘点申请单')">关 闭</a>
+			    </div>
+	    </div>
+		<div data-options="region:'center'">
+			<div class="easyui-panel" title="基本信息" style="width:auto;height:auto;">
+				<div style="padding: 10px 60px 20px 60px">
+					<form id="fm" method="post">
+						<div class="fitem">
+							<label>盘点流水号:</label> <input name="inventorySerialno" id="inventorySerialno" readonly="readonly" class="easyui-textbox" required="true">
+							<label>申请日期:</label> <input name="createtime" id="createtime" class="Wdate" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})">
+						</div>
+						<div class="fitem">
+							<label>申请商户名称:</label> <input name="mchcode" id="fromMchcode" class="easyui-combogrid" value="${mchcode!''}" required="true"> 
+							<label>所属中心:</label> <input name="adminDept" id="adminDept" value="${adminDept.name!''}" readonly="readonly" class="easyui-textbox"> 
+
+						</div>
+						<div class="fitem">
+						    <label>盘点经办人:</label> <input name="inventoryoper" id="inventoryoper" class="easyui-textbox" data-options="required:true">
+							<label>制单人:</label> <input name="createoper" id="createoper" value="${user.loginName!''}" readonly="readonly" class="easyui-textbox" >
+						</div>
+						<div class="fitem">
+							<label>备注:</label> <input name="remark" id="remark"  class="easyui-textbox" data-options="multiline:true" style="width: 600px; height: 40px">
+						</div>
+						<div class="fitem" style="float: left;" >
+						     <div id="tb" style="height: auto">
+								<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="importData()">导入数据</a> 
+							</div>
+							<table id="dgItem" class="easyui-datagrid"	style="width: 780px; height: auto;float: left;"
+								data-options="
+								singleSelect: true,
+								toolbar: '#tb',
+								showFooter: true,
+								onClickCell: onClickCell">
+								<thead>
+									<tr>
+										<th data-options="field:'itemid',width:50,align:'left'">序号</th>
+										<th data-options="field:'materialcode',width:120,align:'left'">物资简码</th>
+										<th data-options="field:'name',width:120,align:'left'">物资名称</th>
+										<th data-options="field:'realTotalS',width:100,align:'left',editor:{type:'numberbox'}">实际库存</th>
+										<th data-options="field:'accTotalS',width:100,align:'left'">账面库存</th>
+										<th data-options="field:'unit',width:50,align:'left'">单位</th>
+										<th data-options="field:'totalM',width:100">-盘亏/+盘盈</th>
+										<th data-options="field:'diffrate',width:100,align:'left'">差异率(%)</th>
+										<th data-options="field:'typeId',hidden:true">父ID</th>
+										<th data-options="field:'fname',hidden:true">父名</th>
+										<th data-options="field:'covertRatio',hidden:true">系数</th>
+										<th data-options="field:'accountFlag',width:60,hidden:false">记账单位</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+	
+						<input name="id" id="id" type="hidden"> <input
+							name="typeid" id="typeid" type="hidden"> <input
+							name="flag" id="flag" type="hidden">
+					</form>
+
+				</div>
+			</div>
+		</div>
+	   
+	</div>
+	
+	<div id="dlg" class="easyui-dialog"
+		style="width: 400px; height: 220px; padding: 10px 20px" closed="true"
+		buttons="#dlg-buttons">
+		<div class="ftitle">导入数据</div>
+		  
+		  <form id="fm2"  method="post"   novalidate  enctype="multipart/form-data">
+			<div class="fitem">
+				<label>模板文件:</label><a href="javascript:downlodTemp()">下载模板</a>
+			</div>
+			<div class="fitem">
+				<label>上传文件:</label> <input name="excelFile" id="excelFile" class="easyui-filebox" data-options="buttonText: '选择文件'">
+			</div>
+			
+		</form>
+	</div>
+	<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="upFile()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+    </div>
+	
+  <#include "stock_inventory_js.html">
+  <script type="text/javascript">
+	
+	    var addBaseAction = "<@sp.ctx />/user/stock/stockInventoryAdd.htm"
+	   
+		
+		$(document).ready(function() {
+			var dateNow = getNowFormatDate();
+			var _no="PD"+generateNum();
+		    $('#inventorySerialno').textbox('setValue',_no);
+		    $('#createtime').val(dateNow);
+		    
+		    loadInventoryByMchcode("${mchcode!''}");
+		});
+	    
+	    
+	    /**
+	   	 *根据商户查询盘点信息
+	   	 **/
+	    function loadInventoryByMchcode(mchcode){
+	    	var _url=addBaseAction+"?method=getInventoryList&mchcode="+mchcode;
+	    	loadInventory(_url);
+	    }
+	    
+
+		function save() {
+			
+			$('#fm').form('submit', {
+				 url:addBaseAction+"?method=inventoryApply",
+				 onSubmit : function(param) {
+				    var rows = getNewListData();
+// 				    if (rows.length < 1) {
+// 						$.messager.alert('错误信息', "请添加物资项目");
+// 						return false;
+// 					}
+// 				    for (var i = 0; i < rows.length; i++) {
+// 						if(rows[i].totalS=="undefined" || rows[i].totalS==null  || rows[i].totalS=='' ){
+// 							$.messager.alert('提示', "请输入数量并保存");
+// 							return false;
+// 						}
+// 					}
+				    var itemData = JSON.stringify(rows);
+					param.dataList = itemData;
+					return $(this).form('validate');
+				},
+				success : function(result) {
+					var result = eval('(' + result + ')');
+					
+					if (!result.success) {
+						$.messager.alert('错误信息', result.errorMsg);
+					} else {
+						$.messager.alert('提示信息', '保存成功！','info' ,function () {
+							createNewTab('中心库存盘点',0);
+							window.parent.$('#tabs').tabs('close', '新增盘点申请单');
+						});
+
+						
+				}}
+			});
+		}
+	    
+	    
+		
+		
+</script>
+</body>
+</html>

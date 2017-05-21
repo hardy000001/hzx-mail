@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>角色权限分配</title>
+
+    <#include "../include_head.html" />
+    <style type="text/css">
+        .but_center {
+            width: 90px;
+            float: left;
+            margin-top: 180px;
+            padding-left: 30px;
+        }
+    </style>
+
+</head>
+
+<body>
+<div class="easyui-layout" data-options="fit:true" style="padding: top:10px;">
+    <div data-options="region:'center'" style="width: 300px; ">
+
+        <div style="width:250px;height:100%;float: left;">
+            <div class="easyui-panel" style="width:250px;height:100%;padding:6px;">
+                <ul id="ttMenu" data-options="animate:true,lines:true" style="padding-bottom: 6px;"></ul>
+            </div>
+        </div>
+
+        <div class="but_center">
+            <a href="javascript:void(0)" class="easyui-linkbutton" style="width:50px;" onclick="save()">保 存</a>
+        </div>
+
+        <div style="width:650px;height:100%;float: left;">
+            <div class="easyui-panel" title="按钮操作资源" style="width:650px;height:100%;">
+                <div style="padding: 1px">
+                    <form id="fmAction" style=" margin:0;padding:10px 10px;" method="post">
+
+                        <table style="width: 100% " id="actionItmesTable">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                        <input name="roleId" id="roleId" type="hidden" value="${roleId}">
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script language="javascript">
+
+    var baseAction = "<@sp.ctx />/user/adminRoleResource.htm";
+
+    var curhtmlBody = "<tr><td style='width: 150px;'><font color='blue'><strong>功能列表</strong><font></td>"
+            + "<td style='width: 75px;'><input type='checkbox' onclick='checkAll(1,this.checked)'  name='checkAll_1' /> 超级全选</td><td></td></tr>";
+
+    $("#actionItmesTable thead").html(curhtmlBody);
+
+
+
+    $('#ttMenu').tree({
+        url: baseAction + '?method=queryRoleMenuList&roleId=${roleId}',
+        data: {roleId: '${roleId}'},
+        checkbox: true,
+        onClick: function (node) {
+            $('#tt').tree('expand', node.target);
+        },
+        onDblClick: function (node) {
+            $('#tt').tree('collapse', node.target);
+        },
+        onCheck: function (node, checked) {
+            getChecked();
+        },
+        onLoadSuccess: function (node, data) {
+            getChecked();
+        }
+
+
+    });
+
+    // 配置
+    function getChecked() {
+        var nodes = $('#ttMenu').tree('getChecked', ['checked', 'indeterminate']);
+        var r = 0;
+        var htmlBody = "";
+        var ids = "";
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id != 1) {
+                if (ids != "") {
+                    ids += "," + nodes[i].id;
+                } else {
+                    ids += nodes[i].id;
+                }
+            }
+        }
+        // 查询选中菜单的操作及按钮
+        var itemsList = getActionItmes(ids);
+
+        for (var i = 0; i < nodes.length; i++) {
+            if (nodes[i].id != 1) {
+
+                var nbsp = "" ;
+                for (var k = 1 ; k <= 10; k++) {
+                    if (k <= nodes[i].attributes.layer) {
+                        nbsp += "&nbsp;&nbsp;&nbsp;";
+                    }
+                }
+                if (nodes[i].children!=null && nodes[i].children !="" ) {
+                    htmlBody += "<tr id='curd_" + nodes[i].id + "'>"
+                            + "<td>" + nbsp + nodes[i].text
+                            + "</td><td>";
+                } else {
+                    htmlBody += "<tr id='curd_" + nodes[i].id + "'>"
+                            + "<td>" + nbsp+ nodes[i].text
+                            + "</td><td>";
+                }
+
+                htmlBody += "<input type='checkbox' value='0' onclick='checkAll(" + nodes[i].id + ",this.checked)'  name='item_checkAll_" + nodes[i].id + "' /> 全选</td><td>";
+
+
+                //input name 命名规则： item + menuid + actionid
+                for (var j = 0; j < itemsList.length; j++) {
+
+                    if (nodes[i].id == itemsList[j].pid) { 	//
+                        if (itemsList[j].checked != '') {
+                            htmlBody += "<input type='checkbox' checked='checked' value='" + itemsList[j].id + "'  name='item_" + nodes[i].id + "_" + itemsList[j].id + "' />" + itemsList[j].name;
+                        } else {
+                            htmlBody += "<input type='checkbox' value='" + itemsList[j].id + "'  name='item_" + nodes[i].id + "_" + itemsList[j].id + "' />" + itemsList[j].name;
+                        }
+                        if ((j + 1) % 4 == 0) {
+                            htmlBody += "<br/>";
+                        }
+
+                    }
+                }
+                htmlBody += "</td></tr>";
+
+            }
+        }
+
+        $("#actionItmesTable tbody").html(htmlBody);
+
+    }
+
+    function checkAll(id, checked) {
+        var doucm = null;
+        var inputName = "item_" + id + "_";
+        if (id == 1) {
+            var inputName = "item_";
+        }
+        doucm = $("#actionItmesTable").find(":input[name*=" + inputName + "]");
+        if (doucm) {
+            if (checked) {
+                doucm.prop("checked", true);
+            } else {
+                doucm.prop("checked", false);
+            }
+        }
+
+    }
+
+    // AJAX 请求所有选中菜单资源的操作权限
+    function getActionItmes(pids) {
+        if (pids == "") {
+            return "";
+        }
+        var itemsList;
+        $.ajax({
+            url: baseAction + '?method=queryResourceListByIds',
+            type: "post",
+            async: false,
+            data: {pids: pids, roleId: '${roleId}'},
+            dataType: "json",
+            success: function (result) {
+                itemsList = result;
+            }
+        });
+        return itemsList;
+    }
+
+    function save() {
+        var roleId = $('#roleId').val();
+        var nodes = $('#ttMenu').tree('getChecked', ['checked', 'indeterminate']);
+        if (nodes.length < 1) {
+            $.messager.alert('提示信息', '请选择资源', 'info');
+            return false;
+        }
+
+        var resourceIds = "";
+        for (var i = 1; i < nodes.length; i++) { // 丢弃第一个功能列表复选框
+            if (resourceIds != "") {
+                resourceIds += "," + nodes[i].id;
+            } else {
+                resourceIds += nodes[i].id;
+            }
+        }
+        $('input[name*="item_"]:checked').each(function () {
+            if ($(this).val() != 0) { // 丢弃全选的复选框
+                resourceIds += "," + $(this).val();
+            }
+        });
+
+        $.messager.confirm('提示信息', '确定要执行操作吗?', function (r) {
+            if (r) {
+                $.ajax({
+                    url: baseAction + '?method=create',
+                    type: "post",
+                    data: {resourceIds: resourceIds, roleId: roleId},
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.success) {
+                            $.messager.alert('提示信息', '操作成功', 'info', function () {
+                                window.parent.$('#tabs').tabs('close', '分配权限资源');
+                            });
+                        } else {
+                            $.messager.alert('提示信息', '操作失败', 'error');
+                        }
+                    }
+                });
+            }
+        });
+
+
+    }
+
+</script>
+
+
+</body>
+</html>

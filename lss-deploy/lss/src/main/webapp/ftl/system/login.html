@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="<@sp.static />/style/bootstrap.min.css">
+    <link rel="stylesheet" href="<@sp.static />/style/public.css">
+    <script type="text/javascript" src="<@sp.static />/easyui/jquery.min.js"></script>
+    <script type="text/javascript" src="<@sp.static />/script/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="Wrapper Allheight Allwidth FLL Clear">
+    <img src="<@sp.static />/images/151.jpg" alt="" class="bgImage Allheight Allwidth">
+    <div class="Logo Auto Clear">
+       <img src="<@sp.static />/images/logo.png" alt="" class="Block Allheight Allwidth"> 
+    </div>
+    <form id="form0" action="<@sp.ctx />/user/forwordMain.htm" method="post">
+    <div class="SignInForm FLL Clear">
+        <div class="FormAuto Auto">
+            <div id="alertTxt" class="Prompt" style="display: none;"></div>
+            <div class="SignIn-text">登录</div>
+            <div class="account-number">
+                <span class="Block">
+                    账号：
+                    <label>
+                        <input id="username" type="text" maxlength="15" id="Num">
+                    </label>
+                    <p id="putusername">请输入邮箱号码或手机号码</p>
+                </span>
+            </div>
+            <div class="Password">
+                <span class="Block">
+                    密码：
+                    <label>
+                        <input id="pwd" type="password" maxlength="12" id="Pas">
+                    </label>
+                    <p id="putpwd">请输入密码</p>
+                </span>
+            </div>
+            <div class="Remember">
+                <label>
+                    <input id="remember" type="checkbox">
+                记住账号
+                </label>
+            </div>
+            <a  class="Block Auto SignIn-btn text-center" id="submit" onclick="login()">登 录</a>
+            <div class="FormFoot Auto Clear">
+                <a href="" style="border-right: solid 1px #cbcbcb">立即注册</a>
+                <a href=""> 忘记密码</a>
+            </div>
+        </div>
+    </div>
+    </form>
+</div>
+<script type="text/javascript">
+	
+	$(document).ready(function(){
+		var u_name = readCookie("etpusername");
+    	var u_pwd = readCookie("etpwd");
+    	$("#username").val(u_name);
+    	$("#pwd").val(u_pwd);
+    	if(u_name && u_pwd){
+    		$("#putusername").html("");
+    		$("#putpwd").html("");
+    		$("#remember").attr("checked","checked");
+    	}
+    	
+    	//解决超时后登陆页面嵌套问题
+    	if (top != window)   
+    	      top.location.href = window.location.href;  
+    	
+	});
+	
+    $(function(){
+        var input=$("input");
+        input.focus(function(){
+            $(this).css({opacity:1});
+            $(this).parent().next("p").fadeOut(300);
+        });
+        input.blur(function(){
+            if($(this).val()!=''){
+               $(".Prompt").fadeOut(300);
+               return;
+            }$(this).css({opacity:0.1});
+            $(this).parent().next("p").fadeIn(300);
+        });
+        $("#submit").click(function(){
+            if($("#alertTxt").val() != "" && $("#alertTxt").val() != null){
+                $("#alertTxt").fadeOut(300)
+            }
+        })
+        
+    })
+    
+    function login() {
+    	var username = $("#username").val();
+    	var pwd = $("#pwd").val();
+    	if (username == "") {
+    		/* alert("用户名不能为空"); */
+    		$("#alertTxt").html("用户名不能为空");
+	  		$("#alertTxt").css("display", "block");
+    		return false;
+    	}
+    	if (pwd == "") {
+    		/* alert("密码不能为空"); */
+    		$("#alertTxt").html("密码不能为空");
+	  		$("#alertTxt").css("display", "block");
+    		return false;
+    	} 
+    	$.post("<@sp.ctx />/login.htm?method=loginAuth",
+    			{"username" : username, "password" : pwd}, function(msg){
+    			var obj = eval("("+msg+")");  
+    		  	if (obj.success){
+    		  		$("#form0").submit();
+    		  		if($("#remember").attr("checked")){
+		    			writeCookie("etpusername", username, 24);
+		    			writeCookie("etpwd", pwd, 24);
+		    		}else{
+		    			writeCookie("etpusername", username, 0);
+		    			writeCookie("etpwd", pwd, 0);
+		    		}
+    		  	} else {
+    		  		$("#alertTxt").html(obj.errorMsg);
+    		  		$("#alertTxt").css("display", "block");
+    		  	}
+    	});
+    }
+    
+    $(document).keyup(function(event){
+    	if(event.keyCode ==13){
+    		login();
+    	}
+    });
+    
+    $("#remember").click(function(){
+		if($(this).attr("checked")){
+			$(this).removeAttr("checked");
+		}else{
+			$(this).attr("checked","checked");
+		}
+	});
+    
+    function writeCookie(name, value, hours){
+		var expire = "";
+		if(hours != null){
+			expire = new Date((new Date()).getTime() + hours * 3600000*24*30);
+			expire = "; expires=" + expire.toGMTString();
+		}
+		document.cookie = name + "=" + escape(value) + expire + ";path=/";
+	}
+	function readCookie(name){
+		var cookieValue = "";
+		var search = name + "=";
+		if(document.cookie.length > 0){
+			offset = document.cookie.indexOf(search);
+			if (offset != -1){
+	 			offset += search.length;
+	 			end = document.cookie.indexOf(";", offset);
+	 			if (end == -1) end = document.cookie.length;
+	 			cookieValue = (document.cookie.substring(offset, end))
+			}
+		}
+		return cookieValue;
+	}
+	
+</script>
+</body>
+</html>

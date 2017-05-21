@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockOut">
+
+	<sql id="tableName" >
+		c_stock_out
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	out_serialno outSerialno ,
+	deptid deptid ,
+	mchcode mchcode ,
+	out_operator outOperator ,
+	in_operator inOperator ,
+	total_m totalM ,
+	total_s totalS ,
+	total_t totalT ,
+	zx_fee zxFee ,
+	other_fee otherFee ,
+	status status ,
+	createoper createoper ,
+	createtime createtime ,
+	auditingoper auditingoper ,
+	auditingtime auditingtime ,
+	transport_fee transportFee,
+	remark remark,
+	trans_date transDate,
+	car_no carNo ,
+	rel_serialno relSerialno,
+	car_driver carDriver     FROM
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockOut" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(out_serialno,deptid,mchcode,out_operator,in_operator,total_m,total_s,total_t,zx_fee,other_fee,status,createoper,createtime,auditingoper,auditingtime,transport_fee,remark,trans_date,car_no,car_driver,rel_serialno)
+		VALUES
+		(#{outSerialno} ,#{deptid} ,#{mchcode} ,#{outOperator} ,#{inOperator} ,#{totalM} ,#{totalS} ,#{totalT} ,#{zxFee} ,#{otherFee} ,#{status} ,#{createoper} ,#{createtime} ,#{auditingoper} ,#{auditingtime} ,#{transportFee} ,#{remark} ,#{transDate} ,#{carNo} ,#{carDriver} ,#{relSerialno} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(out_serialno,deptid,mchcode,out_operator,in_operator,total_m,total_s,total_t,zx_fee,other_fee,status,createoper,createtime,auditingoper,auditingtime,transport_fee,remark,trans_date,car_no,car_driver,rel_serialno)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.outSerialno} ,#{item.deptid} ,#{item.mchcode} ,#{item.outOperator} ,#{item.inOperator} ,#{item.totalM} ,#{item.totalS} ,#{item.totalT} ,#{item.zxFee} ,#{item.otherFee} ,#{item.status} ,#{item.createoper} ,#{item.createtime} ,#{item.auditingoper} ,#{item.auditingtime} ,#{item.transportFee} ,#{item.remark} ,#{item.transDate} ,#{item.carNo} ,#{item.carDriver} ,#{item.relSerialno} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE out_serialno = #{outSerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockOut">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockOut" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where out_serialno = #{outSerialno}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="outSerialno != '' and outSerialno != null">AND out_serialno = #{outSerialno}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="mchcode != '' and mchcode != null">AND m.mchcode = #{mchcode}</if>
+  	<if test="outOperator != '' and outOperator != null">AND out_operator = #{outOperator}</if>
+  	<if test="inOperator != '' and inOperator != null">AND in_operator = #{inOperator}</if>
+  	<if test="totalM != null">AND total_m = #{totalM}</if>
+  	<if test="totalS != null">AND total_s = #{totalS}</if>
+  	<if test="totalT != null">AND total_t = #{totalT}</if>
+  	<if test="zxFee != null">AND zx_fee = #{zxFee}</if>
+  	<if test="otherFee != null">AND other_fee = #{otherFee}</if>
+  	<if test="status != '' and status != null">AND t.status = #{status}</if>
+  	
+  	<if test="createDate != '' and  createDate != null">AND left(t.createtime,10) = #{createDate}</if>
+  	<if test="dealDate != '' and  dealDate != null">AND left(t.trans_date,10)  = #{dealDate}</if>
+  	
+  	
+  	<if test="beginTime != '' and  beginTime != null">AND left(t.createtime,10) &gt;= #{beginTime}</if>
+  	<if test="endTime != '' and  endTime != null">AND left(t.createtime,10) &lt;= #{endTime}</if>
+  	<if test="loginName != '' and loginName != null">AND u.login_name like '%${loginName}%'</if>
+  	
+  	<if test="auditingoper != '' and auditingoper != null">AND auditingoper = #{auditingoper}</if>
+  	<if test="auditingtime != null">AND auditingtime = #{auditingtime}</if>
+  	<if test="cusType != '' and cusType != null">	and m.cusType=#{cusType}    </if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockOut"
+		parameterType="com.lq.lss.model.CStockOut">
+		select
+			t.out_serialno outSerialno ,
+			t.deptid deptid ,
+			t.mchcode mchcode ,
+			t.out_operator outOperator ,
+	        t.in_operator inOperator ,
+			t.total_m totalM ,
+			t.total_s totalS ,
+			t.total_t totalT ,
+			t.zx_fee zxFee ,
+			t.other_fee otherFee ,
+			t.status status ,
+			if(t.status=0,10,t.status) s_status,
+			t.createoper createoper ,
+			t.createtime createtime ,
+			t.auditingoper auditingoper ,
+			t.auditingtime auditingtime,
+			t.transport_fee transportFee,
+			t.remark remark,
+			t.trans_date transDate,
+			t.car_no carNo ,
+			t.car_driver carDriver,
+			t.rel_serialno relSerialno,
+			u.login_name loginName,
+			uu.login_name operName,
+			m.mchname mchname,
+			d.name centerName    FROM 
+	    <include refid="tableName"/> t
+	    left join admin_user u on t.createoper=u.user_id
+	    left join admin_user uu on t.auditingoper=uu.user_id
+	    left join admin_dept d on t.deptid=d.dept_id
+	    LEFT JOIN mch_cus_view m ON (m.mchCode=t.mchCode  AND  m.deptid=t.deptid )
+		<include refid="pageConditions"/>
+		
+		order by s_status ,createtime desc
+		
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName"/> t
+	   left join admin_user u on t.createoper=u.user_id
+	    left join admin_dept d on t.deptid=d.dept_id
+	    LEFT JOIN mch_cus_view m ON (m.mchCode=t.mchCode  AND  m.deptid=t.deptid )
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="mchcode != null">mchcode = #{mchcode},</if>
+		  	<if test="outOperator != null">out_operator = #{outOperator},</if>
+		  	<if test="inOperator != null">in_operator = #{inOperator},</if>
+		  	<if test="totalM != null">total_m = #{totalM},</if>
+		  	<if test="totalS != null">total_s = #{totalS},</if>
+		  	<if test="totalT != null">total_t = #{totalT},</if>
+		  	<if test="zxFee != null">zx_fee = #{zxFee},</if>
+		  	<if test="otherFee != null">other_fee = #{otherFee},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="createtime != null">createtime = #{createtime},</if>
+		  	<if test="auditingoper != null">auditingoper = #{auditingoper},</if>
+		  	<if test="auditingtime != null">auditingtime = #{auditingtime},</if>
+		  	<if test="transportFee != null">transport_fee = #{transportFee},</if>
+		  	<if test="remark != null">remark = #{remark},</if>
+		  	<if test="transDate != null">trans_date = #{transDate},</if>
+		  	<if test="carNo != null">car_no = #{carNo},</if>
+		  	<if test="relSerialno != null">rel_serialno = #{relSerialno},</if>
+		  	<if test="carDriver != null">car_driver = #{carDriver}</if>
+			</set>
+		WHERE out_serialno = #{outSerialno}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockOut">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

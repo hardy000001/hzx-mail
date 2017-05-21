@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>新增收料单</title> <#include "../include_head.html">
+</head>
+<body>
+	<div class="easyui-layout" data-options="fit:true" style="padding: top:10px;">
+	    <div data-options="region:'north'" style="height:35px;">
+	    		<div style="text-align: left; padding: 3px">
+						<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="save()">保 存</a>
+					    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeForm('新增收料单')">关 闭</a>
+			    </div>
+	    </div>
+		<div data-options="region:'center'">
+			<div class="easyui-panel" title="基本信息" style="width:auto;height:auto;">
+				<div style="padding: 10px 60px 20px 60px">
+					<form id="fm" method="post">
+						<div class="fitem">
+							<label>收料流水号:</label> <input name="receiptSerialno" id="receiptSerialno" readonly="readonly" class="easyui-textbox" data-options="required:true">
+							<label>材料所属中心:</label>  <input name="deptname" id="deptname" value="${adminDept.name!''}" class="easyui-combogrid" readonly="readonly">
+						</div>
+						<div class="fitem">
+							<label>合同编号:</label> <input name="htcode" id="htcode" class="easyui-combogrid" data-options="required:true,editable:false"> 
+							<label>项目名称:</label> <input name="projectName" id="projectName" value="" readonly="readonly"  class="easyui-textbox">
+						</div>
+						<div class="fitem">
+						    <label>收料人:</label> <input name="lessee" id="lessee" class="easyui-textbox" data-options="required:true">
+							<label>发料人:</label> <input name="renter" id="renter" class="easyui-textbox" >
+						</div>
+						<div class="fitem">
+						    <label>车号:</label> <input name="carNo" id="carNo" class="easyui-textbox" data-options="required:true">
+							<label>司机:</label> <input name="carDriver" id="carDriver" class="easyui-textbox" data-options="required:true">
+						</div>
+						<div class="fitem">
+						    <label>装卸费:</label> <input name="zxFee" id="zxFee" class="easyui-numberbox" data-options="required:true,precision:2" max="100000" min="0"> 
+						    <label>运输费:</label> <input name="transportFee" id="transportFee" class="easyui-numberbox" data-options="required:true,precision:2" max="100000" min="0" >
+						</div>
+						<div class="fitem">
+							<label>杂费:</label> <input name="otherFee" id="otherFee" class="easyui-numberbox" data-options="required:true,precision:2" max="100000" min="0" >
+							<label>维修费:</label> <input name="repairFee" id="repairFee" class="easyui-numberbox" data-options="required:true,precision:2" max="100000" min="0" >
+						</div>
+						<div class="fitem">
+						    <label>操作员:</label> <input name="createoper" id="createoper" value="${user.loginName!''}" readonly="readonly"  class="easyui-textbox">
+						    <label>申请日期:</label> <input name="receipttime" id="receipttime" class="Wdate" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})">
+						    <input type="radio" name="isrepair" value="0" checked="checked">未修
+						                             <input type="radio" name="isrepair" value="1" >已修
+						</div>
+						<div class="fitem">
+							<label>备注:</label> <input name="remark" id="remark"  class="easyui-textbox" data-options="multiline:true" style="width: 600px; height: 40px">
+						</div>
+						
+						<div class="fitem" style="float: left;" >
+						     <div id="tb" style="height: auto">
+								<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="accept()">保存</a> 
+							</div>
+							<div id="tbb" style="height: auto">
+								<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="accept()">保存</a> 
+							</div>
+							<table id="dgItem" class="easyui-datagrid"	style="width: 685px; height: auto;float: left;"
+								data-options="
+								singleSelect: true,
+								showFooter: true,
+								toolbar:'#tb',
+								footer:'#tbb',
+								onClickCell: onClickCell">
+								<thead>
+									<tr>
+										<th data-options="field:'itemid',width:50,align:'left'">序号</th>
+										<th data-options="field:'materialcode',width:200,align:'left'">物资简码</th>
+										<th data-options="field:'name',width:200,align:'left'">物资名称</th>
+										<th data-options="field:'totalS',width:100,align:'left',editor:{type:'numberbox'}">数量</th>
+										<th data-options="field:'unit',width:50,align:'left'">单位</th>
+										<th data-options="field:'totalM',hidden:true">长度（米）</th>
+										<th data-options="field:'totalL',hidden:true,width:100,align:'left'">总量（只）</th>
+										<th data-options="field:'typeId',hidden:true">父ID</th>
+										<th data-options="field:'fname',hidden:true">父名</th>
+										<th data-options="field:'covertRatio',hidden:true">系数</th>
+										<th data-options="field:'convertFlag',hidden:true">换算单位</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+						<input name="id" id="id" type="hidden"> <input
+							name="typeid" id="typeid" type="hidden"> <input
+							name="flag" id="flag" type="hidden">
+					</form>
+
+				</div>
+			</div>
+		</div>
+	    <div data-options="region:'west',title:'材料选择'" style="width:220px;">
+	        <ul id="kongbai" name="kongbai" ></ul>
+	        <ul id="ttCls" name="ttCls" ></ul>
+	    </div>
+	</div>
+  <#include "stock_receipt_js.html">
+  <script type="text/javascript">
+	
+		$(document).ready(function() {
+			var dateNow = getNowFormatDate();
+			var _no="SL"+generateNum();
+		    $('#receiptSerialno').textbox('setValue',_no);
+		    $('#receipttime').val(dateNow);
+		    
+		    initDgItemTitleColumn();
+		});
+	
+		
+	   	$('#ttCls').tree({
+	   		url: parent.materialAction + "?method=getMaterialListNew",
+	   		checkbox:true,
+	   		method:'post',
+	   		onLoadSuccess:function(){
+	   			//loadData();
+	   		},
+		 	onDblClick: function(node){
+		 	   $('#ttCls').tree('collapse', node.target);
+		 	},
+		 	onCheck:function(node, checked){
+		 		getChecked();
+		 	}
+	   	}); 
+	   	
+	   	function getChecked(){
+	    	// 获取旧的数据
+	   		var oldList=$('#dgItem').datagrid('getRows');
+            
+			var nodes = $('#ttCls').tree('getChecked', ['checked','indeterminate']);
+			
+			var newList=[]
+			var r=1;
+			for(var i=0; i< nodes.length; i++){
+				// 添加时材料项目的选中节点
+				if(nodes[i].attributes.nodeType=='1' || nodes[i].attributes.nodeType=='2') {
+					materialId=nodes[i].id
+					var oldData
+					var isExist=false;
+					for ( var j = 0; j < oldList.length; j++) 
+					{
+						oldMaterialId=oldList[j].materialcode;
+						if(materialId==oldMaterialId)
+						{
+							oldData=oldList[j];
+							isExist=true;
+							break;
+						}
+					}
+					if(isExist)
+					{
+						oldData.itemid=r++
+						newList.push(oldData);
+					}
+					else
+					{
+						checkData={
+									itemid:r++,
+						   			materialcode: nodes[i].id,
+						   			name: nodes[i].text,
+						   			totalM: '',
+						   			totalS: '',
+						   			totalT: '',
+						   			unit:nodes[i].attributes.unit,
+						   			typeId: nodes[i].pid,
+						   			fname:nodes[i].ptext,
+						   			covertRatio:nodes[i].attributes.covertRatio,
+						   			convertFlag:nodes[i].attributes.convertFlag
+					   		      }
+						newList.push(checkData);
+					}
+					
+				}
+			}
+			$('#dgItem').datagrid('loadData',newList);
+		}
+	   	
+		function save() {
+			
+			$('#fm').form('submit', {
+				 url:addBaseAction+"?method=receiptApply",
+				 onSubmit : function(param) {
+				    var rows = $('#dgItem').datagrid('getRows');
+				    if (rows.length < 1) {
+						$.messager.alert('提示', "请添加物资项目");
+						return false;
+					}
+				    for (var i = 0; i < rows.length; i++) {
+						if(rows[i].totalS=="undefined" || rows[i].totalS==null  || rows[i].totalS=='' ){
+							$.messager.alert('提示', "请输入数量并保存");
+							return false;
+						}
+					}
+				    var itemData = JSON.stringify(rows);
+					param.dataList = itemData;
+					return $(this).form('validate');
+				},
+				success : function(result) {
+					var result = eval('(' + result + ')');
+					
+					if (!result.success) {
+						$.messager.alert('错误信息', result.errorMsg);
+					} else {
+						$.messager.alert('提示信息', '保存成功！','info' ,function () {
+							createNewTab('收料单管理',0);
+							window.parent.$('#tabs').tabs('close', '新增收料单');
+						});
+
+						
+				}}
+			});
+		}
+	    
+	    
+		
+		
+</script>
+</body>
+</html>

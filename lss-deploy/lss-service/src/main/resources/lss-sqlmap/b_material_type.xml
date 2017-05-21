@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="BMaterialType">
+
+	<sql id="tableName" >
+		b_material_type
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	typeid typeid ,
+	name name ,
+	parentid parentid ,
+	position position ,
+	account_flag accountFlag ,
+	convert_flag convertFlag ,
+	status status ,
+	createtime createtime     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.BMaterialType" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(typeid,name,parentid,position,account_flag,convert_flag,status,createtime)
+		VALUES
+		(#{typeid} ,#{name} ,#{parentid} ,#{position} ,#{accountFlag} ,#{convertFlag} ,#{status} ,now() )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(typeid,name,parentid,position,account_flag,convert_flag,status,createtime)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.typeid} ,#{item.name} ,#{item.parentid} ,#{item.position} ,#{item.accountFlag} ,#{item.convertFlag} ,#{item.status} ,#{item.createtime} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.Integer">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE typeid = #{typeid}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.BMaterialType">
+		<include refid="selectColumns" />
+		order by  parentId ,position
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.BMaterialType" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where typeid = #{typeid}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="typeid != null">AND typeid = #{typeid}</if>
+  	<if test="name != '' and name != null">AND name = #{name}</if>
+  	<if test="parentid != null">AND parentid = #{parentid}</if>
+  	<if test="position != '' and position != null">AND position = #{position}</if>
+  	<if test="accountFlag != '' and accountFlag != null">AND account_flag = #{accountFlag}</if>
+  	<if test="convertFlag != '' and convertFlag != null">AND convert_flag = #{convertFlag}</if>
+  	<if test="status != '' and status != null">AND status = #{status}</if>
+  	<if test="createtime != null">AND createtime = #{createtime}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.BMaterialType"
+		parameterType="com.lq.lss.model.BMaterialType">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="name != null">name = #{name},</if>
+		  	<if test="parentid != null">parentid = #{parentid},</if>
+		  	<if test="position != null">position = #{position},</if>
+		  	<if test="accountFlag != null">account_flag = #{accountFlag},</if>
+		  	<if test="convertFlag != null">convert_flag = #{convertFlag},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="createtime != null">createtime = #{createtime}</if>
+			</set>
+		WHERE typeid = #{typeid}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.BMaterialType">
+		<include refid="update_sql"/>
+	</update>	
+		
+	<select id="findMaterialTypeList"  parameterType="com.lq.lss.model.BMaterialType" resultType="com.lq.lss.model.BMaterialType">
+		<include refid="selectColumns" />
+	    <include refid="pageConditions"/>
+		order by  
+	   <if test="orderStr != '' and orderStr != null">
+			 ${orderStr},
+		</if>
+		 parentid ,position
+		
+	</select>
+
+</mapper>

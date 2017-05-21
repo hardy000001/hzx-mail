@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CBusPurDetail">
+
+	<sql id="tableName" >
+		c_bus_pur_detail
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	t.id id ,
+	t.pur_serialno purSerialno ,
+	t.material_id materialId ,
+	t.price price ,
+	t.unit unit ,
+	t.quantity quantity ,
+	t.total_amt totalAmt,
+	bt.typeId typeId,
+    bt.name fname,
+    bt.account_flag accountFlag,
+    b.convert_flag convertFlag,
+    b.covert_ratio covertRatio,
+	b.name name     FROM 
+    <include refid="tableName"/> t 
+    left join b_material_info b on t.material_id=b.code
+    left join b_material_type bt on b.typeId=bt.typeId
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CBusPurDetail" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,pur_serialno,material_id,price,unit,quantity,total_amt)
+		VALUES
+		(#{id} ,#{purSerialno} ,#{materialId} ,#{price} ,#{unit} ,#{quantity} ,#{totalAmt} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,pur_serialno,material_id,price,unit,quantity,total_amt)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.purSerialno} ,#{item.materialId} ,#{item.price} ,#{item.unit} ,#{item.quantity} ,#{item.totalAmt} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE pur_serialno = #{purSerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CBusPurDetail">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CBusPurDetail" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where id = #{id}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="purSerialno != '' and purSerialno != null">AND pur_serialno = #{purSerialno}</if>
+  	<if test="materialId != null">AND material_id = #{materialId}</if>
+  	<if test="price != null">AND price = #{price}</if>
+  	<if test="unit != '' and unit != null">AND unit = #{unit}</if>
+  	<if test="quantity != null">AND quantity = #{quantity}</if>
+  	<if test="totalAmt != null">AND total_amt = #{totalAmt}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CBusPurDetail"
+		parameterType="com.lq.lss.model.CBusPurDetail">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="purSerialno != null">pur_serialno = #{purSerialno},</if>
+		  	<if test="materialId != null">material_id = #{materialId},</if>
+		  	<if test="price != null">price = #{price},</if>
+		  	<if test="unit != null">unit = #{unit},</if>
+		  	<if test="quantity != null">quantity = #{quantity},</if>
+		  	<if test="totalAmt != null">total_amt = #{totalAmt}</if>
+			</set>
+		WHERE id = #{id}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CBusPurDetail">
+		<include refid="update_sql"/>
+	</update>	
+	
+	<select id="queryPurDetailListById" resultType="com.lq.lss.model.CBusPurDetail" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where pur_serialno = #{purSerialno}
+		ORDER BY b.typeId,t.material_id desc
+	</select>	
+	
+
+</mapper>

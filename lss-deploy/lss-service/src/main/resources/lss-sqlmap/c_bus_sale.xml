@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CBusSale">
+
+	<sql id="tableName" >
+		c_bus_sale
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	t.sale_serialno saleSerialno ,
+	t.deptid deptid ,
+	t.to_mchcode toMchcode ,
+	t.total_amt totalAmt ,
+	t.customer customer ,
+	t.tel tel ,
+	t.others others ,
+	t.status status ,
+	t.createoper createoper ,
+	t.createtime createtime ,
+	t.auditingoper auditingoper ,
+	uu.login_name operName,
+	u.login_name loginName,
+	t.auditingtime auditingtime     FROM 
+    <include refid="tableName"/> t
+    left join admin_user u on t.createoper=u.user_id
+	left join admin_user uu on t.auditingoper=uu.user_id
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CBusSale" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(sale_serialno,deptid,to_mchcode,total_amt,customer,tel,others,status,createoper,createtime,auditingoper,auditingtime)
+		VALUES
+		(#{saleSerialno} ,#{deptid} ,#{toMchcode} ,#{totalAmt} ,#{customer} ,#{tel} ,#{others} ,#{status} ,#{createoper} ,#{createtime} ,#{auditingoper} ,#{auditingtime} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(sale_serialno,deptid,to_mchcode,total_amt,customer,tel,others,status,createoper,createtime,auditingoper,auditingtime)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.saleSerialno} ,#{item.deptid} ,#{item.toMchcode} ,#{item.totalAmt} ,#{item.customer} ,#{item.tel} ,#{item.others} ,#{item.status} ,#{item.createoper} ,#{item.createtime} ,#{item.auditingoper} ,#{item.auditingtime} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE sale_serialno = #{saleSerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CBusSale">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CBusSale" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where sale_serialno = #{saleSerialno}
+	</select>
+	
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="saleSerialno != null">AND t.sale_serialno = #{saleSerialno}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="toMchcode != '' and toMchcode != null">AND to_mchcode = #{toMchcode}</if>
+  	<if test="totalAmt != null">AND t.total_amt = #{totalAmt}</if>
+  	<if test="customer != '' and customer != null">AND t.customer = #{customer}</if>
+  	<if test="tel != '' and tel != null">AND t.tel = #{tel}</if>
+  	<if test="others != '' and others != null">AND t.others = #{others}</if>
+  	<if test="status != '' and status != null">AND t.status = #{status}</if>
+  	
+  	<if test="beginTime != '' and  beginTime != null">AND left(t.createtime,10) &gt;= #{beginTime}</if>
+  	<if test="endTime != '' and  endTime != null">AND left(t.createtime,10) &lt;= #{endTime}</if>
+  	<if test="loginName != '' and loginName != null">AND u.login_name like '%${loginName}%'</if>
+  	
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CBusSale"
+		parameterType="com.lq.lss.model.CBusSale">
+		select
+			t.sale_serialno saleSerialno ,
+			t.deptid deptid ,
+			t.total_amt totalAmt ,
+			t.customer customer ,
+			t.tel tel ,
+			t.others others ,
+			t.status status ,
+			if(t.status=0,10,t.status) s_status,
+			t.createoper createoper ,
+			t.createtime createtime ,
+			t.auditingoper auditingoper ,
+			t.auditingtime auditingtime,
+			mm.cusname mchname,
+			uu.login_name operName,
+			u.login_name loginName,
+			d.name centerName    FROM 
+			<include refid="tableName"/> t 
+			left join admin_user u on t.createoper=u.user_id
+			left join admin_user uu on t.auditingoper=uu.user_id
+			left join admin_dept d on t.deptid=d.dept_id
+			left join customer_info mm on t.to_mchcode=mm.cuscode and t.deptid=mm.deptid
+		<include refid="pageConditions"/>
+		    order by s_status ,createtime desc
+		    
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName"/> t 
+		  left join admin_user u on t.createoper=u.user_id
+		  left join admin_user uu on t.auditingoper=uu.user_id
+		  left join admin_dept d on t.deptid=d.dept_id
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="toMchcode != null">to_mchcode = #{toMchcode},</if>
+		  	<if test="totalAmt != null">total_amt = #{totalAmt},</if>
+		  	<if test="customer != null">customer = #{customer},</if>
+		  	<if test="tel != null">tel = #{tel},</if>
+		  	<if test="others != null">others = #{others},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="createtime != null">createtime = #{createtime},</if>
+		  	<if test="auditingoper != null">auditingoper = #{auditingoper},</if>
+		  	<if test="auditingtime != null">auditingtime = #{auditingtime}</if>
+			</set>
+		WHERE sale_serialno = #{saleSerialno}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CBusSale">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

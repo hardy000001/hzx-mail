@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockTransferDetail">
+
+    <sql id="tableName">
+		c_stock_transfer_detail
+	</sql>
+
+    <sql id="selectColumns">
+        select
+        t.id id ,
+        t.tsf_serialno tsfSerialno ,
+        t.materialcode materialCode ,
+        t.total_m totalM ,
+        t.total_s totalS ,
+        t.total_t totalT ,
+        t.status status,
+        b.name materialName,
+        bt.typeId typeId,
+        bt.name fname,
+        b.covert_ratio covertratio, 
+        b.convert_flag convertFlag,
+        b.account_flag unit,
+        FORMAT(t.total_s * b.covert_ratio,2) subtotal
+        FROM
+        <include refid="tableName"/>
+        t
+        LEFT JOIN b_material_info b on t.materialcode=b.code
+        LEFT JOIN b_material_type bt on b.typeId=bt.typeId
+    </sql>
+
+    <!-- 添加 -->
+    <insert id="create" parameterType="com.lq.lss.model.CStockTransferDetail" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id,tsf_serialno,materialcode,total_m,total_s,total_t,status)
+        VALUES
+        (#{id} ,#{tsfSerialno} ,#{materialCode} ,#{totalM} ,#{totalS} ,#{totalT} ,#{status} )
+    </insert>
+
+    <!-- 批量 添加 -->
+    <insert id="create_BATCH" parameterType="List">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id,tsf_serialno,materialcode,total_m,total_s,total_t,status)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id} ,#{item.tsfSerialno} ,#{item.materialCode} ,#{item.totalM} ,#{item.totalS} ,#{item.totalT} ,#{item.status} )
+        </foreach>
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.String">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE tsf_serialno = #{id}
+    </delete>
+
+    <select id="loadAll" resultType="com.lq.lss.model.CStockTransferDetail">
+        <include refid="selectColumns"/>
+    </select>
+
+    <select id="findById" resultType="com.lq.lss.model.CStockTransferDetail"
+            parameterType="java.lang.String">
+        <include refid="selectColumns"/>
+        where tsf_serialno = #{tsfSerialno}
+    </select>
+
+    <sql id="pageConditions">
+        WHERE 1=1
+        <if test="id != null">AND id = #{id}</if>
+        <if test="tsfSerialno != '' and tsfSerialno != null">AND tsf_serialno = #{tsfSerialno}</if>
+        <if test="materialcode != '' and materialcode != null">AND materialcode = #{materialCode}</if>
+        <if test="totalM != null">AND total_m = #{totalM}</if>
+        <if test="totalS != null">AND total_s = #{totalS}</if>
+        <if test="totalT != null">AND total_t = #{totalT}</if>
+        <if test="status != '' and status != null">AND status = #{status}</if>
+    </sql>
+
+    <!-- 分页查询 -->
+    <select id="findPage" resultType="com.lq.lss.model.CStockTransferDetail"
+            parameterType="com.lq.lss.model.CStockTransferDetail">
+        <include refid="selectColumns"/>
+        <include refid="pageConditions"/>
+        <if test="orderStr != '' and orderStr != null">
+            order by ${orderStr}
+        </if>
+    </select>
+
+    <select id="findPage_COUNT" resultType="int">
+        select count(1) from
+        <include refid="tableName"/> t
+        <include refid="pageConditions"/>
+    </select>
+
+    <sql id="update_sql">
+        UPDATE
+        <include refid="tableName"/>
+        <set>
+            <if test="tsfSerialno != null">tsf_serialno = #{tsfSerialno},</if>
+            <if test="materialcode != null">materialcode = #{materialCode},</if>
+            <if test="totalM != null">total_m = #{totalM},</if>
+            <if test="totalS != null">total_s = #{totalS},</if>
+            <if test="totalT != null">total_t = #{totalT},</if>
+            <if test="status != null">status = #{status}</if>
+        </set>
+        WHERE id = #{id}
+    </sql>
+
+    <update id="update" parameterType="com.lq.lss.model.CStockTransferDetail">
+        <include refid="update_sql"/>
+    </update>
+
+    <!-- 以上是自动生成 -->
+
+    <select id="queryDetailList" resultType="com.lq.lss.model.CStockTransferDetail" parameterType="String">
+        <include refid="selectColumns"/>
+        where tsf_serialno = #{trsSerialNo}
+        ORDER BY b.typeId,b.position desc
+    </select>
+</mapper>

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="MchBaseinfo">
+
+    <sql id="tableName">
+		mch_baseinfo
+	</sql>
+
+    <sql id="selectColumns">
+        select
+        t.mchcode mchcode ,
+        t.id id ,
+        t.deptid deptid ,
+        t.mchname mchname ,
+        t.mchrule mchrule ,
+        t.mchtel mchtel ,
+        t.mchaddress mchaddress ,
+        t.mchlicence mchlicence ,
+        t.contracturl contracturl ,
+        t.bankinfo bankinfo ,
+        t.bankaccount bankaccount ,
+        t.accountno accountno ,
+        t.status status ,
+        if(t.status=0,10,t.status) s_status,
+        t.modifytime modifytime ,
+        t.createoper createoper ,
+        t.createtime createtime,
+        u.login_name loginName ,
+        d.name deptName
+        FROM
+        <include refid="tableName"/>
+        t
+        left join admin_user u on t.createoper=u.user_id
+        left join admin_dept d ON d.dept_id=t.deptid
+    </sql>
+
+    <!-- 添加 -->
+    <insert id="create" parameterType="com.lq.lss.model.MchBaseinfo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tableName"/>
+        (mchcode,id,deptid,mchname,mchrule,mchtel,mchaddress,mchlicence,contracturl,bankinfo,bankaccount,accountno,status,modifytime,createoper,createtime)
+        VALUES
+        (#{mchcode} ,#{id} ,#{deptid} ,#{mchname} ,#{mchrule} ,#{mchtel} ,#{mchaddress} ,#{mchlicence} ,#{contracturl}
+        ,#{bankinfo} ,#{bankaccount} ,#{accountno} ,#{status} ,#{modifytime} ,#{createoper} ,#{createtime} )
+    </insert>
+
+    <!-- 批量 添加 -->
+    <insert id="create_BATCH" parameterType="List">
+        INSERT INTO
+        <include refid="tableName"/>
+        (mchcode,id,deptid,mchname,mchrule,mchtel,mchaddress,mchlicence,contracturl,bankinfo,bankaccount,accountno,status,modifytime,createoper,createtime)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.mchcode} ,#{item.id} ,#{item.deptid} ,#{item.mchname} ,#{item.mchrule} ,#{item.mchtel}
+            ,#{item.mchaddress} ,#{item.mchlicence} ,#{item.contracturl} ,#{item.bankinfo} ,#{item.bankaccount}
+            ,#{item.accountno} ,#{item.status} ,#{item.modifytime} ,#{item.createoper} ,#{item.createtime} )
+        </foreach>
+    </insert>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE mchcode = #{mchcode}
+    </delete>
+
+    <select id="loadAll" resultType="com.lq.lss.model.MchBaseinfo">
+        <include refid="selectColumns"/>
+        where t.status = '0'
+    </select>
+
+    <select id="findById" resultType="com.lq.lss.model.MchBaseinfo"
+            parameterType="java.lang.Integer">
+        <include refid="selectColumns"/>
+        where id = #{id}
+    </select>
+
+    <sql id="pageConditions">
+        WHERE 1=1
+        <if test="mchcode != null">AND t.mchcode = #{mchcode}</if>
+        <if test="id != null">AND t.id = #{id}</if>
+        <if test="deptid != null and deptid !=-1">AND t.deptid = #{deptid}</if>
+        <if test="mchname != '' and mchname != null">AND t.mchname = #{mchname}</if>
+        <if test="mchrule != null">AND t.mchrule = #{mchrule}</if>
+        <if test="mchtel != '' and mchtel != null">AND t.mchtel = #{mchtel}</if>
+        <if test="mchaddress != '' and mchaddress != null">AND t.mchaddress = #{mchaddress}</if>
+        <if test="mchlicence != '' and mchlicence != null">AND t.mchlicence = #{mchlicence}</if>
+        <if test="contracturl != '' and contracturl != null">AND t.contracturl = #{contracturl}</if>
+        <if test="bankinfo != '' and bankinfo != null">AND t.bankinfo = #{bankinfo}</if>
+        <if test="bankaccount != '' and bankaccount != null">AND t.bankaccount = #{bankaccount}</if>
+        <if test="accountno != '' and accountno != null">AND t.accountno = #{accountno}</if>
+        <if test="status != null">AND t.status = #{status}</if>
+        <if test="modifytime != null">AND t.modifytime = #{modifytime}</if>
+        <if test="createoper != null">AND t.createoper = #{createoper}</if>
+        <if test="createtime != null">AND t.createtime = #{createtime}</if>
+    </sql>
+
+    <!-- 分页查询 -->
+    <select id="findPage" resultType="com.lq.lss.model.MchBaseinfo"
+            parameterType="com.lq.lss.model.MchBaseinfo">
+        <include refid="selectColumns"/>
+        <include refid="pageConditions"/>
+        
+        order by s_status ,createtime desc
+        
+    </select>
+
+    <select id="findPage_COUNT" resultType="int">
+        select count(1) from
+        <include refid="tableName"/> t
+        <include refid="pageConditions"/>
+    </select>
+
+    <sql id="update_sql">
+        UPDATE
+        <include refid="tableName"/>
+        <set>
+            <if test="mchname != null">mchname = #{mchname},</if>
+            <if test="mchrule != null">mchrule = #{mchrule},</if>
+            <if test="mchtel != null">mchtel = #{mchtel},</if>
+            <if test="mchaddress != null">mchaddress = #{mchaddress},</if>
+            <if test="mchlicence != null">mchlicence = #{mchlicence},</if>
+            <if test="contracturl != null">contracturl = #{contracturl},</if>
+            <if test="bankinfo != null">bankinfo = #{bankinfo},</if>
+            <if test="bankaccount != null">bankaccount = #{bankaccount},</if>
+            <if test="accountno != null">accountno = #{accountno},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="modifytime != null">modifytime = #{modifytime},</if>
+            <if test="createoper != null">createoper = #{createoper},</if>
+        </set>
+        WHERE mchcode = #{mchcode} and deptid=#{deptid}
+
+    </sql>
+
+    <update id="update" parameterType="com.lq.lss.model.MchBaseinfo">
+        <include refid="update_sql"/>
+    </update>
+
+    <select id="queryMaxMchCodeByDeptId" parameterType="String" resultType="String">
+
+        select max(mchcode) from
+        <include refid="tableName"/>
+
+    </select>
+    <select id="queryMchBaseinfoById" resultType="com.lq.lss.model.MchBaseinfo"
+            parameterType="map">
+        <include refid="selectColumns"/>
+        where mchcode = #{mchcode} and deptid=#{deptid}
+    </select>
+
+    <delete id="deleteByIdAndDeptid" parameterType="map">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE mchcode = #{mchcode} and deptid=#{deptid}
+    </delete>
+
+
+    <select id="findMchCodeByDeptId" parameterType="String" resultType="com.lq.lss.model.MchBaseinfo">
+
+        <include refid="selectColumns"/>
+        WHERE deptid = #{deptId} and t.status = '0'
+
+    </select>
+    
+    
+    
+     <select id="findMchInfAndCustomerinfoByDeptId" parameterType="String" resultType="com.lq.lss.model.MchBaseinfo">
+
+        select
+        t.mchcode mchcode ,
+        t.deptid deptid ,
+        t.mchname mchname ,
+        t.status status ,
+        t.cusType type,
+        if(t.status=0,10,t.status) s_status
+        FROM
+           mch_cus_view t
+     
+        WHERE deptid = #{deptId} and t.status = '0' and t.cusType in(1,-1)
+
+    </select>
+    
+    
+
+    <select id="selectMchBaseinfo"  parameterType="com.lq.lss.model.MchBaseinfo" resultType="com.lq.lss.model.MchBaseinfo">
+
+        <include refid="selectColumns"/>
+        WHERE 1=1
+        <if test="mchcode != null">AND mchcode = #{mchcode}</if>
+        <if test="id != null">AND id = #{id}</if>
+        <if test="deptid != null">AND deptid = #{deptid}</if>
+        <if test="mchname != '' and mchname != null">AND mchname = #{mchname}</if>
+        <if test="mchrule != null">AND mchrule = #{mchrule}</if>
+        <if test="mchtel != '' and mchtel != null">AND mchtel = #{mchtel}</if>
+        <if test="mchaddress != '' and mchaddress != null">AND mchaddress = #{mchaddress}</if>
+        <if test="mchlicence != '' and mchlicence != null">AND mchlicence = #{mchlicence}</if>
+        <if test="contracturl != '' and contracturl != null">AND contracturl = #{contracturl}</if>
+        <if test="bankinfo != '' and bankinfo != null">AND bankinfo = #{bankinfo}</if>
+        <if test="bankaccount != '' and bankaccount != null">AND bankaccount = #{bankaccount}</if>
+        <if test="accountno != '' and accountno != null">AND accountno = #{accountno}</if>
+        <if test="status != null">AND status = #{status}</if>
+        <if test="modifytime != null">AND modifytime = #{modifytime}</if>
+        <if test="createoper != null">AND createoper = #{createoper}</if>
+        <if test="createtime != null">AND createtime = #{createtime}</if>
+    </select>
+</mapper>

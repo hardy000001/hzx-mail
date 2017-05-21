@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="BConsumableInfo">
+
+    <sql id="tableName">
+		b_consumable_info
+	</sql>
+
+    <sql id="selectColumns">
+        select
+        t.id id ,
+        t.typeid typeid ,
+        t.name name ,
+        t.price price ,
+        t.unit unit ,
+        t.quantity quantity ,
+        t.status status ,
+        t.py_code pyCode,
+        t.createtime createtime ,
+        t.code code,
+        a.name typeName
+        FROM
+        <include refid="tableName"/>
+        t
+        left JOIN b_consumable_type a on a.typeId=t.typeid
+    </sql>
+
+    <!-- 添加 -->
+    <insert id="create" parameterType="com.lq.lss.model.BConsumableInfo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id,typeid,name,code,price,unit,quantity,status,py_code,createtime)
+        VALUES
+        (#{id} ,#{typeid} ,#{name} ,#{code} ,#{price} ,#{unit} ,#{quantity} ,#{status} ,#{pyCode},#{createtime} )
+    </insert>
+
+    <!-- 批量 添加 -->
+    <insert id="create_BATCH" parameterType="List">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id,typeid,name,code,price,unit,quantity,status,py_code,createtime)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id} ,#{item.typeid} ,#{item.name} ,#{item.code} ,#{item.price} ,#{item.unit} ,#{item.quantity}
+            ,#{item.status},#{item.pyCode} ,#{item.createtime} )
+        </foreach>
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE id = #{id}
+    </delete>
+
+    <select id="loadAll" resultType="com.lq.lss.model.BConsumableInfo">
+        <include refid="selectColumns"/>
+    </select>
+
+    <select id="findById" resultType="com.lq.lss.model.BConsumableInfo"
+            parameterType="java.lang.String">
+        <include refid="selectColumns"/>
+        where t.id = #{id}
+    </select>
+
+    <sql id="pageConditions">
+        WHERE 1=1
+        <if test="id != null">AND t.id = #{id}</if>
+        <if test="typeid != null">AND t.typeid = #{typeid}</if>
+        <if test="name != '' and name != null">AND t.name = #{name}</if>
+        <if test="code != '' and code != null">AND t.code = #{code}</if>
+        <if test="price != null">AND t.price = #{price}</if>
+        <if test="unit != '' and unit != null">AND t.unit = #{unit}</if>
+        <if test="quantity != null">AND t.quantity = #{quantity}</if>
+        <if test="status != '' and status != null">AND t.status = #{status}</if>
+        <if test="pyCode != '' and pyCode != null">AND t.py_code = #{pyCode}</if>
+        <if test="createtime != null">AND t.createtime = #{createtime}</if>
+    </sql>
+
+    <!-- 分页查询 -->
+    <select id="findPage" resultType="com.lq.lss.model.BConsumableInfo"
+            parameterType="com.lq.lss.model.BConsumableInfo">
+        <include refid="selectColumns"/>
+        <include refid="pageConditions"/>
+        <if test="orderStr != '' and orderStr != null">
+            order by ${orderStr}
+        </if>
+    </select>
+
+    <select id="findPage_COUNT" resultType="int">
+        select count(1) from
+        <include refid="tableName"/>
+        t
+        <include refid="pageConditions"/>
+    </select>
+
+    <sql id="update_sql">
+        UPDATE
+        <include refid="tableName"/>
+        <set>
+            <if test="typeid != null">typeid = #{typeid},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="pyCode != null">py_code = #{pyCode},</if>
+            <if test="createtime != null">createtime = #{createtime}</if>
+        </set>
+        WHERE id = #{id}
+    </sql>
+
+    <update id="update" parameterType="com.lq.lss.model.BConsumableInfo">
+        <include refid="update_sql"/>
+    </update>
+
+    <select id="findByTypeId" resultType="com.lq.lss.model.BConsumableInfo" parameterType="java.lang.Integer">
+        <include refid="selectColumns"/>
+        
+        where t.typeid = #{typeid}
+    </select>
+
+
+</mapper>

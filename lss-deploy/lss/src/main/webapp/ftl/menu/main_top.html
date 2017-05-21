@@ -1,0 +1,217 @@
+<script language="javascript">
+	$(function() {
+		$('#loginOut').click(function() {
+			$.messager.confirm('系统提示', '您确定要退出登录吗?', function(r) {
+				if (r) {
+					$.post('<@sp.ctx />/login.htm?method=loginOut',{},function(msg){
+						window.location.href = "<@sp.ctx />/";
+					});
+				}
+			});
+		});
+	});
+	
+	function editPwdDg(){
+	    $('#editPassword').dialog('open').dialog('setTitle',"修改密码");
+	    $('#fmPwd').form('clear');
+    }
+  
+    
+	function newPwd() {
+		$('#fmPwd').form(
+			'submit',
+			{
+				"url" : "<@sp.ctx />/user/adminUser.htm?method=updatePwd",
+				onSubmit : function() {
+					return $(this).form('validate');
+				},
+				success : function(result) {
+					var result = eval('(' + result + ')');
+					if (result.errorMsg) {
+						$.messager.alert('错误提示', result.errorMsg);
+					} else {
+						$.messager.alert('成功提示', "密码修改成功，请牢记并下次请用新密码登录！",
+							"info", function() {
+							$('#editPassword').dialog('close');
+							//$('#loginOut').click();
+						});
+					}
+				}
+		});
+	}
+</script>
+<link rel="stylesheet" type="text/css" href="<@sp.static />/css/myeasyui.css">
+<link rel="stylesheet" type="text/css" href="<@sp.static />/style/nav.css?9">
+<span style="float: right; padding-right: 20px;" class="head">
+	<!-- <a  id="editPwd" href="javascript:editPwdDg()" style="margin-left: 50px;">修改密码</a>
+	<a href="#" id="loginOut"  style="margin-left: 10px">退出登录</a> --> 
+	<select id="cb-theme" style="width:120px;height:25px"></select>
+	<script language="javascript">
+	var themes = [
+	  			{value:'default',text:'Default',group:'Base'},
+	  			{value:'gray',text:'Gray',group:'Base'},
+	  			{value:'metro',text:'Metro',group:'Base'},
+	  			{value:'material',text:'Material',group:'Base'},
+	  			{value:'bootstrap',text:'Bootstrap',group:'Base'},
+	  			{value:'metro-blue',text:'Metro Blue',group:'Metro'},
+	  			{value:'metro-gray',text:'Metro Gray',group:'Metro'},
+	  			{value:'metro-green',text:'Metro Green',group:'Metro'},
+	  			{value:'metro-orange',text:'Metro Orange',group:'Metro'},
+	  			{value:'metro-red',text:'Metro Red',group:'Metro'},
+	  			{value:'ui-cupertino',text:'Cupertino',group:'UI'},
+	  			{value:'ui-pepper-grinder',text:'Pepper Grinder',group:'UI'},
+	  			{value:'ui-sunny',text:'Sunny',group:'UI'}
+	  		];
+	
+	  		$('#cb-theme').combobox({
+	  			groupField:'group',
+	  			prompt:'切换主题样式',
+	  			data: themes,
+	  			editable:false,
+	  			panelHeight:'auto',
+	  			onLoadSuccess:function(){
+	  				$(this).combobox('setValue', $.cookie('easyuiCSS'));
+	  			}
+	  		});
+	  		
+	  		$('#cb-theme').combobox({
+	  			onSelect: function(param){
+	  				$.cookie('easyuiCSS', $('#cb-theme').combobox('getValue'), { expires: 30 }); 
+	  				$('#cb-theme').combobox('setValue', $.cookie('easyuiCSS'));
+	  				location.reload();
+	  			}
+	  		});
+	</script>
+</span>
+<span style="padding-left: 10px; font-size: 15px;float: left;line-height: 55px;">
+<img src="<@sp.static />/images/logo.ico"  style="vertical-align: text-bottom; padding-top: 2px;" width="20" height="20" align="absmiddle" />
+租赁调度结算系统</span>
+  
+<span style="padding-left: 10px;float: left;height: 55px;margin-left:85px">
+	<div class="nav_ float">
+    <ul style="margin: 0;padding: 0">
+    <!--
+        <li>
+            <a href="javascript:;">
+                <dl>
+                    <dt>
+                        <img src="<@sp.static />/images/nav/perregister.png" alt="">
+                    </dt>
+                    <dd>个人登记</dd>
+                </dl>
+            </a>
+        </li>
+        <li>
+            <a href="javascript:createNewTab('团体登记', '<@sp.ctx />/user/pe/inc/tjIncReg.htm')">
+                <dl>
+                    <dt>
+                        <img src="<@sp.static />/images/nav/groupregister.png" alt="">
+                    </dt>
+                    <dd>团体登记</dd>
+                </dl>
+            </a>
+        </li>
+        <li>
+            <a href="javascript:createNewTab('条码打印', '<@sp.ctx />/user/pe/bar/barType.htm')">
+                <dl>
+                    <dt>
+                        <img src="<@sp.static />/images/nav/barprint.png" alt="">
+                    </dt>
+                    <dd>条码打印</dd>
+                </dl>
+            </a>
+        </li>
+        <li>
+            <a href="javascript:createNewTab('结果录入', '<@sp.ctx />/user/pe/tj/resultInput.htm')">
+                <dl>
+                    <dt>
+                        <img src="<@sp.static />/images/nav/resultwt.png" alt="">
+                    </dt>
+                    <dd>结果录入</dd>
+                </dl>
+            </a>
+        </li>
+        <li>
+            <a href="javascript:createNewTab('主检审核', '<@sp.ctx />/user/pe/tj/primaryInspectionAudit.htm')">
+                <dl>
+                    <dt>
+                        <img src="<@sp.static />/images/nav/audit.png" alt="">
+                    </dt>
+                    <dd>主检审核</dd>
+                </dl>
+            </a>
+        </li>
+        <li>
+            <a href="javascript:createNewTab('打印报告', '<@sp.ctx />/user/pe/tj/tjReportPrint.htm')">
+                <dl>
+                    <dt>
+                        <img src="<@sp.static />/images/nav/reportprint.png" alt="">
+                    </dt>
+                    <dd>打印报告</dd>
+                </dl>
+            </a>
+        </li>
+        <li>
+            <a href="javascript:createNewTab('综合查询', '<@sp.ctx />/user/pe/query/tjQueryAll.htm')">
+                <dl>
+                    <dt>
+                        <img src="<@sp.static />/images/nav/query.png" alt="">
+                    </dt>
+                    <dd>综合查询</dd>
+                </dl>
+            </a>
+        </li>
+        -->
+        <li>
+            <a href="javascript:editPwdDg()">
+                <dl>
+                    <dt>
+                        <img src="<@sp.static />/images/nav/modifypwd.png" alt="">
+                    </dt>
+                    <dd>修改密码</dd>
+                </dl>
+            </a>
+        </li>
+        <li>
+            <a href="javascript:;" id="loginOut">
+                <dl>
+                    <dt>
+                        <img src="<@sp.static />/images/nav/logout.png" alt="">
+                    </dt>
+                    <dd>退出系统</dd>
+                </dl>
+            </a>
+        </li>
+    </ul>
+</div>
+<script type="text/javascript">
+	function createNewTab(title, url) {
+		window.parent.open1(title, url);
+	}
+</script>
+</span>	
+	
+<!-- 修改密码 -->
+<div id="editPassword" class="easyui-dialog" style="width:300px;height:200px;padding:10px 20px"
+    closed="true" buttons="#editPassword-buttons">
+    <form id="fmPwd" method="post"   >
+	    
+	      <div class="fitem">
+	    <label>原密码:</label>
+	    <input name="oldPwd" type="password" class="easyui-textbox" required="true"   >
+	    </div>
+	    <div class="fitem">
+	    <label>新密码:</label>
+	    <input name="newPwd" type="password" id="newPwd__1"  class="easyui-textbox"  data-options="validType:'length[6,16]',required:true">
+	    </div>
+	    <div class="fitem">
+	    <label>确认新密码:</label>
+	    <input name="newPwd2" type="password" class="easyui-textbox" required="required" validType="equals['#newPwd__1']" >
+	    </div>
+    </form>
+    </div>
+  <div id="editPassword-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="newPwd()">修改密码</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#editPassword').dialog('close')">关闭</a>
+   </div>  
+	

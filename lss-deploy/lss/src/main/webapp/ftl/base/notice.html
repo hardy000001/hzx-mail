@@ -1,0 +1,274 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <title>发布通知管理</title>
+     <#include "../include_head.html" />
+    </head>
+    <body>
+    
+	<table id="dg" title="消息管理" class="easyui-datagrid" style="height: auto,width:auto;"
+			data-options="url:'<@sp.ctx />/user/sys/tNotice.htm?method=query&adminstatus=0&fromoper=${userId!''}'"
+			toolbar="#toolbar" pagination="true"
+			rownumbers="true" fitColumns="true" singleSelect="true">
+			<thead>
+				<tr>
+					<th field="ntitle" width="20%" >标题</th>
+					<th field="notice" width="40%" >内容</th>
+					<th field="type" formatter="formatType" width="10%" >类型</th>
+					 <th field="toName" width="12%" >接收人/商户</th>
+					<th field="createtime" width="12%" >创建时间</th>
+					<th field="modifytime" width="12%" >修改时间</th>
+				</tr>
+			</thead>
+	</table>
+    <div id="toolbar">
+	    <@shiro.hasPermission name="${add}">
+	    <a id="add_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addDg()">新增</a>
+	    </@shiro.hasPermission>
+	    <@shiro.hasPermission name="${update}">
+	    <a id="edit_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editDg()">修改</a>
+	    </@shiro.hasPermission>
+	    <@shiro.hasPermission name="${del}">
+	    <a id="del_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyDg()">删除</a>
+  		</@shiro.hasPermission>
+  		<a id="view_detail"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="viewDetail_()">查看</a>
+	</div>
+	<!-- 查看详情 -->
+     <div id="view-dlg" class="easyui-dialog" style="width:500px;height:400px;padding:10px 20px"  closed="true" buttons="#view-dlg-buttons">
+    	<div id="view-dlg-content"></div>
+    	<input type="hidden"  id="hide_id">
+    	<input type="hidden"  id="hide_mchcode">
+    </div>
+    <div id="view-dlg-buttons" >
+        <a href="javascript:void(0)" id="btn_view_ok" style="display: none;" class="easyui-linkbutton"  onclick="javascript:saveAudit(0)">审核通过</a>
+	    <a href="javascript:void(0)" id="btn_view_no" style="display: none" class="easyui-linkbutton"  onclick="javascript:saveAudit(2)">审核拒绝</a>
+    	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#view-dlg').dialog('close')">关闭</a>
+    </div>
+	
+	<div id="dlg" class="easyui-dialog"
+		style="width: 565px; height: 350px; padding: 10px 20px" closed="true"
+		buttons="#dlg-buttons">
+		<div class="ftitle">发布通知<span id="changeInfo" style="margin-left: 360px;color: blue;cursor: pointer;"></span></div>
+		<form id="fm" method="post" >
+			<div class="fitem" id="div_tooper">
+				<label>接收人:</label>
+				<input id="tooper" name="tooper" style="width:156px;">
+				<span style="color: red;">【公告】:不选择&nbsp;【消息】:选接收人</span>
+			</div>
+			<div class="fitem" id="div_tomerchant">
+				<label>接收商户:</label>
+				<input id="tomerchant" name="tomerchant" style="width:156px;">
+				<span style="color: red;">【公告】:不选择&nbsp;【消息】:选接收商户</span>
+			</div>
+			<div class="fitem">
+				<label>标题:</label> 
+				<input name="ntitle" id="ntitle" required="true" class="easyui-textbox" >
+			</div>
+			<div class="fitem">
+				<label>内容:</label> <input name="notice" id="notice" required="true" class="easyui-textbox" data-options="multiline:true" style="width: 355px; height: 80px">
+			</div>
+			<div class="fitem">
+				<label>重要程度:</label>
+                <input name="level" id="level1" type="radio" value="0">普通
+                <input name="level" id="level2" type="radio" value="1">紧急
+			</div>
+		</form>
+	</div>
+	<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+    </div>
+    <script type="text/javascript">
+        
+        var MCH_INFO="切换商户"
+        var USER_INFO="切换用户"
+       
+        $("#changeInfo").click(function(){
+        	var txtVal=$(this).html();
+        	if(txtVal==MCH_INFO){
+        		$("#div_tooper").hide();
+        		$("#div_tomerchant").show();
+        		$(this).html(USER_INFO);
+        	}else{
+        		$("#div_tooper").show();
+        		$("#div_tomerchant").hide();
+        		$(this).html(MCH_INFO);
+        	}
+        });
+
+		var baseAction = "<@sp.ctx />/user/sys/tNotice.htm"
+		
+		var url;
+		$('#tooper').combobox({    
+		    url:baseAction+'?method=getUserList',
+		    valueField:'userId',    
+		    textField:'realName'
+		});  
+		$('#tomerchant').combobox({    
+			url:'<@sp.ctx />/user/sys/mchBaseinfo.htm?method=getMchInfoList',
+			valueField:'mchcode',
+	        textField:'mchname',
+		});  
+
+		function addDg() {
+
+			$('#dlg').dialog('open').dialog('setTitle', '新增通知');
+			$('#fm').form('clear');
+			
+			$("#div_tooper").show();
+			$("#div_tomerchant").hide();
+			$("#changeInfo").html(MCH_INFO);
+			$('#fm').form('load', {"level":0});
+
+			url = baseAction + '?method=create&_ajax';
+		}
+		function editDg() {
+
+			var row = $('#dg').datagrid('getSelected');
+			
+			if (row.type=='0') {
+				$.messager.alert('消息提示', "消息不可修改");
+				return;
+			}
+			
+			if (row) {
+				$('#dlg').dialog('open').dialog('setTitle', '修改通知');
+				$('#fm').form('load', row);
+				url = baseAction + '?method=modify&nid='+row.nid;
+			}
+			
+			$("#div_tooper").hide();
+			$("#div_tomerchant").hide();
+			
+			if(row.tomerchant.length>0){
+				$("#changeInfo").click();
+			}
+			
+			
+		}
+		function save() {
+			$('#fm').form('submit', {
+				"url": url,
+				onSubmit: function () {
+					return $(this).form('validate');
+				},
+				success: function (result) {
+					var result = eval('(' + result + ')');
+					if (!result.success) {
+						$.messager.alert('Error', result.errorMsg);
+					} else {
+						$('#dlg').dialog('close'); // close the dialog
+						$('#dg').datagrid('reload'); // reload the user data
+					}
+				}
+			});
+		}
+		function destroyDg() {
+			var row = $('#dg').datagrid('getSelected');
+			if (row) {
+				$.messager.confirm('确定删除', '确定删除选中数据吗?', function (r) {
+					if (r) {
+						if(row.type=='1'){
+							_url=baseAction + '?method=remove';
+						}else{
+							_url=baseAction + '?method=adminDelNotice';
+						}
+						$.post(_url, {id: row.nid}, function (result) {
+							if (result.success) {
+								$('#dg').datagrid('reload'); // reload the user data
+							} else {
+								$.messager.alert('Error', result.errorMsg
+								);
+							}
+						}, 'json');
+						
+					}
+				});
+			}
+		}
+		
+		function viewDetail_(){
+		    $("#btn_view_ok").hide();
+			$("#btn_view_no").hide();
+			comm_view('详情',"dg");
+		}
+		
+		function formatType(val, row) {
+			var vResult = "";
+			if (val == '0') {
+				vResult = '<span style="color:green;">消息</span>';
+			} else if (val == '1') {
+				vResult = '<span style="color:red;">公告</span>';
+			} 
+			return vResult;
+		}
+		
+		    //详情查看 
+		    var dg_views_init = false;
+			var dg_titles_arr  ;
+			var dg_props_arr  ;
+			function initDgView(dgId){
+				dg_titles_arr = [];
+				dg_props_arr = [];
+				var props = $("th","#"+dgId);
+				for(var i=0;i<props.length;i++){
+					dg_props_arr.push($(props[i]).attr("field"));
+					dg_titles_arr.push($(props[i]).text());
+				}
+				dg_views_init = true;
+			}
+
+		function comm_view(title,dgId){
+			
+			var row = $('#'+dgId).datagrid('getSelected');
+			if (!row) {
+				return;
+			}
+			if(! dg_views_init){
+				initDgView(dgId);	
+			}
+			
+			$('#view-dlg').dialog('open').dialog('setTitle',title);
+			var newHtml = "";
+			for(var i=0;i<dg_props_arr.length;i++){
+				var ti = dg_titles_arr[i];
+				var va = row[dg_props_arr[i]];
+				if(!va && va!=0){
+					va = "&nbsp;"
+				}
+				var sty = "border-bottom: solid 1px #fff;padding: 4px;margin:0px;" ;
+				if(i%2 == 0){
+					sty += "background-color:#F0F0F0;";
+				}else{
+					sty += "background-color:#ECF5FF;";
+				}
+				
+		        var propertyId=dg_props_arr[i];
+					var dataId
+					if(propertyId=="receiptSerialno")
+					{
+						dataId=va;
+						$("#hide_id").val(va);
+					}
+					
+		    	if(propertyId=="type"){
+		    		selectStatus=va;
+		    		va = formatType(va,'')
+		    	}
+		    	if(propertyId=="isrepair"){
+		    		va = formatIsrepair(va,'')
+		    	}
+		        //文本显示
+				newHtml+="<div class=\"fitem\" style=\""+sty+"\"><label style=\"width: 100px;text-align:right\">"+ti+":</label> <label style=\"width: 200px;\">"+va+"</label></div>"
+
+				
+			}
+			$('#view-dlg-content').html(newHtml);
+			
+		}
+
+	</script>
+   
+    </body>
+    </html>

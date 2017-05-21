@@ -1,0 +1,120 @@
+
+	
+	<table id="tt" class="easyui-datagrid" style="height:auto;">
+			<thead>
+				<tr>
+					<th field="name1" width="100">物资编码</th>
+					<th field="name2" width="200">物资名称</th>
+					<th field="name3" width="100">数量</th>
+					<th field="name4" width="100">单位</th>
+					<th field="name5" width="100">小计</th>
+					<th field="name6" width="60">换算单位</th>
+				</tr>                          
+			</thead>                           
+			<tbody>  
+			    <#if orderType=='13'>
+			    <#list sendDetails as obj>                          
+				<tr>                       
+				    <td>${obj.materialcode!''}</td>    
+					<td>${obj.name!''}</td>            
+					<td>${obj.totalS!''}</td> 
+					<td>${obj.unit!''}</td>            
+					<td>${obj.totalS?number*obj.covertratio?number}</td>   
+					<td>${obj.convertFlag!''}</td>            
+				</tr>
+				</#list>   
+				</#if>    
+				  
+				<#if orderType=='14'>
+			    <#list receiptDetails as obj>                          
+				<tr>                       
+				    <td>${obj.materialcode!''}</td>    
+					<td>${obj.name!''}</td>            
+					<td>${obj.totalS!''}</td>
+					<td>${obj.unit!''}</td>            
+					<td>${obj.totalS?number*obj.covertratio?number}</td>   
+					<td>${obj.convertFlag!''}</td>            
+				</tr>
+				</#list>   
+				</#if>      
+				
+				<#if orderType=='3'>
+			    <#list purDetails as obj>                          
+				<tr>                       
+				    <td>${obj.materialId!''}</td>    
+					<td>${obj.name!''}</td>            
+					<td>${obj.quantity!''}</td> 
+					<td>${obj.unit!''}</td>            
+					<td>${obj.quantity?number*obj.covertRatio?number}</td>   
+					<td>${obj.convertFlag!''}</td>            
+				</tr>
+				</#list>   
+				</#if>      
+				
+				<#if orderType=='4'>
+			    <#list saleDetails as obj>                          
+				<tr>                       
+				    <td>${obj.materialId!''}</td>    
+					<td>${obj.name!''}</td>            
+					<td>${obj.quantity!''}</td>  
+					<td>${obj.unit!''}</td>           
+					<td>${obj.quantity?number*obj.covertRatio?number}</td>   
+					<td>${obj.convertFlag!''}</td>            
+				</tr>
+				</#list>   
+				</#if>    
+				<#if orderType=='8' | orderType=='9' | orderType=='11' | orderType=='12'>
+			    <#list centerTransferDetails as obj>                          
+				<tr>                       
+				    <td>${obj.materialcode!''}</td>    
+					<td>${obj.name!''}</td>            
+					<td>${obj.totalS!''}</td>   
+					<td>${obj.unit!''}</td>          
+					<td>${obj.totalS?number*obj.covertratio?number}</td>   
+					<td>${obj.convertFlag!''}</td>            
+				</tr>
+				</#list>   
+				</#if>      
+				
+				<#if orderType=='25' || orderType=='29' || orderType=='32' >
+			    <#list stockTransferDetails as obj>                          
+				<tr>                       
+				    <td>${obj.materialCode!''}</td>    
+					<td>${obj.materialName!''}</td>            
+					<td>${obj.totalS!''}</td>  
+					<td>${obj.unit!''}</td>       
+					<td>${obj.totalS?number*obj.covertratio?number}</td>   
+					<td>${obj.convertFlag!''}</td>   
+				</tr>
+				</#list>   
+				</#if>    
+				
+				<#if orderType=='1' | orderType=='35'>
+			    <#list inDetails as obj>                          
+				<tr>                       
+				    <td>${obj.materialCode!''}</td>    
+					<td>${obj.name!''}</td>            
+					<td>${obj.totalS!''}</td>  
+					<td>${obj.unit!''}</td>       
+					<td>${obj.totalS?number*obj.covertRatio?number}</td>   
+					<td>${obj.convertFlag!''}</td>   
+				</tr>
+				</#list>   
+				</#if>    
+				
+				<#if orderType=='2' | orderType=='36'>
+			    <#list ouDetails as obj>                          
+				<tr>                       
+				    <td>${obj.materialcode!''}</td>    
+					<td>${obj.name!''}</td>            
+					<td>${obj.totalS!''}</td>  
+					<td>${obj.unit!''}</td>       
+					<td>${obj.totalS?number*obj.covertRatio?number}</td>   
+					<td>${obj.convertFlag!''}</td>   
+				</tr>
+				</#list>   
+				</#if>    
+				
+			</tbody>                           
+    </table>
+	

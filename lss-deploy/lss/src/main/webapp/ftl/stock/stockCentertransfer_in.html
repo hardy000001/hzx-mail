@@ -1,0 +1,623 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+ <title>中心调入管理</title> 
+ <#include "../include_head.html">
+</head>
+<body>
+	<div id="query_panel" class="easyui-panel" title="查询面板"
+		style="height: 110px; padding: 10px; background: #fafafa;"
+		data-options="iconCls:'icon-search',collapsible:true">
+		<form id="queryFm" method="post" novalidate>
+					    <div class="fitem">
+						    <input name="tsfSerialno" prompt="调入流水号" class="easyui-textbox">
+						    <input name="fromMchcode" prompt="调出商户" id="fromMchcode" class="easyui-combogrid">
+						    <select prompt="状态" class="easyui-combobox" name="status" style="width:153px;" panelHeight="auto">   
+			 							<option value=""></option>
+			 							<option value="0">正常</option>
+			 							<option value="1">等待复核</option>
+			 							<option value="2">复核未通过</option>
+			 							<option value="9">已禁用</option>
+			 				</select>
+						    <input name="loginName"  prompt="操作员" class="easyui-textbox">
+						    <input class="easyui-datebox" id="dealDate" name="dealDate" prompt="交易日期"   data-options="editable:false" style="width:150px">
+                            <input class="easyui-datebox" id="createDate" name="createDate" prompt="创建日期"   data-options="editable:false" style="width:150px">
+						    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
+						    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" onclick="clearQueryFm();">重置</a>
+				        </div>
+						
+					</form>
+		<!-- 这里的query是通用js,如果有特别的查询可以不引入 -->
+		<#include "../query_js_inc.html">
+	</div>
+	
+	<table id="dg" title="用户" class="easyui-datagrid" style="height: 400px"
+		data-options="url:'<@sp.ctx />/user/stock/centertransfer_in.htm?method=queryList&tradetype=6'"
+		toolbar="#toolbar" pagination="true"
+		rownumbers="true" fitColumns="true" singleSelect="true">
+		<thead>
+			<tr>
+				<th field="tsfSerialno" width="15%" sortable="true">调入流水号</th>
+				<th field="mchOrderNo" sortable="true" width="10%">商户订单号</th>
+				<th field="centerName" width="10%">调入中心</th>
+				<th field="fromname" width="10%">调出租赁公司</th>
+				<th field="toMchcode" width="10%">调入租赁公司ID</th>
+				<th field="tomname" width="10%">调入租赁公司</th>
+				<th field="status" width="10%" formatter="formatStatus">状态</th>
+				<th field="carNo" width="10%">车号</th>
+				<th field="carDriver" width="10%">司机</th>
+				<th field="zxFee" width="10%">装卸费用</th>
+				<th field="otherFee" width="10%">杂费</th>
+				<th field="transportFee" width="10%">运费</th>
+				<th field="traOutOper" width="10%">出库经办人</th>
+				<th field="traInOper" width="10%">入库经办人</th>
+				<th field="loginName" width="10%">操作员</th>
+				<th field="remark" width="10%">备注</th>
+				<th field="tsfSdate" width="10%">申请日期</th>
+				<th field="createtime" width="10%">录单日期</th>
+				<th field="operName" width="10%">审核人</th>
+				<th field="auditingtime" width="10%">审核时间</th>
+			</tr>
+		</thead>
+	</table>
+	<div id="toolbar">
+	
+  		
+  			<@shiro.hasPermission name="${add}">
+		    <a id="add_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true"   onclick="createNewTab('新增中心调入单')">新增中心调入单</a>
+		     </@shiro.hasPermission>
+		    <@shiro.hasPermission name="${update}">
+		    <a id="edit_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="createEditTab('修改中心调入单')">修改</a>
+		    </@shiro.hasPermission>
+		    <@shiro.hasPermission name="${del}">
+		    <a id="del_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyDg()">删除</a>
+	  		</@shiro.hasPermission>
+	  		<a id="view_detail"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="viewDetail_()">查看</a>
+	  		<@shiro.hasPermission name="${check}">
+	  		<a id="aud_bar"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="auditDg()">审核</a>
+	  		</@shiro.hasPermission>
+	  		<a id="print_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-print" plain="true" onclick="print()">打印</a>
+    </div>
+	    
+  <!-- 查看详情 -->
+	     <div id="view-dlg" class="easyui-dialog" style="width:700px;height:600px;padding:10px 20px"  closed="true" buttons="#view-dlg-buttons">
+	    	<div id="view-dlg-content"></div>
+	    	<div class="fitem">
+					 	
+				    	<table id="dgItem_detail" class="easyui-datagrid"  style="width:625px;height:150px"
+								    data-options="rownumbers:true
+									"
+								    >
+							     
+					   </table>
+		   </div>
+	     </div>
+		 <!-- 操作按钮与明细 END -->
+   	<div id="view-dlg-buttons" >
+       
+       <a href="javascript:void(0)" id="btn_view_ok" style="display: none" class="easyui-linkbutton"  onclick="saveAuditDg(0)">审核通过</a>
+        <a href="javascript:void(0)" id="btn_view_no" style="display: none" class="easyui-linkbutton"  onclick="saveAuditDg(2)">审核拒绝</a>
+       <a href="javascript:void(0)" id="btn_view_anti" style="display: none" class="easyui-linkbutton"  onclick="saveAntiAudit(1)">反审核</a>
+    	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#view-dlg').dialog('close')">关闭</a>
+       
+   
+    </div>
+	
+	<div id="print_text_id" style="display: none"></div>
+	
+	<script type="text/javascript">
+		
+		function createNewTab(title) {
+				var a="${add!'0'}"
+				var b="${upd!'0'}"
+				var c="${del!'0'}"
+				var d="${exp!'0'}"
+				var e="${aud!'0'}"
+				var role="&a="+a+"&b="+b+"&c="+c+"&d="+d+"&e="+e;
+			window.parent.open1(title, "<@sp.ctx />/user/stock/centertransfer_inAdd.htm?"+role);
+			window.parent.$('#tabs').tabs('close', '中心调入管理');
+		}	   
+		
+		
+		function createEditTab(title) {
+			    var a="${add!'0'}"
+				var b="${upd!'0'}"
+				var c="${del!'0'}"
+				var d="${exp!'0'}"
+				var e="${aud!'0'}"
+				var role="&a="+a+"&b="+b+"&c="+c+"&d="+d+"&e="+e;
+			var row = $('#dg').datagrid('getSelected');
+			
+			if (row.status == '0') {
+	            $.messager.alert('错误信息', "不能修改已经审核单据");
+	            return false;
+	        }
+
+			if (row) {
+				window.parent.open1(title, "<@sp.ctx />/user/stock/centertransfer_inEdit.htm?id="+row.tsfSerialno+"&loginName="+row.loginName+role);
+				window.parent.$('#tabs').tabs('close', '中心调入管理');
+			}
+		
+		}	
+	
+	
+		var editIndex = undefined;
+		function endEditing(){
+			if (editIndex == undefined){return true}
+			if ($('#dgItem').datagrid('validateRow', editIndex)){
+				$('#dgItem').datagrid('endEdit', editIndex);
+				editIndex = undefined;
+				return true;
+			} else {
+				return false;
+			}
+		}
+		// 双击编辑行
+		function onClickCell(index, field){
+			if (editIndex != index){
+				if (endEditing()){
+					$('#dgItem').datagrid('selectRow', index).datagrid('beginEdit', index);
+					var ed = $('#dgItem').datagrid('getEditor', {index:index,field:field});
+					if (ed){
+						($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+					}
+					editIndex = index;
+				} else {
+					setTimeout(function(){
+						$('#dgItem').datagrid('selectRow', editIndex);
+					},0);
+				}
+			}
+		}
+		function onEndEdit(index, row){
+		 	var ed = $(this).datagrid('getEditor', {
+				index: index,
+				field: 'materialCode'
+			});
+			row.name = $(ed.target).combogrid('getText'); 
+		}
+		function append(){
+			if (endEditing()){
+				$('#dgItem').datagrid('appendRow',{itemid:$('#dgItem').datagrid('getRows').length+1});
+				editIndex = $('#dgItem').datagrid('getRows').length -1;
+				$('#dgItem').datagrid('selectRow', editIndex).datagrid('beginEdit', editIndex);
+			}
+		}
+		function removeit(){
+			if (editIndex == undefined){return}
+			$('#dgItem').datagrid('cancelEdit', editIndex).datagrid('deleteRow', editIndex);
+			editIndex = undefined;
+		}
+		function accept(){
+			if (endEditing()){
+				$('#dgItem').datagrid('acceptChanges');
+			}
+		}
+		function reject(){
+			$('#dgItem').datagrid('rejectChanges');
+			editIndex = undefined;
+		}
+		
+	   
+	   
+	   
+		var baseAction = "<@sp.ctx />/user/stock/centertransfer_in.htm"
+		var url;
+		var printAction = "<@sp.ctx />/user/print/stockCentertransferPrintIn.htm"
+		function editDg() {
+			var row = $('#dg').datagrid('getSelected');
+			if (row) {
+				$('#dlg').dialog('open').dialog('setTitle', '修改');
+				$('#fm').form('load', row);
+				 url = baseAction+'?method=update';
+			}
+		}
+
+		
+		function destroyDg() {
+			var row = $('#dg').datagrid('getSelected');
+			if (row) {
+				$.messager.confirm('确定删除', '确定删除选中数据吗?', function(r) {
+					if (r) {
+						$.post(baseAction + '?method=removeCStockCenterTransferInAll', {
+							id : row.tsfSerialno
+						}, function(result) {
+							if (!result.success) {
+								$.messager.alert('Error', result.errorMsg);
+							} else {
+								$.messager.alert('提示信息', '删除成功！','info' ,function () {
+									
+									$('#dg').datagrid('reload'); // reload the user data
+									$('#view-dlg').dialog('close')
+								});
+							}
+						}, 'json');
+					}
+				});
+			}
+		}
+
+	
+		
+		
+		//详情查看 
+		var dg_views_init = false;
+	 	var dg_titles_arr  ;
+	 	var dg_props_arr  ;
+	 	function initDgView(){
+	 		dg_titles_arr = [];
+	 		dg_props_arr = [];
+	 		var props = $("th","#dg");
+	 		for(var i=0;i<props.length;i++){
+	 			dg_props_arr.push($(props[i]).attr("field"));
+	 			dg_titles_arr.push($(props[i]).text());
+	 		}
+	 		dg_views_init = true;
+	 	}
+		
+	 	var selectStatus
+		function comm_view(title,audit){
+				var row = $('#dg').datagrid('getSelected');
+				if (!row) {
+					return;
+				}
+				if(! dg_views_init){
+					initDgView();	
+				}
+				
+				$('#view-dlg').dialog('open').dialog('setTitle',title);
+				var newHtml = "";
+				for(var i=0;i<dg_props_arr.length;i++){
+					var ti = dg_titles_arr[i];
+					var va = row[dg_props_arr[i]];
+					if(!va && va!=0){
+						va = "&nbsp;"
+					}
+					var sty = "border-bottom: solid 1px #fff;padding: 4px;margin:0px;" ;
+					if(i%2 == 0){
+						sty += "background-color:#F0F0F0;";
+					}else{
+						sty += "background-color:#ECF5FF;";
+					}
+					
+                    var propertyId=dg_props_arr[i];
+ 					var dataId
+ 					if(propertyId=="tsfSerialno")
+ 					{
+ 						dataId=va;
+ 						$("#hide_id").val(va);
+ 					}
+ 					
+			    	if(propertyId=="status"){
+			    		selectStatus=va
+			    		va = formatStatus(va,'')
+			    	}
+			        //文本显示
+					newHtml+="<div class=\"fitem\" style=\""+sty+"\"><label style=\"width: 100px;text-align:right\">"+ti+":</label> <label style=\"width: 200px;\">"+va+"</label></div>"
+			
+					
+				}
+				$('#view-dlg-content').html(newHtml);
+				
+				var openStatus=1; //是开户状态
+ 				if(selectStatus!=openStatus){
+ 					$("#btn_view_ok").hide();
+ 					$("#btn_view_no").hide();
+ 					
+ 				}
+ 				if(selectStatus==0 &&title=='审核')
+ 					{
+ 					$("#btn_view_anti").show();
+ 					}
+ 				
+ 				if(selectStatus==1)
+					{
+					$("#btn_view_anti").hide();
+					}
+				
+				//获取明细
+				loadSaleDetailData(dataId);
+			
+		}
+	 	
+	 	function viewDetail_(){
+			$("#btn_view_ok").hide();
+			$("#btn_view_no").hide();
+			$("#btn_view_anti").hide();
+			comm_view('详情',false);
+		}
+		function auditDg(){
+			$("#btn_view_ok").show();
+			$("#btn_view_no").show();
+			comm_view('审核',true);
+			
+		}
+		
+		function loadSaleDetailData(dataId){
+        	
+        	var detailUrl=baseAction+'?method=getCStockCenterTransferDetailList&id='+dataId
+        	
+        	$('#dgItem_detail').datagrid({    
+        	    url:detailUrl,    
+        	    ctrlSelect:true,
+        	    nowrap:true,
+        	    showFooter: true,
+        	    onLoadSuccess:function(){
+        	    	//$('#dgItem_detail').datagrid("autoMergeCells",['consumableId']);
+        	    	return false;
+        	    },
+        	    loadFilter: function(data){
+			    	
+			    	return loadFilterData(data);
+				},
+        	    columns:[[
+        	        {field:'materialcode',title:'物资简码',width:80,align:'left'},    
+        	        {field:'name',title:'物资名称',width:160,align:'left'},  
+        	        {field:'totalS',title:'数量',width:100,align:'left'},        	
+        	        {field:'unit',title:'单位',width:50,align:'left'},      	      
+        	        {field:'totalM',title:'小计',width:100,align:'left'},
+        	        {field:'convertFlag',title:'换算单位',width:60,align:'left'},
+        	    ]]    
+        	});  
+
+        }
+		
+		
+		function loadFilterData(data){
+			//过滤数据
+	    	var dataList={
+	    			rows:[],
+	    			footer:[]
+	    	}
+	    	dataList.rows=data;
+			
+			var typeMap={};  
+	        var len = data.length;  
+	        for(var i=0;i<len;i++){
+		            if(typeMap[data[i].typeId] == undefined){
+		                var list = [];  
+		                list.push(data[i]);  
+		                typeMap[data[i].typeId] = list;  
+		            }else{  
+		            	typeMap[data[i].typeId].push(data[i]);
+		            }  
+	        }
+	        var tj=0;
+	        for(var typeId in typeMap){
+		            var obj = typeMap[typeId];
+		            var totalS=0;
+		            var covertratio=0;
+		           
+		            footers={"materialcode":"合计","name":""}
+		            for(var i = 0;i < obj.length;i++){
+		            	
+		            	totalS=obj[i].totalS;
+		            	covertratio+=obj[i].covertratio*obj[i].totalS;
+		            	
+		            }
+		            if(tj>0){
+	            		footers.materialcode="";
+	            		 
+	            	}
+	            	tj++;
+		           
+		            footers.name=obj[0].fname+": "+covertratio.toFixed(2)+""+obj[0].convertFlag;
+		            dataList.footer.push(footers)
+	        }  
+	    	return  dataList;
+		}
+		
+		 
+		 function formatStatus(val, row) {
+				var vResult = "";
+				if (val == '0') {
+					vResult = '<span style="color:green;">正常</span>';
+				} else if (val == '1') {
+					vResult = '<span style="color:dodgerblue;">等待审核</span>';
+				} else if (val == '2') {
+					vResult = '<span style="color:red;">审核未通过</span>';
+				} else if (val == '9') {
+					vResult = '<span style="color:gray;">已作废</span>';
+				}
+				return vResult;
+			}
+		 
+		 
+		 function saveAuditDg(status) {
+				var row = $('#dg').datagrid('getSelected');
+				if (row) {
+							$.post(baseAction + '?method=auditStockCenterTransferIn', {
+								tsfSerialno : row.tsfSerialno,
+								status:status
+								
+							}, function(result) {
+								if (!result.success) {
+									$.messager.alert('Error', result.errorMsg);
+								} else {
+									$.messager.alert('提示信息', '操作成功！','info' ,function () {
+										
+										$('#dg').datagrid('reload'); // reload the user data
+										$('#view-dlg').dialog('close')
+									});
+								}
+							}, 'json');
+
+				}
+			}
+		 
+		 $('#fromMchcode').combogrid({
+		        url:'<@sp.ctx />/user/stock/centertransferAdd.htm?method=getCustomerInfos',
+		        idField:'cuscode',
+		        textField:'cusname',
+		        columns:[[
+		                  {field:'cuscode',title:'商户号',width:50},
+		                  {field:'cusname',title:'商户名称',width:100},
+		                 ]],
+		    	mode:'local',
+			    filter:function(q, row){
+			    	var opts = $(this).combogrid('options');
+					// 过滤拼音码，转换大写字母
+				    /* if( row.pyCode.indexOf(q.toUpperCase()) >= 0){
+				    	alert(1);
+						return row.pyCode.indexOf(q.toUpperCase()) >= 0;
+				    } */
+				    // 过滤中文名称
+			        if(row[opts.textField].indexOf(q) >= 0){
+			        	return row[opts.textField].indexOf(q) >= 0;
+			        }
+				}
+		    });
+		 
+		 
+		 function print() {
+	        	var row = $('#dg').datagrid('getSelected');
+				if (!row) {
+					return;
+				}
+	    		var dataUrl=printAction+"?method=printInfo&id="+row.tsfSerialno
+	    		$.post(dataUrl,row,function(msg){
+	    			$("#print_text_id").html(msg);
+	    			previewMytable();
+	    		});
+	    		
+	    	}
+	        
+		 function previewMytable(){
+	        	var fenye = $("#fenye").val(); //获取
+	    		var LODOP=getLodop();  
+	    		LODOP.PRINT_INIT("打印调入单");
+	    		var strStyle="<style> table,td,th {border-width: 1px;border-style: solid;border-collapse: collapse}</style>"
+	    			LODOP.SET_PRINT_PAGESIZE(1,"241mm","280mm","siliandan");
+	    			
+         if(fenye>0)
+         	{
+         	 for (var i=1;i<=fenye;i++){
+         		 
+         	
+             LODOP.ADD_PRINT_TABLE(128,"4%","80%","80%",strStyle+document.getElementById("div"+i).innerHTML);
+      		LODOP.SET_PRINT_STYLEA(0,"Vorient",3);
+      		
+      		LODOP.ADD_PRINT_HTM(26,"4%","80%",109,document.getElementById("diva").innerHTML);
+      		LODOP.SET_PRINT_STYLEA(0,"ItemType",1);
+      		LODOP.SET_PRINT_STYLEA(0,"LinkedItem",-1);	
+      	    	
+     
+      		LODOP.ADD_PRINT_HTM(1,600,300,100,"总页号：<font color='#0000ff' format='ChineseNum'><span tdata='pageNO'>第##页</span>/<span tdata='pageCount'>共##页</span></font>");
+      		LODOP.SET_PRINT_STYLEA(0,"ItemType",1);
+      		
+      		LODOP.SET_PRINT_STYLEA(0,"Horient",1);
+      		//LODOP.ADD_PRINT_TEXT("90%","80%",196,20,"签字：");
+      		LODOP.ADD_PRINT_HTM("95%","10%","50%",200,"<body style='margin-top:0'>调出经办人签字：</body>");
+	     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+	     		LODOP.ADD_PRINT_HTM("95%","40%","50%",200,"<body style='margin-top:0'>司机签字：</body>");
+	     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+	     		LODOP.ADD_PRINT_HTM("95%","70%","50%",200,"<body style='margin-top:0'>调入经办人签字：</body>");
+          	LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+          	LODOP.ADD_PRINT_HTM("1%","32%","300",200,"<body style='margin-top:0'>枝星储运（上海）有限公司</body>");
+         	LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+          	
+          	LODOP.ADD_PRINT_HTM("20%","96%","50%",200,"<body style='margin-top:0'>①</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("22%","96%","50%",200,"<body style='margin-top:0'>存</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("24%","96%","50%",200,"<body style='margin-top:0'>根</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("26%","96%","50%",200,"<body style='margin-top:0'>︵</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("28%","96%","50%",200,"<body style='margin-top:0'>白</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("30%","96%","50%",200,"<body style='margin-top:0'>︶</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		
+     	
+     		
+     		
+     		LODOP.ADD_PRINT_HTM("34%","96%","50%",200,"<body style='margin-top:0'>②</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("36%","96%","50%",200,"<body style='margin-top:0'>财</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("38%","96%","50%",200,"<body style='margin-top:0'>务</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("40%","96%","50%",200,"<body style='margin-top:0'>︵</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("42%","96%","50%",200,"<body style='margin-top:0'>红</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("44%","96%","50%",200,"<body style='margin-top:0'>︶</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		
+     		LODOP.ADD_PRINT_HTM("48%","96%","50%",200,"<body style='margin-top:0'>③</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("50%","96%","50%",200,"<body style='margin-top:0'>客</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("52%","96%","50%",200,"<body style='margin-top:0'>户</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("54%","96%","50%",200,"<body style='margin-top:0'>︵</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("56%","96%","50%",200,"<body style='margin-top:0'>蓝</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("58%","96%","50%",200,"<body style='margin-top:0'>︶</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		
+     		
+     		LODOP.ADD_PRINT_HTM("62%","96%","50%",200,"<body style='margin-top:0'>④</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("64%","96%","50%",200,"<body style='margin-top:0'>服</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("66%","96%","50%",200,"<body style='margin-top:0'>务</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("68%","96%","50%",200,"<body style='margin-top:0'>中</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("70%","96%","50%",200,"<body style='margin-top:0'>心</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("72%","96%","50%",200,"<body style='margin-top:0'>︵</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("74%","96%","50%",200,"<body style='margin-top:0'>黄</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+     		LODOP.ADD_PRINT_HTM("76%","96%","50%",200,"<body style='margin-top:0'>︶</body>");
+     		LODOP.SET_PRINT_STYLEA(0,"PageIndex",i);
+          	LODOP.NewPageA();
+         	 }
+         	}
+         
+        
+     
+    
+	    		 
+	    		LODOP.PREVIEW();	
+	    	};	
+
+		 
+	    	
+	    	
+		function saveAntiAudit(status) {
+	    		
+	    		var row = $('#dg').datagrid('getSelected');
+	    		if (row) {
+	    					$.post(baseAction + '?method=antiAuditStockCentertansferIn', {
+	    						tsfSerialno : row.tsfSerialno,
+	    						status:status
+	    						
+	    					}, function(result) {
+	    						if (!result.success) {
+	    							$.messager.alert('Error', result.errorMsg);
+	    						} else {
+	    							$.messager.alert('提示信息', '操作成功！','info' ,function () {
+	    								
+	    								$('#dg').datagrid('reload'); // reload the user data
+	    								$('#view-dlg').dialog('close')
+	    							});
+	    						}
+	    					}, 'json');
+
+	    		}
+	    	}
+	</script>
+	
+	
+	
+	
+
+</body>
+</html>

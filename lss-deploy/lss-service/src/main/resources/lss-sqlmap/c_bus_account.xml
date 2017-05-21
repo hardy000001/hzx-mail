@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CBusAccount">
+
+	<sql id="tableName" >
+		c_bus_account
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	ac_serialno acSerialno ,
+	deptid deptid ,
+	cuscode cuscode ,
+	htcode htcode ,
+	trade_amt tradeAmt ,
+	trade_type tradeType ,
+	status status ,
+	createoper createoper ,
+	createtime createtime ,
+	auditingoper auditingoper ,
+	auditingtime auditingtime     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CBusAccount" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(ac_serialno,deptid,cuscode,htcode,trade_amt,trade_type,status,createoper,createtime,auditingoper,auditingtime)
+		VALUES
+		(#{acSerialno} ,#{deptid} ,#{cuscode} ,#{htcode} ,#{tradeAmt} ,#{tradeType} ,#{status} ,#{createoper} ,#{createtime} ,#{auditingoper} ,#{auditingtime} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(ac_serialno,deptid,cuscode,htcode,trade_amt,trade_type,status,createoper,createtime,auditingoper,auditingtime)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.acSerialno} ,#{item.deptid} ,#{item.cuscode} ,#{item.htcode} ,#{item.tradeAmt} ,#{item.tradeType} ,#{item.status} ,#{item.createoper} ,#{item.createtime} ,#{item.auditingoper} ,#{item.auditingtime} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE ac_serialno = #{acSerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CBusAccount">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CBusAccount" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where ac_serialno = #{acSerialno}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="acSerialno != '' and acSerialno != null">AND t.ac_serialno = #{acSerialno}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="cuscode != '' and cuscode != null">AND t.cuscode = #{cuscode}</if>
+  	<if test="htcode != '' and htcode != null">AND t.htcode = #{htcode}</if>
+  	<if test="tradeAmt != null">AND t.trade_amt = #{tradeAmt}</if>
+  	<if test="tradeType != null">AND t.trade_type = #{tradeType}</if>
+  	<if test="status != '' and status != null">AND t.status = #{status}</if>
+  	<if test="createoper != '' and createoper != null">ANDt. createoper = #{createoper}</if>
+  	<if test="createtime != null">AND t.createtime = #{createtime}</if>
+  	<if test="auditingoper != '' and auditingoper != null">AND auditingoper = #{auditingoper}</if>
+  	<if test="auditingtime != null">AND t.auditingtime = #{auditingtime}</if>
+  	
+  	
+  	<if test="beginTime != '' and  beginTime != null">AND left(t.createtime,10) &gt;= #{beginTime}</if>
+  	<if test="endTime != '' and  endTime != null">AND left(t.createtime,10) &lt;= #{endTime}</if>
+  	<if test="loginName != '' and loginName != null">AND u.login_name like '%${loginName}%'</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CBusAccount"
+		parameterType="com.lq.lss.model.CBusAccount">
+		select
+		t.ac_serialno acSerialno ,
+		t.deptid deptid ,
+		t.cuscode cuscode ,
+		t.htcode htcode ,
+		t.trade_amt tradeAmt ,
+		t.trade_type tradeType ,
+		t.status status ,
+		if(t.status=0,10,t.status) s_status,
+		t.createoper createoper ,
+		t.createtime createtime ,
+		t.auditingoper auditingoper ,
+		t.auditingtime auditingtime,
+		uu.login_name operName,
+		u.login_name loginName,
+		d.name  deptname,
+		c.project_name projectName
+		FROM  c_bus_account t
+			 left join admin_user u on t.createoper=u.user_id
+			 left join admin_user uu on t.auditingoper=uu.user_id
+			 left join admin_dept d on t.deptid=d.dept_id
+			 left join c_bus_ht c on c.htcode=t.htcode
+			 <include refid="pageConditions"/>
+			
+			order by s_status ,createtime desc
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName"/> t
+			 left join admin_user u on t.createoper=u.user_id
+			 left join admin_user uu on t.auditingoper=uu.user_id
+			 left join admin_dept d on t.deptid=d.dept_id
+			 left join c_bus_ht c on c.htcode=t.htcode
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="cuscode != null">cuscode = #{cuscode},</if>
+		  	<if test="htcode != null">htcode = #{htcode},</if>
+		  	<if test="tradeAmt != null">trade_amt = #{tradeAmt},</if>
+		  	<if test="tradeType != null">trade_type = #{tradeType},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="createtime != null">createtime = #{createtime},</if>
+		  	<if test="auditingoper != null">auditingoper = #{auditingoper},</if>
+		  	<if test="auditingtime != null">auditingtime = #{auditingtime}</if>
+		  	
+		  	
+		  	
+	
+			</set>
+		WHERE ac_serialno = #{acSerialno}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CBusAccount">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

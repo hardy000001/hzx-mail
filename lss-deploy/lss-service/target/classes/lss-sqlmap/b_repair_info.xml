@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="BRepairInfo">
+
+	<sql id="tableName" >
+		b_repair_info
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	typeid typeid ,
+	name name ,
+	fee_percant feePercant ,
+	fee_unit feeUnit ,
+	flag flag ,
+	status status     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.BRepairInfo" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,typeid,name,fee_percant,fee_unit,status,flag)
+		VALUES
+		(#{id} ,#{typeid} ,#{name} ,#{feePercant} ,#{feeUnit} ,#{status},#{flag} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,typeid,name,fee_percant,fee_unit,status,flag)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.typeid} ,#{item.name} ,#{item.feePercant} ,#{item.feeUnit} ,#{item.status},#{item.flag} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.Integer">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE id = #{id}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.BRepairInfo">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.BRepairInfo" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where id = #{id}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="typeid != null">AND typeid = #{typeid}</if>
+  	<if test="name != '' and name != null">AND name = #{name}</if>
+  	<if test="feePercant != null">AND fee_percant = #{feePercant}</if>
+  	<if test="feeUnit != '' and feeUnit != null">AND fee_unit = #{feeUnit}</if>
+  	<if test="flag != '' and flag != null">AND flag = #{flag}</if>
+  	<if test="status != '' and status != null">AND status = #{status}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.BRepairInfo"
+		parameterType="com.lq.lss.model.BRepairInfo">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="typeid != null">typeid = #{typeid},</if>
+		  	<if test="name != null">name = #{name},</if>
+		  	<if test="feePercant != null">fee_percant = #{feePercant},</if>
+		  	<if test="feeUnit != null">fee_unit = #{feeUnit},</if>
+		  	<if test="flag != null">flag = #{flag},</if>
+		  	<if test="status != null">status = #{status}</if>
+			</set>
+		WHERE id = #{id}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.BRepairInfo">
+		<include refid="update_sql"/>
+	</update>	
+		
+	<select id="findRepairInfoByTypeid" resultType="com.lq.lss.model.BRepairInfo" 
+	parameterType="map">
+		select
+	     t.id id ,
+	     t.typeid typeid ,
+	     t.name name ,
+	     t.fee_percant feePercant ,
+	     t.fee_unit feeUnit ,
+	     t.flag flag ,
+	     t.status status,
+	     m.name tName FROM 
+    <include refid="tableName"/> t 
+    left join b_material_type m on t.typeid=m.typeId
+    <if test="typeid != '' and typeid != null">
+        where t.typeid = #{typeid}
+    </if>
+	
+	</select>
+
+</mapper>

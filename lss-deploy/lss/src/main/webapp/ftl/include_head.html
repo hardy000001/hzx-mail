@@ -1,0 +1,26 @@
+
+
+
+<link id="easyuiCss" rel="stylesheet" type="text/css" href="<@sp.static />/easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="<@sp.static />/easyui/themes/icon.css"> 
+<link rel="stylesheet" type="text/css" href="<@sp.static />/css/myeasyui.css">
+<script type="text/javascript" src="<@sp.static />/easyui/jquery.min.js"></script>
+<script type="text/javascript" src="<@sp.static />/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="<@sp.static />/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="<@sp.static />/easyui/datagrid-groupview.js"></script>
+<script type="text/javascript" src="<@sp.static />/easyui/datagrid-mergeCells.js"></script>
+<script type="text/javascript" src="<@sp.static />/easyui/datagrid-detailview.js"></script>
+<script type="text/javascript" src="<@sp.static />/easyui/datagrid-keyCtr.js"></script>
+<script type="text/javascript" src="<@sp.static />/js/My97DatePicker/WdatePicker.js"  ></script>
+<script type="text/javascript" src="<@sp.static />/js/lss-public.js?v=2"></script>
+<script type="text/javascript" src="<@sp.static />/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="<@sp.static />/js/hanziToPinyin.js"></script>
+<script type="text/javascript" src="<@sp.static />/js/easyuiFormat.js"></script>
+<script type="text/javascript" src="<@sp.static />/lodop/LodopFuncs.js?v=1"></script>
+
+<script language="javascript">
+ var css =  $.cookie('easyuiCSS') ;
+ if(css!=null && css!="" && css!="undefined"){
+ 	$("#easyuiCss").attr("href","<@sp.static />/easyui/themes/"+css+"/easyui.css");
+ }
+</script>

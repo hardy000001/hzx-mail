@@ -1,0 +1,112 @@
+<div id="div1">
+<DIV style="LINE-HEIGHT: 30px" class=size16 align=center><STRONG><font color="#0000FF">采购单</font></STRONG></DIV>        
+<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD  width="43%"><font color="#0000FF">所属租赁公司：<SPAN>${busPur.mchname!''}</SPAN></font></TD>
+    <TD width="33%"><font color="#0000FF">采购单号：<SPAN>${busPur.purSerialno!''}</SPAN></font></TD>
+    <TD><font color="#0000FF">所属中心：<SPAN>${busPur.centerName!''}</SPAN></font></TD></TR>
+  <TR>
+    <TD><font color="#0000FF">操作员：<SPAN>${busPur.loginName!''}</SPAN></font></TD> 
+    <TD><font color="#0000FF">操作时间：<SPAN>${busPur.createtime!''}</SPAN></font><font color="#0000FF"></font></TD>
+ 
+ </TBODY></TABLE>
+</div>
+
+<p>----------------------div2:------------------------------------------------------------------------------------</p>
+<div id="div2">
+
+<TABLE border=1 cellSpacing=0 cellPadding=1 width="100%" style="border-collapse:collapse" bordercolor="#333333">
+<thead>
+  <TR>
+    <TD width="10%">
+      <DIV align=center><b>类型</b></DIV></TD>
+    <TD width="20%">
+      <DIV align=center><b>物资简码</b></DIV></TD>
+    <TD width="20%">
+      <DIV align=center><b>物资名称</b></DIV></TD>
+    <TD width="10%">
+      <DIV align=center><b>单价</b></DIV></TD>
+    <TD width="10%">
+      <DIV align=center><b>数量</b></DIV></TD>
+    <TD width="10%">
+      <DIV align=center><b>单位</b></DIV></TD>
+    <TD width="20%">
+      <DIV align=center><b>金额</b></DIV></TD></TR>
+</thead>      
+  <TBODY>    
+  <#assign x='0'>
+  <#list detailList as obj>  
+  <TR align="center">
+    <#if x!=obj.typeId>
+    <TD >&nbsp;${obj.fname!''}</TD>
+    <#else>
+    <TD >&nbsp;</TD>
+    </#if>
+    <#assign x='${obj.typeId}'>
+    <TD >${obj.materialId!''}</TD>
+    <TD >${obj.name!''}</TD>
+    <TD >${obj.price!''}</TD>
+    <TD >${obj.quantity!''}</TD>
+    <TD >${obj.unit!''}</TD>
+    <TD >${obj.totalAmt!''}</TD></TR>
+   </#list>
+   
+   </TBODY>
+  
+  <tfoot>
+  <#list totalList?reverse as obj>
+  <tr>
+    <#if obj_index==0>
+    <TD ><b>合计</b></TD>
+    <#else>
+    <TD ><b>&nbsp;</b></TD>
+    </#if>
+    <TD align="center"><b>${obj.fname!''}</b></TD>
+	<TD tdata="pageNO" format="#" align="center">
+  	<p align="center"><b>${obj.totalAmt?string('#.##')}${obj.convertFlag!''}</b></p>
+	</TD>
+	<TD tdata="pageCount" format="#" align="left">
+  	<p align="center"><b></b></TD>    
+	<TD width="14%" align="center"></TD>
+	<TD ><b>&nbsp;</b></TD>
+	<TD width="20%" tdata="subSum" align="center"><font color="#0000FF"></font></TD>    
+  </tr>
+  </#list>
+  <tr>
+    <TD ><b>总金额</b></TD>
+    <TD align="center"><b>${busPur.totalAmt!''}元</b></TD>
+	<TD tdata="pageNO" format="#" align="center">
+  	<p align="center"><b>&nbsp;</b></p>
+	</TD>
+	<TD tdata="pageCount" format="#" align="left">
+  	<p align="center"><b></b></TD>    
+	<TD width="14%" align="center"></TD>
+	<TD ><b>&nbsp;</b></TD>
+	<TD width="20%" tdata="subSum" align="center"><font color="#0000FF"></font></TD>    
+  </tr>
+  
+  </tfoot>
+</TABLE>
+</div>
+<p>----------------------div3:------------------------------------------------------------------------------------</p>
+<div id="div3">
+  <DIV style="LINE-HEIGHT: 60px" 
+align=center><span tdata='pageNO' format="00">(采购单)</span></DIV>
+</div>
+<p>----------------------div4:------------------------------------------------------------------------------------</p>
+<div id="div4">
+<DIV style="LINE-HEIGHT: 30px" class=size16 align=center><STRONG><font color="#FF0000">销售发货单-02</font></STRONG></DIV>         
+<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD width="43%"><font color="#FF0000">店铺名称：<SPAN 
+      id=rpt_Pro_Order_List_ctl00_lbl_eShop_Name><b>黄阁专卖店</b></SPAN></font></TD>
+    <TD width="33%"><font color="#FF0000">物流单号：<SPAN >2011050810373</SPAN></font></TD>
+  </TR>
+  <TR>
+    <TD><font color="#FF0000">收 货 人：<SPAN >刘波</SPAN></font></TD>                                                  
+    <TD><font color="#FF0000">网店订单：<SPAN>74235823905644</SPAN></font></TD>
+  </TR>
+  </TBODY></TABLE>
+</div>

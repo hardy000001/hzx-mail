@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>角色管理</title>
+
+    <#include "../include_head.html" />
+
+</head>
+
+
+<body>
+
+<table id="dg" title="" class="easyui-datagrid" style="width:100%;height:auto"
+       data-options="url:'<@sp.ctx />/user/adminRole.htm?method=query'"
+       toolbar="#toolbar"
+       pagination="true"
+       rownumbers="true"
+       fitColumns="true"
+       singleSelect="true"
+>
+    <thead>
+    <tr>
+        <th field="id" width="10%">角色ID</th>
+        <th field="code" width="25%">角色编码</th>
+        <th field="name" width="25%">角色名称</th>
+        <th field="userCnt" width="10%">用户数</th>
+        <th field="createTime" width="20%">创建时间</th>
+    </tr>
+    </thead>
+</table>
+<div id="toolbar">
+    <div id="query_panel" class="easyui-panel" style="width:100%; height: auto; padding: 10px; background: #fafafa;"
+         data-options="iconCls:'icon-search'">
+        <form id="queryFm" method="post" novalidate>
+            <div class="fitem">
+                <input name="name" class="easyui-textbox" prompt="角色名称">
+                <input name="code" class="easyui-textbox" prompt="角色编号">
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" onclick="clearQueryFm()">重置</a>
+            </div>
+        </form>
+    </div>
+    <@shiro.hasPermission name="${add}">
+         <a id="add_bar" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addDgRole();">新增</a>
+    </@shiro.hasPermission>
+    <@shiro.hasPermission name="${update}">
+        <a id="edit_bar" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editDg();">修改</a>
+    </@shiro.hasPermission>
+    <@shiro.hasPermission name="${del}">
+        <a id="del_bar" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyDg();">删除</a>
+    </@shiro.hasPermission>
+    <@shiro.hasPermission name="${resource}">
+        <a id="res_bar" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="roleRes();">分配权限资源</a>
+    </@shiro.hasPermission>
+
+</div>
+
+
+<div id="user-dlg" class="easyui-dialog" style="width:600px;height:400px;padding:0px 0px" closed="true" buttons="">
+    <table id="user-dg" title="" class="easyui-datagrid" style="width:100%;height:auto"
+           data-options="url:''"
+           pagination="true"
+           rownumbers="true"
+           fitColumns="true"
+           singleSelect="true"
+    >
+        <thead>
+        <tr>
+            <th field="id" width="10%">用户ID</th>
+            <th field="name" width="15%">用户登录名</th>
+            <th field="realName" width="15%" align="center">真实姓名</th>
+            <th field="mobile" width="15%">手机号码</th>
+            <th field="email" width="20%">电子邮箱</th>
+            <th field="statusText" width="10%" align="center">状态</th>
+            <th field="createTime" width="15%" data-options="formatter:trunc2Date">创建日期</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+
+<div id="dlg" class="easyui-dialog" style="width:450px;height:300px;padding:10px 20px" closed="true" buttons="#dlg-buttons">
+
+    <form id="fm" method="post">
+        <div class="fitem">
+            <label>角色 ID:</label>
+            <input name="id" id="id" class="easyui-numberbox" style="width: 180px" required="true" data-options="validType:'length[4,10]'" prompt="请输入数字">
+        </div>
+        <div class="fitem">
+            <label>角色编码:</label> <input name="code" id="code" class="easyui-textbox" style="width: 180px" required="true" data-options="validType:'length[0,50]'" prompt="_A-Z0-9组成，且不能数字打头">
+        </div>
+        <div class="fitem">
+            <label>角色名称:</label> <input name="name" id="name" class="easyui-textbox" style="width: 180px" required="true" data-options="validType:'length[0,30]'">
+        </div>
+        <input name="doType" id="doType" type="hidden">
+    </form>
+</div>
+
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+<script language="javascript">
+
+    var baseAction = "<@sp.ctx />/user/adminRole.htm";
+
+    function addDgRole() {
+        $('#fm').form('clear');
+        $('#doType').val('create');
+        $('#code').textbox('readonly',false);
+        $('#id').textbox('readonly',false);
+        $('#dlg').dialog('open').dialog('setTitle', '新增');
+    }
+    function editDg() {
+        $('#doType').val('modify');
+        $('#code').textbox('readonly',true);
+        $('#id').textbox('readonly',true);
+        var row = $('#dg').datagrid('getSelected');
+        if (row) {
+            console.log(row.id);
+            console.log(row.code);
+            $('#fm').form('load', row);
+            $('#dlg').dialog('open').dialog('setTitle', '修改');
+        }else{
+            $.messager.alert('提示信息','请选择要修改的行','info');
+            return false ;
+        }
+    }
+
+    function destroyDg() {
+        var row = $('#dg').datagrid('getSelected');
+        if (row) {
+            $.messager.confirm('确定删除', '确定删除选中数据吗?', function(r) {
+                if (r) {
+                    $.post(baseAction + '?method=delete', { roleId : row.id
+                    }, function(result) {
+                        if (result.success) {
+                            $('#dg').datagrid('reload');
+                        } else {
+                            $.messager.alert('错误信息', result.errorMsg,'error');
+                        }
+                    }, 'json');
+                }
+            });
+        }else{
+            $.messager.alert('提示信息','请选择要操作的行','info');
+            return false ;
+        }
+    }
+    var javaConstName = new RegExp("^[_A-Z][_A-Z0-9]*$");
+    function save(){
+        if($('#fm').form('validate')){
+            var code = $('#code').textbox('getValue');
+            if(!javaConstName.test(code)){
+                $.messager.alert('错误信息','编码不符合规则:<br>大写字母、数字、下划线组成，且不能数字打头!','error');
+                return ;
+            }
+
+            $.messager.confirm("操作提示", "您确定要执行操作吗？", function (data) {
+                if (data) {
+                    $.ajax({
+                        url: baseAction+"?method=" + $('#doType').val(),
+                        type: "post",
+                        data: $("#fm").serialize(),
+                        dataType: "json",
+                        success: function (result) {
+                            if(result.success){
+                                $.messager.alert('提示','操作成功','info',function(){
+                                    $('#dlg').dialog('close');
+                                    $('#dg').datagrid('reload');
+                                });
+
+                            }else{
+                                $.messager.alert('错误信息',result.errorMsg,'error');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    function roleRes() {
+        var row = $('#dg').datagrid('getSelected');
+        if (row) {
+            //打开新tab
+            var url = "<@sp.ctx />/user/adminRoleResource.htm?id=" + row.id;
+            window.parent.open1("分配权限资源", url);
+        } else {
+            $.messager.alert('提示信息', '请选择要操作的行', 'info');
+            return false;
+        }
+
+    }
+
+</script>
+
+</body>
+</html>

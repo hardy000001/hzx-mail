@@ -1,0 +1,457 @@
+<div id="toolbar">
+		<@shiro.hasPermission name="${add}">
+	    <a id="add_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addDg()">新增</a>
+	    </@shiro.hasPermission>
+	    <@shiro.hasPermission name="${update}">
+	    <a id="edit_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editDg()">修改</a>
+	    </@shiro.hasPermission>
+	    <@shiro.hasPermission name="${del}">
+	    <a id="del_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyDg()">删除</a>
+  		</@shiro.hasPermission>
+  		<a id="view_detail"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="viewDetail_()">查看</a>
+  		<@shiro.hasPermission name="${check}">
+  		<a id="aud_bar"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="auditDg()">审核</a>
+  		</@shiro.hasPermission>
+  		<a id="size1w"    href="javascript:void(0)"  class="easyui-linkbutton"iconCls="icon-height-resize" plain="true"  onclick="rowResize(1)" >1X</a>
+  		<a id="size2w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(2)" >2X</a>
+  		<a id="size3w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(3)" >3X</a>
+  		<a id="size4w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(4)" >4X</a>
+  		<a id="size5w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(5)" >5X</a>
+  </div>
+  <div id="dlg-export" class="easyui-dialog" style="width:400px;height:250px;padding:10px 20px"
+    closed="true" buttons="#dlg-export-buttons">
+    <div class="ftitle">导出文件</div>
+    <form id="fm-export" name="fm-export" method="post" novalidate  >
+	    
+	    <div class="fitem">
+	    <label>导出类型:</label>
+	    <input name="fileSuffix" type="text" class="easyui-validatebox" style="color: #999" value=".xls" required="true" size="10" readonly="readonly" >
+	    </div>
+	    
+	     <div class="fitem">
+	    <label>开始索引:</label>
+	    <input name="startIndex" type="number" class="easyui-validatebox" size="10"  value="0" required="true" >
+	    </div>
+	    <div class="fitem">
+	    <label>结束索引:</label>
+	    <input name="lastIndex" type="number" class="easyui-validatebox" size="10"  value="-1" required="true">MAX=60000,-1
+	    </div>
+	     <div class="fitem">
+	    <label>日期格式:</label>
+	    <select  class="easyui-combobox" name="dataFmt" >
+						<option value="yyyy-MM-dd HH:mm:ss">yyyy-MM-dd HH:mm:ss</option>
+						<option value="yyyy-MM-dd HH:mm">yyyy-MM-dd HH:mm</option>
+						<option value="yyyy/MM/dd HH:mm:ss">yyyy/MM/dd HH:mm:ss</option>
+						<option value="yyyy/MM/dd HH:mm">yyyy/MM/dd HH:mm</option>                
+					   	<option value="yyyy-MM-dd">yyyy-MM-dd</option>
+					   	<option value="yyyy/MM/dd">yyyy/MM/dd</option> 
+				</select>   
+	    </div>
+	    
+	    
+	     
+		<input name="titles" id="fm-export-titles" type="hidden"  >
+	     <input name="props" id="fm-export-props" type="hidden"  >
+    </form>
+    </div>
+     <div id="dlg-export-buttons">
+	    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-download" onclick="exportFile()">导出</a>
+	    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg-export').dialog('close')">取消</a>
+    	<iframe  id="exportFrame" name="exportFrame" width=0 height=0 style="display:none" frameborder=0 src="about:blank"></iframe>  
+    </div>
+    
+    
+    
+    <!-- 查看详情 -->
+     <div id="view-dlg" class="easyui-dialog" style="width:500px;height:440px;padding:10px 20px"  closed="true" buttons="#view-dlg-buttons">
+    	<div id="view-dlg-content"></div>
+    	<input type="hidden"  id="hide_id">
+    	<input type="hidden"  id="hide_cuscode">
+    </div>
+    <div id="view-dlg-buttons" >
+        <a href="javascript:void(0)" id="btn_view_ok" style="display: none;" class="easyui-linkbutton"  onclick="javascript:saveAudit(0)">审核通过</a>
+	    <a href="javascript:void(0)" id="btn_view_no" style="display: none" class="easyui-linkbutton"  onclick="javascript:saveAudit(2)">审核拒绝</a>
+    	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#view-dlg').dialog('close')">关闭</a>
+    </div>
+    
+    <script type="text/javascript">
+    
+        var baseAction = "<@sp.ctx />/user/sys/customerInfo.htm"
+        var staticHref="<@sp.upfile_dir />/";   //本地:upfile_dir 七牛:upfile
+        var url;
+      
+        function addDg(){
+    	    $('#dlg').dialog('open').dialog('setTitle','新增客户');
+    	    $('#status_id').hide();
+    	    $('#fm').form('clear');
+    	    url = baseAction+'?method=saveCustomerInfo&_ajax';
+        }
+        function editDg(){
+        	
+        	url = baseAction+'?method=updateInfo&_ajax';
+        	
+        	var row = $('#dg').datagrid('getSelected');
+ 			
+ 	        if (row.status != '1') {
+ 	            $.messager.alert('错误信息', "不能修改已经审核客户");
+ 	            return false;
+ 	        }
+        	
+        	//文件类型数据会影响数据填充所有置为空
+        	row.mchlicence="";
+        	row.contracturl="";
+    	   
+    	    if (row){
+    		    $('#status_id').show();
+    		    $('#dlg').dialog('open').dialog('setTitle','修改客户信息');
+    		    $('#fm').form('clear');
+    		    $('#fm').form('load',row);
+
+    	    }
+    	    
+    	    
+        }
+        var dataPara={
+        		id:'',
+        		status:'',
+        		cuscode:'',
+        }
+        function saveAudit(status){
+        	var id=$("#hide_id").val();
+        	var cuscode=$("#hide_cuscode").val();
+        	dataPara.status=status;
+        	dataPara.id=id;
+        	dataPara.cuscode=cuscode;
+        	url = baseAction+'?method=auditInfo';
+        	$.ajax({
+				url: url,
+				type: 'POST',
+				data:dataPara,
+				dataType: 'json',
+				//timeout: 1000,
+				error: function(){
+					$.messager.alert('失败提示', '提交数据失败，请联系管理员。');
+				},
+				success: function(result){
+					
+					if (result.success) {
+						$.messager.alert('提示信息', '保存成功！','info' ,function () {
+							 $('#view-dlg').dialog('close'); // close the dialog
+		    				 $('#dg').datagrid('reload'); // reload the user data
+						});
+					} else {
+						$.messager.alert('错误信息', result.errorMsg);
+					}
+					
+				}
+			});
+        }
+        var isClick=true;
+        function save(){
+        
+        if(!isClick){
+        	return;
+        }
+        isClick=false;
+        //formfile
+        $('#fm').form('submit',{
+        "url": url,
+        onSubmit: function(){ return $(this).form('validate');
+        },
+        success: function(result){
+    		    var result = eval('('+result+')');
+    		    if (result.success){
+    		    	$.messager.alert('提示信息', '保存成功！','info' ,function () {
+    		    		 $('#dlg').dialog('close'); // close the dialog
+        				 $('#dg').datagrid('reload'); // reload the user data
+					});
+    		    } else {
+    		    	$.messager.alert('错误信息', result.errorMsg);
+    		    }
+    		    isClick=true;
+             }
+          });
+        isClick=true;
+        }
+        
+        
+        function destroyDg(){
+            var row = $('#dg').datagrid('getSelected');
+			
+	        if (row.status != '1') {
+	            $.messager.alert('错误信息', "不能删除已经审核客户");
+	            return false;
+	        }
+	        
+    	    if (row){
+    	   		 $.messager.confirm('确定删除','确定删除选中数据吗?',function(r){
+    	    if (r){
+    	    	$.post(baseAction+'?method=remove',{id:row.cuscode},function(result){
+    			    if (result.success){
+    			    	$('#dg').datagrid('reload'); // reload the user data
+    			    } else {
+    			    	  $.messager.alert('错误信息',result.errorMsg
+    			    		 );
+    		        }
+              },'json');
+            }
+           });
+           }
+        }
+        
+        function formatHref(val, row){
+        	 
+        	 var  vResult = "";
+        	 
+        	 var  httpVal=staticHref+"/"+val;
+        	 
+             if(val!=null && val.length>10)
+             {
+            	  vResult = '<a style="color:blue;" href="'+httpVal+'">'+val+'</span>';
+             }
+             
+     	     return vResult;
+        }
+        
+        function formatCustype(val, row) {
+    	    
+        	var vResult = "";
+    	    
+    	    if (val == '1') 
+    	    {
+    	        vResult = '<span style="color:green;">调拨客户</span>';
+    	    }
+    	    else if(val == '2')
+    	    {
+    	    	vResult = '<span style="color:green;">供应商</span>';
+    	    }
+    	    else if(val == '3')
+    	    {
+    	    	vResult = '<span style="color:green;">采购商</span>';
+    	    }
+    	    else if (val == '4') 
+    	    {
+    	        vResult = '<span style="color:green;">担保公司</span>';
+    	    }
+    	    else if (val == '5') 
+    	    {
+    	        vResult = '<span style="color:green;">项目客户</span>';
+    	    }
+    	    return vResult;
+    	}
+        function formatStatus(val, row) {
+    	    
+        	var vResult = "";
+    	    
+    	    if (val == '1') 
+    	    {
+    	        vResult = '<span style="color:dodgerblue;">开户申请</span>';
+    	    }
+    	    else if(val == '2')
+    	    {
+    	    	vResult = '<span style="color:red;">已拒绝</span>';
+    	    }
+    	    else if(val == '9')
+    	    {
+    	    	vResult = '<span style="color:red;">停用</span>';
+    	    }
+    	    else if (val == '0') {
+    	        vResult = '<span style="color:green;">正常</span>';
+    	    }
+    	    return vResult;
+    	}
+    
+    
+    	function showOptDetail(){
+    		var hurl = location.href+"";
+        	var start_ = hurl.indexOf("_rs=");
+        	if(start_!=-1){
+        		var d = (hurl.substr(start_+4,5))+"" ;
+        		var queF =  1;//查  必须有权限 
+        		var addF =  d.substr(1,1)*1;
+        		var ediF =  d.substr(2,1)*1;
+        		var delF =  d.substr(3,1)*1;
+        		var expF =  d.substr(4,1)*1;
+        		if(addF){
+        			$("#add_bar").show();
+        		}
+        		if(ediF){
+        			$("#edit_bar").show();
+        		}
+        		if(delF){
+        			$("#del_bar").show();
+        		}
+        		if(expF){
+        			$("#exp_bar").show();
+        		}
+        	}
+    	}
+    	function exportDg(){
+    		$('#dlg-export').dialog('open').dialog('setTitle','导出设置');
+    	}
+    	
+    	 function exportFile(){
+    	    	var props = $("th","#dg");
+    	    	var propStr = "";
+    	    	var propTiles = "";
+    	    	for(var i=0;i<props.length;i++){
+    	    		propStr += ($(props[i]).attr("field"));
+    	    		propTiles += ($(props[i]).text());
+    	    		if(i!=props.length-1){
+    	    			propStr+=",";
+    	    			propTiles+=",";
+    	    		}
+    	    	}
+    	    	var startIndex = $("#fm-export").find(":input[name=startIndex]").val();
+    	    	var lastIndex = $("#fm-export").find(":input[name=lastIndex]").val();
+    	    	var regNum = /^(\-)?\d{1,}$/;
+    	    	if(!(regNum.test(startIndex) &&  regNum.test(lastIndex))){
+    	    		$.messager.alert('Error',"索引必须都是数字");
+    	    		return ;
+    	    	}
+    	    	if(lastIndex*1!=-1 && lastIndex*1<startIndex*1){
+    	    		$.messager.alert('Error',"结束索引不能小于开始索引");
+    	    		return ;
+    	    	}
+    	    	
+    	    	$("#fm-export-titles").val(propTiles);
+    	    	$("#fm-export-props").val(propStr);
+    	    	var prms = $('#queryFm').serialize();
+    	    	var exportUrl  = baseAction+"?method=export&"+prms;
+    	    	$("#fm-export").attr("action",exportUrl);
+    	    	location.href = exportUrl;
+    	    	$('#dlg-export').dialog('close');
+    		    $('#fm-export').submit();
+    		  }
+    	 
+    	 
+    	 
+    	 	//详情查看 
+    		var dg_views_init = false;
+    	 	var dg_titles_arr  ;
+    	 	var dg_props_arr  ;
+    	 	function initDgView(){
+    	 		dg_titles_arr = [];
+    	 		dg_props_arr = [];
+    	 		var props = $("th","#dg");
+    	 		for(var i=0;i<props.length;i++){
+    	 			dg_props_arr.push($(props[i]).attr("field"));
+    	 			dg_titles_arr.push($(props[i]).text());
+    	 		}
+    	 		dg_views_init = true;
+    	 	}
+    		
+    		$(function(){
+        		showOptDetail();
+        		//dbclick open view
+        		
+        	});
+    		function comm_view(title,audit){
+    			var row = $('#dg').datagrid('getSelected');
+    			if (!row) {
+					return;
+				}
+ 				if(! dg_views_init){
+ 					initDgView();
+ 				}
+ 				$('#view-dlg').dialog('open').dialog('setTitle',title);
+    			var newHtml = "";
+ 				for(var i=0;i<dg_props_arr.length;i++){
+ 					var ti = dg_titles_arr[i];
+ 					var va = row[dg_props_arr[i]];
+ 					if(!va && va!=0){
+ 						va = "&nbsp;"
+ 					}
+ 					var sty = "border-bottom: solid 1px #fff;padding: 4px;margin:0px;" ;
+ 					if(i%2 == 0){
+ 						sty += "background-color:#F0F0F0;";
+ 					}else{
+ 						sty += "background-color:#ECF5FF;";
+ 					}
+ 					
+ 					var propertyId=dg_props_arr[i];
+ 					
+ 					var  httpVal=staticHref+"/"+va;
+ 					
+ 					var  selectStatus
+ 					
+ 					if(propertyId=="id"){
+ 						$("#hide_id").val(va);
+ 					}
+ 					if(propertyId=="cuscode"){
+ 						$("#hide_cuscode").val(va);
+ 					}
+ 					
+ 					if(!(propertyId=="id" || propertyId=="cuscode"))
+ 					{
+ 						if((va!=null && va.length>10) && (propertyId=="cuslicence" || propertyId=="contracturl"))
+ 						{
+ 							//链接显示
+ 							newHtml+="<div class=\"fitem\" style=\""+sty+"\"><label style=\"width: 100px;text-align:right\">"+ti+":</label> <a style=\"width: 200px;\" href=\""+httpVal+"\">"+va+"</a></div>"
+ 						}else
+ 						{
+ 							
+					    	if(propertyId=="status"){
+					    		selectStatus=va
+					    		va = formatStatus(va,'')
+					    	}
+					    	if(propertyId=="custype"){
+					    		va = formatCustype(va,'')
+					    	}
+						    //文本显示
+	 						newHtml+="<div class=\"fitem\" style=\""+sty+"\"><label style=\"width: 100px;text-align:right\">"+ti+":</label> <label style=\"width: 200px;\">"+va+"</label></div>"
+ 						    
+ 						}
+ 					}
+ 				}
+ 				
+ 				$('#view-dlg-content').html(newHtml);
+ 				
+ 				var openStatus=1; //是开户状态
+ 				if(selectStatus!=openStatus){
+ 					$("#btn_view_ok").hide();
+					$("#btn_view_no").hide();
+ 				}
+ 				
+    		}
+    		function viewDetail_(){
+    			$("#btn_view_ok").hide();
+				$("#btn_view_no").hide();
+ 				comm_view('详情',false);
+ 			}
+    		function auditDg(){
+    			$("#btn_view_ok").show();
+				$("#btn_view_no").show();
+    			comm_view('审核',true);
+    			
+    		}
+    		
+    		//上传文件结果给子页面调用 
+    		function uploadResult(result,msg){
+    			if( result!='true'){
+    				 $.messager.alert('Error',  msg);
+    			}else{
+    				$.messager.confirm("上传成功","上传成功，关闭窗口？",function(r){    
+    				    if (r){    
+    				    	$('#dlg').dialog('close');
+    				    }   
+    				    query();
+    			 });
+    			}
+    		}
+    		
+    		
+    		function rowResize(sizeType){
+    			var baseHeight = 150;
+    			var newpageSize = sizeType *10; 
+    			
+    			  $("#dg").datagrid('resize', {
+    				   height : baseHeight + (250 * sizeType)
+    				  });
+    			  $('#dg').datagrid({ 
+      				"pageSize":newpageSize 
+      				}); 
+    		}
+    		
+    		
+    </script>

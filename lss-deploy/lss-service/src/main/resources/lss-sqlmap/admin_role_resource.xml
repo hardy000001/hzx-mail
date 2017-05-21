@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AdminRoleResource">
+
+	<sql id="tableName" >
+		admin_role_resource
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	role_id roleId ,
+	type type ,
+	resource_id resourceId ,
+	create_time createTime     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.AdminRoleResource" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,role_id,type,resource_id,create_time)
+		VALUES
+		(#{id} ,#{roleId} ,#{type} ,#{resourceId} ,#{createTime} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,role_id,type,resource_id,create_time)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.roleId} ,#{item.type} ,#{item.resourceId} ,#{item.createTime} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.Integer">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE role_id = #{roleId}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.AdminRoleResource">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.AdminRoleResource" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where id = #{id}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="roleId != null">AND role_id = #{roleId}</if>
+  	<if test="type != null">AND type = #{type}</if>
+  	<if test="resourceId != null">AND resource_id = #{resourceId}</if>
+  	<if test="createTime != null">AND create_time = #{createTime}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.AdminRoleResource"
+		parameterType="com.lq.lss.model.AdminRoleResource">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="roleId != null">role_id = #{roleId},</if>
+		  	<if test="type != null">type = #{type},</if>
+		  	<if test="resourceId != null">resource_id = #{resourceId},</if>
+		  	<if test="createTime != null">create_time = #{createTime}</if>
+			</set>
+		WHERE id = #{id}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.AdminRoleResource">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

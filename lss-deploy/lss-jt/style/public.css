@@ -1,0 +1,105 @@
+*{ margin: 0;padding: 0; font-family:"微软雅黑",sans-serif;box-sizing:border-box; }:focus{ outline: none;}a{text-decoration: none;}
+ol,ul{list-style: none; }html, body {height:100%;}.cent{text-align: center; }.Clear{clear: both}.fontWeight{font-weight: bold}
+.half{width: 50%;}.Auto{margin: auto;}.Vert{vertical-align: middle;}.Allwidth{width: 100%;}.Allheight{height: 100%;}.marginL{ margin-left: 0;}
+.marginR{margin-right: 0;}.marginT{margin-top: 0;}.marginB{margin-bottom: 0;}.Cursor{cursor: pointer; }.FLL{ float: left;}
+.FLR{float: right;}.Block{display: block;}.None{display: none;}.White{color: #ffffff;} .bagCor{background-color: white;}
+
+.Wrapper{
+    position: relative;
+}
+.bgImage{
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -9999;
+}
+.Logo{
+    width: 350px;
+    height: 68px;
+}
+.Logo img{
+    margin-top: 30%;
+}
+.SignInForm{
+    margin-top: 3%;
+    width: 100%;
+}
+.FormAuto{
+    position: relative;
+    width: 500px;
+    height: 350px;
+    background-color: #f6f6f6;
+    box-shadow: 2px 2px 1px #f7f7f7;
+    border-radius: 6px;
+    background: -moz-linear-gradient(top, #fcfcfc, #f6f6f6);
+    background: -o-linear-gradient(top,#fcfcfc, #f6f6f6);
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fcfcfc), to(#f6f6f6));
+}
+.Prompt{
+    position: absolute;
+    display: none;
+    right: 150px;
+    top: 20px;
+    font-size: 18px;
+    color: rgba(255, 0, 0, 0.65);
+}
+.SignIn-text{
+    padding: 10px 30px;
+    font-size: 28px;
+}
+.account-number,.Password,.Remember,.SignIn-btn{
+    padding: 10px 30px;
+}
+.account-number span,.Password span{
+    font-size: 18px;
+    position: relative;
+}
+.account-number p,.Password p{
+    position: absolute;
+    left: 60px;
+    top: 0;
+    line-height: 28px;
+    background-color: #fff;
+    border:solid 1px #cbcbcb;
+    z-index:1;
+}
+.account-number input,.Password input,.account-number p,.Password p{
+    text-indent: 15px;
+    font-size: 18px;
+    padding: 5px 0;
+    width: 375px;
+    border-radius: 4px;
+    height:38px;
+}
+.account-number input,.Password input{
+    position: relative;
+    border: solid 1px #cbcbcb;
+    background-color: #ffffff;
+    opacity:0.1;
+    z-index: 2;
+    transition:300ms;
+    color: #474747;
+}
+.SignIn-btn{
+    width: 85%;
+    padding: 5px;
+    font-size: 24px;
+    background-color: #7bb724;
+    color: #fff;
+    border-radius: 5px;
+    transition:300ms;
+}
+.SignIn-btn:hover{
+    color: #fff;
+    text-decoration: none;
+    background-color: #88c725;
+    cursor: pointer;
+}
+.FormFoot{
+    margin-top: 20px;
+    width: 175px;
+}
+.FormFoot a{
+    font-size: 16px;
+    padding: 0 10px;
+}

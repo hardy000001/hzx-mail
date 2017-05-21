@@ -1,0 +1,132 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <title>调拨客户信息维护</title>
+     <#include "../include_head.html">
+    </head>
+    <body>
+    <div id="query_panel" class="easyui-panel" title="查询面板"
+		style="height: 110px; padding: 10px; background: #fafafa;"
+		data-options="iconCls:'icon-search',collapsible:true">
+		<form id="queryFm" method="post" novalidate>
+			<div class="fitem">
+			    <input name="deptid" hidden="true" prompt="隐藏的中心id" value="${deptId!''}">
+			    <input name="cuscode" prompt="客户号" class="easyui-textbox">
+				<input name="cusname" prompt="客户名称" class="easyui-textbox">
+				<select prompt="状态" class="easyui-combobox" name="status" style="width:153px;" panelHeight="auto">   
+			 							<option value=""></option>
+			 							<option value="0">正常</option>
+			 							<option value="1">开户申请</option>
+			 							<option value="2">已拒绝</option>
+			 							<option value="9">停用</option>
+			 	</select>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" onclick="clearQueryFm();">重置</a>
+			</div>
+			
+		</form>
+		<!-- 这里的query是通用js,如果有特别的查询可以不引入 -->
+		<#include "../query_js_inc.html">
+	</div>
+	<table id="dg" title="客户管理" class="easyui-datagrid" style="height:400px"
+     data-options="url:'<@sp.ctx />/user/sys/customerInfo.htm?method=allotCustomerQuery&deptid=${deptId!''}'",showGroup:true,scrollbarSize:0
+    toolbar="#toolbar" pagination="true"
+    rownumbers="true" fitColumns="true" singleSelect="true">
+		<thead>
+			<tr>
+			    <th field="id" width="10%" hidden="true">id</th>
+			    <th field="cuscode" width="10%">客户号</th>
+				<th field="cusname" width="10%">客户名称</th>
+				<th field="custype" formatter="formatCustype" width="10%">客户类型</th>
+				<th field="cusrule" hidden="true" width="8%">结算规则</th>
+				<th field="linkman" width="10%">联系人 </th>
+				<th field="custel" width="10%">客户联系电话 </th>
+				<th field="cusaddress" width="10%">客户地址</th>
+				<th field="cuslicence"  formatter="formatHref" width="10%">营业执照</th>
+				<th field="contracturl" formatter="formatHref" width="10%">合同文件</th>
+				<th field="status" width="8%" formatter="formatStatus">状态</th>
+				<th field="bankinfo" width="10%">开户银行名称</th>
+				<th field="bankaccount" width="8%">开户名</th>
+				<th field="accountno" width="10%">开户账号 </th>
+				<th field="loginName" width="8%">操作员</th>
+				<th field="createtime" width="12%">创建时间 </th>
+				<th field="modifytime" width="12%">修改时间</th>
+			</tr>
+		</thead>
+	</table>
+
+	<#include "customer_rentinfo_js.html">
+	<div id="dlg" class="easyui-dialog"
+		style="width: 400px; height: 450px; padding: 10px 20px" closed="true"
+		buttons="#dlg-buttons">
+		<div class="ftitle">开户</div>
+		  
+		  <form id="fm"  method="post"   novalidate  enctype="multipart/form-data">
+			<div class="fitem" hidden="true">
+				<label>id:</label> <input name="id" class="easyui-validatebox">
+				<label>cuscode:</label> <input name="cuscode" class="easyui-validatebox">
+			</div>
+			<div class="fitem">
+				<label>客户名称:</label> 
+				<input name="cusname" id="cusname" class="easyui-textbox"  required="true">
+			</div>
+			<div class="fitem" style="display: none">
+				<label>入驻结算规则:</label> 
+				<select id="gz" class="easyui-combobox" name="cusrule" style="width:153px;" panelHeight="auto">   
+				    <#list mchRuleList as obj>
+				        <option value="${obj.id!''}" >${obj.id!''}</option>
+				    </#list>   
+                </select>  
+			</div>
+			<div class="fitem">
+				<label>客户类型:</label> 
+				<select class="easyui-combobox" name="custype" style="width:153px;" data-options="required:true,panelHeight:'auto',editable:false">
+                          <option value="1">调拨客户</option>
+                          <option value="2">供应商</option>
+                          <option value="3">采购商</option>
+                          <option value="4">担保公司</option>
+                          <option value="5">项目客户</option>
+				</select>
+			</div>
+			<div class="fitem">
+				<label>联系人:</label> <input name="linkman"  class="easyui-textbox">
+			</div>
+			<div class="fitem">
+				<label>客户联系电话:</label> <input name="custel"  class="easyui-textbox">
+			</div>
+			<div class="fitem">
+				<label>客户地址:</label> <input name="cusaddress" class="easyui-textbox" >
+			</div>
+			<div class="fitem">
+				<label>营业执照:</label> <input name="cuslicenceFile" id="cuslicenceFile" class="easyui-filebox" data-options="buttonText: '选择文件'">
+			</div>
+			<div class="fitem">
+				<label>合同文件:</label> <input name="contracturlFile" id="contracturlFile" class="easyui-filebox" data-options="buttonText: '选择文件'">
+			</div>
+			<div class="fitem">
+				<label>开户银行名称:</label> <input name="bankinfo"  class="easyui-textbox" >
+			</div>
+			<div class="fitem">
+				<label>开户名 :</label> <input name="bankaccount" class="easyui-textbox" >
+			</div>
+			<div class="fitem">
+				<label>银行开户账号:</label> <input name="accountno" class="easyui-textbox" >
+			</div>
+		</form>
+	</div>
+	
+	<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+    </div>
+    <script type="text/javascript">
+    
+    
+    
+ 
+   
+    </script>
+   
+    </body>
+    </html>

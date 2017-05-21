@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="BChangeRule">
+
+	<sql id="tableName" >
+		b_change_rule
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	materialcode materialcode ,
+	unit_old unitOld ,
+	unit_new unitNew ,
+	percentage percentage     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.BChangeRule" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,materialcode,unit_old,unit_new,percentage)
+		VALUES
+		(#{id} ,#{materialcode} ,#{unitOld} ,#{unitNew} ,#{percentage} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,materialcode,unit_old,unit_new,percentage)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.materialcode} ,#{item.unitOld} ,#{item.unitNew} ,#{item.percentage} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE id = #{id}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.BChangeRule">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.BChangeRule" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where id = #{id}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="materialcode != null">AND materialcode = #{materialcode}</if>
+  	<if test="unitOld != '' and unitOld != null">AND unit_old = #{unitOld}</if>
+  	<if test="unitNew != '' and unitNew != null">AND unit_new = #{unitNew}</if>
+  	<if test="percentage != null">AND percentage = #{percentage}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.BChangeRule"
+		parameterType="com.lq.lss.model.BChangeRule">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="materialcode != null">materialcode = #{materialcode},</if>
+		  	<if test="unitOld != null">unit_old = #{unitOld},</if>
+		  	<if test="unitNew != null">unit_new = #{unitNew},</if>
+		  	<if test="percentage != null">percentage = #{percentage}</if>
+			</set>
+		WHERE id = #{id}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.BChangeRule">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

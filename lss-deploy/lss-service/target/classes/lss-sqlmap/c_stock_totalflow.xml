@@ -1,0 +1,747 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockTotalflow">
+
+	<sql id="tableName" >
+		c_stock_totalflow
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	t.order_no orderNo ,
+	t.id id ,
+	t.deptid deptid ,
+	t.from_mchcode fromMchcode ,
+	t.to_mchcode toMchcode ,
+	t.order_type orderType ,
+	t.transport_fee transportFee ,
+	t.zx_fee zxFee ,
+	t.other_fee otherFee ,
+	t.total_gguan totalGguan ,
+	t.total_kjian totalKjian ,
+	t.total_dguan totalDguan ,
+	t.total_tguan totalTguan ,
+	t.total_lkjia totalLkjia ,
+	t.total_cgang totalCgang ,
+	t.total_twgzgang totalTwgzgang ,
+	t.total_gzgang totalGzgang ,
+	t.total_twang totalTwang ,
+	t.total_item1 totalItem1 ,
+	t.total_item2 totalItem2 ,
+	t.htcode htcode,
+	t.tradetime tradetime     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockTotalflow" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(order_no,id,deptid,from_mchcode,to_mchcode,order_type,transport_fee,zx_fee,other_fee,total_gguan,total_kjian,total_dguan,total_tguan,total_lkjia,total_cgang,total_twgzgang,total_gzgang,total_twang,total_item1,total_item2,tradetime,htcode)
+		VALUES
+		(#{orderNo} ,#{id} ,#{deptid} ,#{fromMchcode} ,#{toMchcode} ,#{orderType} ,#{transportFee} ,#{zxFee} ,#{otherFee} ,#{totalGguan} ,#{totalKjian} ,#{totalDguan} ,#{totalTguan} ,#{totalLkjia} ,#{totalCgang} ,#{totalTwgzgang} ,#{totalGzgang} ,#{totalTwang} ,#{totalItem1} ,#{totalItem2} ,#{tradetime} ,#{htcode} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(order_no,id,deptid,from_mchcode,to_mchcode,order_type,transport_fee,zx_fee,other_fee,total_gguan,total_kjian,total_dguan,total_tguan,total_lkjia,total_cgang,total_twgzgang,total_gzgang,total_twang,total_item1,total_item2,tradetime,htcode)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.orderNo} ,#{item.id} ,#{item.deptid} ,#{item.fromMchcode} ,#{item.toMchcode} ,#{item.orderType} ,#{item.transportFee} ,#{item.zxFee} ,#{item.otherFee} ,#{item.totalGguan} ,#{item.totalKjian} ,#{item.totalDguan} ,#{item.totalTguan} ,#{item.totalLkjia} ,#{item.totalCgang} ,#{item.totalTwgzgang} ,#{item.totalGzgang} ,#{item.totalTwang} ,#{item.totalItem1} ,#{item.totalItem2} ,#{item.tradetime} ,#{item.htcode} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE order_no = #{orderNo}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockTotalflow">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockTotalflow" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where order_no = #{orderNo}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="orderNo != '' and orderNo != null">AND t.order_no = #{orderNo}</if>
+  	<if test="id != null">AND t.id = #{id}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="toMchcode != '' and toMchcode != null">AND (t.from_mchcode = #{toMchcode} or t.to_mchcode = #{toMchcode})</if>
+  	<if test="orderType != '' and orderType != null">AND t.order_type in ${orderType}</if>
+  	<if test="htcode != '' and htcode != null">AND t.htcode = #{htcode}</if>
+  	<if test="dealDate != '' and dealDate != null">AND left(t.tradetime,10) &gt;= #{dealDate}</if>
+  	<if test="createDate != '' and createDate != null">AND left(t.tradetime,10) &lt;= #{createDate}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockTotalflow"
+		parameterType="com.lq.lss.model.CStockTotalflow">
+		select
+		    if(t.order_type=14,m.cusname,mm.cusname)mchname,
+			d.name deptname,
+			t.order_no orderNo ,
+			t.id id ,
+			t.deptid deptid ,
+			t.from_mchcode fromMchcode ,
+			t.to_mchcode toMchcode ,
+			t.order_type orderType ,
+			t.transport_fee transportFee ,
+			t.zx_fee zxFee ,
+			t.other_fee otherFee ,
+			t.total_gguan totalGguan ,
+			t.total_kjian totalKjian ,
+			t.total_dguan totalDguan ,
+			t.total_tguan totalTguan ,
+			t.total_lkjia totalLkjia ,
+			t.total_cgang totalCgang ,
+			t.total_twgzgang totalTwgzgang ,
+			t.total_gzgang totalGzgang ,
+			t.total_twang totalTwang ,
+			t.total_item1 totalItem1 ,
+			t.total_item2 totalItem2 ,
+			t.htcode htcode,
+			h.project_name htname,
+			left(t.tradetime,10) tradeDate,
+			t.tradetime tradetime     FROM 
+		    <include refid="tableName"/> t
+	        left join customer_info m on t.from_mchcode=m.cuscode and t.deptid=m.deptid
+	        left join customer_info mm on t.to_mchcode=mm.cuscode and t.deptid=mm.deptid
+	        left join admin_dept d on t.deptid=d.dept_id
+	        left join c_bus_ht h on t.htcode=h.htcode
+		 
+		<include refid="pageConditions"/>
+		order by tradetime desc
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		<include refid="pageConditions" />
+	</select>
+	
+	<select id="findTotalData" resultType="com.lq.lss.model.CStockTotalflow"
+		parameterType="com.lq.lss.dto.StockTotalflowDto">
+		select
+			sum(t.transport_fee) transportFee ,
+			sum(t.zx_fee) zxFee ,
+			sum(t.other_fee) otherFee ,
+			sum(t.total_gguan) totalGguan ,
+			sum(t.total_kjian) totalKjian ,
+			sum(t.total_dguan) totalDguan ,
+			sum(t.total_tguan) totalTguan ,
+			sum(t.total_lkjia) totalLkjia ,
+			sum(t.total_cgang) totalCgang ,
+			sum(t.total_twgzgang) totalTwgzgang ,
+			sum(t.total_gzgang) totalGzgang ,
+			sum(t.total_twang) totalTwang ,
+			sum(t.total_item1) totalItem1 ,
+			sum(t.total_item2) totalItem2   FROM 
+		    <include refid="tableName"/> t
+	        
+		<include refid="pageConditions"/>
+		
+	</select>
+	
+	
+	<select id="findTotalDataInfo" resultType="com.lq.lss.dto.StockTotalDataDto" 
+	    parameterType="com.lq.lss.dto.StockTotalflowDto">
+	    
+		  SELECT serialNo orderNo,
+	              mi.typeid typeid,
+	              SUM(total_m) totalM 
+	      FROM detail_view dv
+	      LEFT JOIN b_material_info mi ON dv.materialCode=mi.code
+	      LEFT JOIN c_stock_totalflow t ON dv.serialNo=t.order_no
+	      
+	      <include refid="pageConditions"/>
+	      
+	      GROUP BY orderNo,typeid
+	    
+	</select>
+	
+	<select id="findTotalDataInfoIn" resultType="com.lq.lss.dto.StockTotalDataDto" 
+	    parameterType="com.lq.lss.dto.StockTotalflowDto">
+	    
+		  SELECT serialNo orderNo,
+	              mi.typeid typeid,
+	              SUM(total_m) totalM 
+	      FROM detail_view dv
+	      LEFT JOIN b_material_info mi ON dv.materialCode=mi.code
+	      LEFT JOIN c_stock_totalflow t ON dv.serialNo=t.order_no 
+	      AND ((dv.mchcode=#{fromMchcode} AND t.order_type in (25,29,32))
+	      OR t.order_type in (1,2))
+	      <include refid="pageConditions"/>
+	      
+	      GROUP BY orderNo,typeid
+	    
+	</select>
+	
+	<select id="findTotalDataList" resultType="com.lq.lss.dto.StockTotalDataDto"
+		parameterType="com.lq.lss.dto.StockTotalflowDto">
+		  SELECT serialNo orderNo,
+	              mi.typeid typeid,
+	              SUM(total_m) totalM 
+	      FROM detail_view dv
+	      LEFT JOIN b_material_info mi ON dv.materialCode=mi.code
+	      LEFT JOIN c_stock_totalflow t ON dv.serialNo=t.order_no
+	      <include refid="pageConditions"/>
+	      
+	      GROUP BY typeid
+		
+	</select>
+	
+	<select id="findTotalDataListIn" resultType="com.lq.lss.dto.StockTotalDataDto"
+		parameterType="com.lq.lss.dto.StockTotalflowDto">
+		  SELECT serialNo orderNo,
+	              mi.typeid typeid,
+	              SUM(total_m) totalM 
+	      FROM detail_view dv
+	      LEFT JOIN b_material_info mi ON dv.materialCode=mi.code
+	      LEFT JOIN c_stock_totalflow t ON dv.serialNo=t.order_no
+	      AND ((dv.mchcode=#{fromMchcode} AND t.order_type in (25,29,32))
+	      OR t.order_type in (1,2))
+	      <include refid="pageConditions"/>
+	      
+	      GROUP BY typeid
+		
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="queryTranseferPage" resultType="com.lq.lss.model.CStockTotalflow"
+		parameterType="com.lq.lss.dto.StockTotalflowDto">
+		select
+		    if((t.order_type=11 or t.order_type=36),m.cusname,mm.cusname)mchname,
+			d.name deptname,
+			t.order_no orderNo ,
+			t.id id ,
+			t.deptid deptid ,
+			t.from_mchcode fromMchcode ,
+			t.to_mchcode toMchcode ,
+			t.order_type orderType ,
+			t.transport_fee transportFee ,
+			t.zx_fee zxFee ,
+			t.other_fee otherFee ,
+			t.total_gguan totalGguan ,
+			t.total_kjian totalKjian ,
+			t.total_dguan totalDguan ,
+			t.total_tguan totalTguan ,
+			t.total_lkjia totalLkjia ,
+			t.total_cgang totalCgang ,
+			t.total_twgzgang totalTwgzgang ,
+			t.total_gzgang totalGzgang ,
+			t.total_twang totalTwang ,
+			t.total_item1 totalItem1 ,
+			t.total_item2 totalItem2 ,
+			left(t.tradetime,10) tradeDate,
+			t.tradetime tradetime     FROM 
+		    <include refid="tableName"/> t
+	        left join customer_info m on t.from_mchcode=m.cuscode and t.deptid=m.deptid
+	        left join customer_info mm on t.to_mchcode=mm.cuscode and t.deptid=mm.deptid
+	        left join admin_dept d on t.deptid=d.dept_id
+		 
+		<include refid="pageConditions"/>
+		
+		order by tradetime desc
+		
+	</select>
+	
+	<select id="queryTranseferCount" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		<include refid="pageConditions" />
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="queryTranseferInPage" resultType="com.lq.lss.model.CStockTotalflow"
+		parameterType="com.lq.lss.dto.StockTotalflowDto">
+		select
+            m.mchName,
+            mm.mchName toMchname,
+			d.name deptname,
+			t.order_no orderNo ,
+			t.id id ,
+			t.deptid deptid ,
+			t.from_mchcode fromMchcode ,
+			t.to_mchcode toMchcode ,
+			t.order_type orderType ,
+			t.transport_fee transportFee ,
+			t.zx_fee zxFee ,
+			t.other_fee otherFee ,
+			t.total_gguan totalGguan ,
+			t.total_kjian totalKjian ,
+			t.total_dguan totalDguan ,
+			t.total_tguan totalTguan ,
+			t.total_lkjia totalLkjia ,
+			t.total_cgang totalCgang ,
+			t.total_twgzgang totalTwgzgang ,
+			t.total_gzgang totalGzgang ,
+			t.total_twang totalTwang ,
+			t.total_item1 totalItem1 ,
+			t.total_item2 totalItem2 ,
+			left(t.tradetime,10) tradeDate,
+			t.tradetime tradetime     FROM 
+		    <include refid="tableName"/> t
+	        left join mch_baseinfo m on t.from_mchcode=m.mchCode and t.deptid=m.deptid
+	        left join mch_baseinfo mm on t.to_mchcode=mm.mchCode and t.deptid=mm.deptid
+	        left join admin_dept d on t.deptid=d.dept_id
+		 
+		<include refid="pageConditions"/>
+		
+		order by tradetime desc
+		
+	</select>
+	
+	<select id="queryTranseferInCount" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		<include refid="pageConditions" />
+	</select>
+	
+	<!-- 分页查询 -->
+	<select id="queryCenterTotalPage" resultType="com.lq.lss.model.CStockTotalflow"
+		parameterType="com.lq.lss.dto.StockTotalflowDto">
+		select
+		    if(t.order_type=1 or t.order_type=3,m.cusname,mm.cusname)mchname,
+			d.name deptname,
+			t.order_no orderNo ,
+			t.id id ,
+			t.deptid deptid ,
+			t.from_mchcode fromMchcode ,
+			t.to_mchcode toMchcode ,
+			t.order_type orderType ,
+			t.transport_fee transportFee ,
+			t.zx_fee zxFee ,
+			t.other_fee otherFee ,
+			t.total_gguan totalGguan ,
+			t.total_kjian totalKjian ,
+			t.total_dguan totalDguan ,
+			t.total_tguan totalTguan ,
+			t.total_lkjia totalLkjia ,
+			t.total_cgang totalCgang ,
+			t.total_twgzgang totalTwgzgang ,
+			t.total_gzgang totalGzgang ,
+			t.total_twang totalTwang ,
+			t.total_item1 totalItem1 ,
+			t.total_item2 totalItem2 ,
+			left(t.tradetime,10) tradeDate,
+			t.tradetime tradetime     FROM 
+		    <include refid="tableName"/> t
+		    left join customer_info m on t.from_mchcode=m.cuscode and t.deptid=m.deptid
+	        left join customer_info mm on t.to_mchcode=mm.cuscode and t.deptid=mm.deptid
+	        left join admin_dept d on t.deptid=d.dept_id
+		 
+		<include refid="pageConditions"/>
+		order by tradetime desc
+	</select>
+	
+	<select id="queryCenterCount" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="id != null">id = #{id},</if>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="fromMchcode != null">from_mchcode = #{fromMchcode},</if>
+		  	<if test="toMchcode != null">to_mchcode = #{toMchcode},</if>
+		  	<if test="orderType != null">order_type = #{orderType},</if>
+		  	<if test="transportFee != null">transport_fee = #{transportFee},</if>
+		  	<if test="zxFee != null">zx_fee = #{zxFee},</if>
+		  	<if test="otherFee != null">other_fee = #{otherFee},</if>
+		  	<if test="totalGguan != null">total_gguan = #{totalGguan},</if>
+		  	<if test="totalKjian != null">total_kjian = #{totalKjian},</if>
+		  	<if test="totalDguan != null">total_dguan = #{totalDguan},</if>
+		  	<if test="totalTguan != null">total_tguan = #{totalTguan},</if>
+		  	<if test="totalLkjia != null">total_lkjia = #{totalLkjia},</if>
+		  	<if test="totalCgang != null">total_cgang = #{totalCgang},</if>
+		  	<if test="totalTwgzgang != null">total_twgzgang = #{totalTwgzgang},</if>
+		  	<if test="totalGzgang != null">total_gzgang = #{totalGzgang},</if>
+		  	<if test="totalTwang != null">total_twang = #{totalTwang},</if>
+		  	<if test="totalItem1 != null">total_item1 = #{totalItem1},</if>
+		  	<if test="totalItem2 != null">total_item2 = #{totalItem2},</if>
+		  	<if test="tradetime != null">tradetime = #{tradetime}</if>
+		  	<if test="htcode != null">htcode = #{htcode}</if>
+			</set>
+		WHERE order_no = #{orderNo}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockTotalflow">
+		<include refid="update_sql"/>
+	</update>	
+	
+     <select id="findTotalTransferFlow" resultType="com.lq.lss.model.CStockTotalflow"
+		parameterType="map">
+		 select
+			t.from_mchCode fromMchcode,
+			t.to_mchCode toMchcode,
+			t.order_type orderType, 
+		    t.deptid deptid ,
+			sum(t.other_fee) otherFee,
+			sum(t.zx_fee) zxFee,
+			sum(t.transport_fee) transportFee,
+			sum(t.total_dguan) totalDguan,
+			sum(t.total_tguan) totalTguan,
+			sum(t.total_gguan) totalGguan,
+			sum(t.total_kjian) totalKjian,
+			sum(t.total_lkjia) totalLkjia,
+			sum(t.total_cgang) totalCgang,
+			sum(t.total_twgzgang) totalTwgzgang,
+			sum(t.total_gzgang) totalGzgang,
+			sum(t.total_twang) totalTwang,
+			sum(t.total_item1) totalItem1,
+			sum(t.total_item2) totalItem2
+		    from  <include refid="tableName"/> t
+		   	WHERE 1=1
+		   	
+		   	and t.tradeTime >=#{sDate}' 00:00:01' 
+		   	and t.tradeTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		    and t.order_type in (11,12)
+            GROUP BY t.from_mchCode,t.to_mchCode,t.order_type, t.deptid
+	</select>
+	
+	     <select id="findTotalFlowData" resultType="com.lq.lss.model.CStockTotalflow"
+		parameterType="map">
+		 select
+			s.from_mchCode fromMchcode,
+			s.to_mchCode toMchcode,
+			t.order_type orderType, 
+		    t.deptid deptid ,
+			sum(t.amt) totalAmt,
+			m.typeId
+			
+			from c_stock_flow t
+			left join c_stock_totalflow s on t.order_no=s.order_no
+			
+			inner join b_material_info m ON m.`code`=t.materialCode
+		   
+		   	WHERE 1=1 
+		   	
+		   	and t.creatTime >=#{sDate}' 00:00:01' 
+		   	and t.creatTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		    and t.order_type in (11,12)
+            GROUP BY s.from_mchCode,s.to_mchCode,t.order_type, t.deptid, m.typeId
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	     <select id="findTotalMchTransferFlow" resultType="com.lq.lss.model.CStockTotalflow"
+		parameterType="map">
+		
+				 select
+			s.from_mchCode fromMchcode,
+			s.to_mchCode toMchcode,
+			t.order_type orderType, 
+		    t.deptid deptid ,
+			sum(t.amt) totalAmt,
+			m.typeId
+			
+			from c_stock_flow t
+			left join c_stock_totalflow s on t.order_no=s.order_no
+			
+			inner join b_material_info m ON m.`code`=t.materialCode
+		   
+		   	WHERE 1=1 
+		   	
+		   	and t.creatTime >=#{sDate}' 00:00:01' 
+		   	and t.creatTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		    and t.order_type in (29,32,1,2)
+            GROUP BY s.from_mchCode,s.to_mchCode,t.order_type, t.deptid, m.typeId
+		
+<!-- 		 select
+			t.from_mchCode fromMchcode,
+			t.to_mchCode toMchcode,
+			t.order_type orderType, 
+		    t.deptid deptid ,
+			sum(t.other_fee) otherFee,
+			sum(t.zx_fee) zxFee,
+			sum(t.transport_fee) transportFee,
+			sum(t.total_dguan) totalDguan,
+			sum(t.total_tguan) totalTguan,
+			sum(t.total_gguan) totalGguan,
+			sum(t.total_kjian) totalKjian,
+			sum(t.total_lkjia) totalLkjia,
+			sum(t.total_cgang) totalCgang,
+			sum(t.total_twgzgang) totalTwgzgang,
+			sum(t.total_gzgang) totalGzgang,
+			sum(t.total_twang) totalTwang,
+			sum(t.total_item1) totalItem1,
+			sum(t.total_item2) totalItem2
+		    from  <include refid="tableName"/> t
+		   	WHERE 1=1
+		   	and t.tradeTime >=#{sDate}' 00:00:01' 
+		   	and t.tradeTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		    and t.order_type in (29,32,1,2)
+            GROUP BY t.from_mchCode,t.to_mchCode,t.order_type, t.deptid -->
+	</select>
+	
+	
+	
+	
+	
+	
+	     <select id="findTotalRentData" resultType="com.lq.lss.model.CStockTotalflow"
+		parameterType="map">
+		
+		
+				 select
+			s.from_mchCode fromMchcode,
+			s.to_mchCode toMchcode,
+			t.order_type orderType, 
+		    t.deptid deptid ,
+		    t.htCode,
+		    
+			sum(t.amt) totalAmt,
+			m.typeId
+			
+			from c_stock_flow t
+			left join c_stock_totalflow s on t.order_no=s.order_no
+			
+			inner join b_material_info m ON m.`code`=t.materialCode
+		   
+		   	WHERE 1=1 
+		   	
+		   	and t.creatTime >=#{sDate}' 00:00:01' 
+		   	and t.creatTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		    and t.order_type in (13,14)
+            GROUP BY  t.htCode,s.from_mchCode,s.to_mchCode,t.order_type, t.deptid, m.typeId		
+		
+		<!--  select
+			t.from_mchCode fromMchcode,
+			t.to_mchCode toMchcode,
+			t.order_type orderType, 
+		    t.deptid deptid ,
+		    t.htcode htcode,
+			sum(t.other_fee) otherFee,
+			sum(t.zx_fee) zxFee,
+			sum(t.transport_fee) transportFee,
+			sum(t.total_dguan) totalDguan,
+			sum(t.total_tguan) totalTguan,
+			sum(t.total_gguan) totalGguan,
+			sum(t.total_kjian) totalKjian,
+			sum(t.total_lkjia) totalLkjia,
+			sum(t.total_cgang) totalCgang,
+			sum(t.total_twgzgang) totalTwgzgang,
+			sum(t.total_gzgang) totalGzgang,
+			sum(t.total_twang) totalTwang,
+			sum(t.total_item1) totalItem1,
+			sum(t.total_item2) totalItem2
+		    from  <include refid="tableName"/> t
+		   	WHERE 1=1
+		   	
+		   	and t.tradeTime >=#{sDate}' 00:00:01' 
+		   	and t.tradeTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		   	and t.order_type in (13,14)
+		    
+            GROUP BY t.htcode,t.to_mchCode,t.from_mchCode,t.order_type, t.deptid -->
+	</select>
+	
+	
+	<select id="findTotalTransferFee" resultType="com.lq.lss.dto.StockTransTotalflowDto"
+		parameterType="map">
+		 
+         SELECT
+			
+			t.order_type orderType
+			, ROUND(SUM((t.amt)* (m.covert_ratio)) * ((y.transfer_nprice))* binary (DATEDIFF(LAST_DAY(t.creatTime),t.creatTime)),3) totalFee
+			,tr.from_mchCode fromMchcode,
+			tr.to_mchCode toMchcode
+			
+			FROM c_stock_flow t
+			INNER join b_material_info m
+			ON t.materialCode=m.`code`
+			INNER join b_material_type y
+			on m.typeId=y.typeId
+			INNER JOIN c_stock_center_transfer  tr
+			ON t.order_no=tr.tsf_serialNo
+			
+		   	WHERE 1=1
+					   	
+		   	and t.creatTime >=#{sDate}' 00:00:01' 
+		   	and t.creatTime <![CDATA[<=]]> #{eDate}' 23:59:59'
+		   	and t.order_type in (11,12)
+			GROUP BY t.mchCode,t.order_type
+
+	</select>
+	
+	
+		
+	<select id="findTotalMchTransferFee" resultType="com.lq.lss.dto.StockTransTotalflowDto"
+		parameterType="map">
+		 
+         SELECT
+			
+			t.order_type orderType
+			, ROUND(SUM((t.amt)* (m.covert_ratio)) * ((y.transfer_nprice))* binary (DATEDIFF(LAST_DAY(t.creatTime),t.creatTime)),3) totalFee
+			,tr.from_mchCode fromMchcode,
+			tr.to_mchCode toMchcode
+			
+			FROM c_stock_flow t
+			INNER join b_material_info m
+			ON t.materialCode=m.`code`
+			INNER join b_material_type y
+			on m.typeId=y.typeId
+			INNER JOIN c_stock_totalflow  tr
+			ON t.order_no=tr.order_no
+			
+		   	WHERE 1=1
+					   	
+		   	and t.creatTime >=#{sDate}' 00:00:01' 
+		   	and t.creatTime <![CDATA[<=]]> #{eDate}' 23:59:59'
+		   	and t.order_type in (29,32)
+			GROUP BY t.mchCode,t.order_type
+
+	</select>
+	
+	
+		
+		  <select id="findTotalTsfOthrerFee" resultType="com.lq.lss.dto.StockTransTotalflowDto"
+		parameterType="map">
+		 
+         SELECT
+			
+			t.order_type orderType,
+			SUM(t.transport_fee) totalTransportFee,
+			SUM(t.other_fee) totalOtherFee,
+			SUM(t.zx_fee) totalZxFee,
+			t.from_mchCode fromMchcode,
+            t.to_mchCode toMchcode 
+			FROM c_stock_totalflow t
+		   	WHERE 1=1	   	
+		   	and t.tradeTime >=#{sDate}' 00:00:01' 
+		   	and t.tradeTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		   	and t.order_type in (11,12)
+			GROUP BY t.order_type,t.from_mchCode,t.to_mchCode
+
+	</select>
+	
+	
+			
+		  <select id="findTotalRentOthrerFee" resultType="com.lq.lss.dto.StockTransTotalflowDto"
+		parameterType="map">
+		 
+         SELECT
+			
+			t.order_type orderType,
+			SUM(t.transport_fee) totalTransportFee,
+			SUM(t.other_fee) totalOtherFee,
+			SUM(t.zx_fee) totalZxFee,
+			t.from_mchCode fromMchcode,
+            t.to_mchCode toMchcode
+            ,t.htCode
+			FROM c_stock_totalflow t
+		   	WHERE 1=1	   	
+		   	and t.tradeTime >=#{sDate}' 00:00:01' 
+		   	and t.tradeTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		   	and t.order_type in (13,14)
+			GROUP BY t.order_type,t.from_mchCode,t.to_mchCode,t.htCode
+
+	</select>
+	
+	
+	
+	   <select id="findTotalRentFee" resultType="com.lq.lss.dto.StockTransTotalflowDto"
+		parameterType="map">
+		 
+         SELECT
+			
+			t.order_type orderType
+			, ROUND(SUM((t.amt)* (m.covert_ratio) * ((b.rental_day)))* binary (DATEDIFF(LAST_DAY(t.creatTime),t.creatTime)),3) totalFee
+		    ,f.from_mchCode fromMchcode
+			,f.to_mchCode toMchcode
+			,t.htCode
+			FROM c_stock_flow t
+			INNER join b_material_info m
+			ON t.materialCode=m.`code`
+			INNER join b_material_type y
+			on m.typeId=y.typeId
+			INNER join c_bus_ht_rentinfo b
+            ON (t.htCode=b.htCode and m.typeId=b.materialCode)
+            INNER join  c_stock_totalflow f
+            ON (t.order_no=f.order_no  and t.htCode=f.htCode)
+            
+            
+		   	WHERE 1=1
+					   	
+		   	and t.creatTime >=#{sDate}' 00:00:01' 
+		   	and t.creatTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		   	and t.order_type in (13,14)
+			GROUP BY t.mchCode,t.order_type
+
+	</select>
+	
+	
+		
+	   <select id="findTotalRepairFee" resultType="com.lq.lss.dto.StockTransTotalflowDto"
+		parameterType="map">
+		 
+         SELECT
+			
+            r.htCode,
+            sum(b.fee_percant*t.repair_fee) totalFee,
+            r.mchCode
+            
+            FROM 
+				c_stock_receipt_repairinfo t
+				INNER JOIN c_stock_receipt r
+				ON t.receipt_serialNo = r.receipt_serialNo
+				INNER JOIN b_repair_info b
+				ON t.repair_id=b.id
+				
+		   	WHERE 1=1
+					   	
+		   	and r.createTime >=#{sDate}' 00:00:01' 
+		   	and r.createTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		   	and r.status ='0'
+			GROUP BY t.receipt_serialNo,r.htCode
+
+	</select>
+	
+	
+	
+				
+		  <select id="findTotalMchOthrerFee" resultType="com.lq.lss.dto.StockTransTotalflowDto"
+		parameterType="map">
+		 
+         SELECT
+			
+			t.order_type orderType,
+			SUM(t.transport_fee) totalTransportFee,
+			SUM(t.other_fee) totalOtherFee,
+			SUM(t.zx_fee) totalZxFee,
+			t.from_mchCode fromMchcode,
+            t.to_mchCode toMchcode
+			FROM c_stock_totalflow t
+		   	WHERE 1=1	   	
+		   	and t.tradeTime >=#{sDate}' 00:00:01' 
+		   	and t.tradeTime<![CDATA[<=]]> #{eDate}' 23:59:59'
+		   	and t.order_type in (1,2)
+			GROUP BY t.order_type,t.from_mchCode,t.to_mchCode,t.htCode
+
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+
+</mapper>

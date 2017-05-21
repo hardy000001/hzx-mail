@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CBusHt">
+
+	<sql id="tableName" >
+		c_bus_ht
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	htcode htcode ,
+	deptid deptid,
+	com_name comName ,
+	com_address comAddress ,
+	com_linkman comLinkman ,
+	com_tel comTel ,
+	com_type comType ,
+	project_deposit projectDeposit ,
+	project_adress projectAdress ,
+	begin_date beginDate ,
+	end_date endDate ,
+	total_days totalDays ,
+	status status ,
+	ht_type htType ,
+	createoper createoper ,
+	createtime createtime ,
+	auditingoper auditingoper ,
+	auditingtime auditingtime ,
+	project_name projectName ,
+	lessee_cus_code lesseeCusCode ,
+	assure_cus_code assureCusCode     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CBusHt" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,htcode,deptid,com_name,com_address,com_linkman,com_tel,com_type,project_deposit,project_adress,begin_date,end_date,total_days,status,ht_type,createoper,createtime,auditingoper,auditingtime,project_name,lessee_cus_code,assure_cus_code)
+		VALUES
+		(#{id} ,#{htcode} ,#{deptid} ,#{comName} ,#{comAddress} ,#{comLinkman} ,#{comTel} ,#{comType} ,#{projectDeposit} ,#{projectAdress} ,#{beginDate} ,#{endDate} ,#{totalDays} ,#{status} ,#{htType} ,#{createoper} ,#{createtime} ,#{auditingoper} ,#{auditingtime} ,#{projectName} ,#{lesseeCusCode} ,#{assureCusCode} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,htcode,deptid,com_name,com_address,com_linkman,com_tel,com_type,project_deposit,project_adress,begin_date,end_date,total_days,status,ht_type,createoper,createtime,auditingoper,auditingtime,project_name,lessee_cus_code,assure_cus_code)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.htcode} ,#{item.deptid} ,#{item.comName} ,#{item.comAddress} ,#{item.comLinkman} ,#{item.comTel} ,#{item.comType} ,#{item.projectDeposit} ,#{item.projectAdress} ,#{item.beginDate} ,#{item.endDate} ,#{item.totalDays} ,#{item.status} ,#{item.htType} ,#{item.createoper} ,#{item.createtime} ,#{item.auditingoper} ,#{item.auditingtime} ,#{item.projectName} ,#{item.lesseeCusCode} ,#{item.assureCusCode} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE htcode = #{htcode}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CBusHt">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CBusHt" 
+	parameterType="java.lang.String">
+		select
+			ci.cuscode cuscode ,
+			ci.cusname lesseeCusname ,
+			ci.linkman linkman ,
+			ci.custel custel ,
+			ci.cusaddress cusaddress ,
+			t.id id ,
+			t.htcode htcode ,
+			t.deptid deptid,
+			t.com_name comName ,
+			t.com_address comAddress ,
+			t.com_linkman comLinkman ,
+			t.com_tel comTel ,
+			t.com_type comType ,
+			t.project_deposit projectDeposit ,
+			t.project_adress projectAdress ,
+			t.begin_date beginDate ,
+			t.end_date endDate ,
+			t.total_days totalDays ,
+			t.status status ,
+			t.ht_type htType ,
+			t.createoper createoper ,
+			t.createtime createtime ,
+			t.auditingoper auditingoper ,
+			t.auditingtime auditingtime ,
+			t.project_name projectName ,
+			t.lessee_cus_code lesseeCusCode ,
+			t.assure_cus_code assureCusCode     FROM 
+		    <include refid="tableName"/> t
+		    
+		    LEFT JOIN customer_info ci ON t.lessee_cus_code=ci.cuscode   
+			where htcode = #{htcode}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != '' and id != null">AND t.id = #{id}</if>
+  	<if test="htcode != '' and htcode != null">AND t.htcode = #{htcode}</if>
+  	<if test="deptid != null">AND deptid = #{deptid}</if>
+  	<if test="comName != '' and comName != null">AND t.com_name = #{comName}</if>
+  	<if test="comAddress != '' and comAddress != null">AND t.com_address = #{comAddress}</if>
+  	<if test="comLinkman != '' and comLinkman != null">AND t.com_linkman = #{comLinkman}</if>
+  	<if test="comTel != '' and comTel != null">AND t.com_tel = #{comTel}</if>
+  	<if test="comType != null">AND t.com_type = #{comType}</if>
+  	<if test="projectDeposit != null">AND t.project_deposit = #{projectDeposit}</if>
+  	<if test="projectAdress != '' and projectAdress != null">AND t.project_adress = #{projectAdress}</if>
+  	<if test="beginDate != null">AND t.begin_date = #{beginDate}</if>
+  	<if test="endDate != null">AND t.end_date = #{endDate}</if>
+  	<if test="totalDays != null">AND t.total_days = #{totalDays}</if>
+  	<if test="status != '' and status != null">AND t.status = #{status}</if>
+  	<if test="htType != null">AND t.ht_type = #{htType}</if>
+  	<if test="createoper != '' and createoper != null">AND t.createoper = #{createoper}</if>
+  	
+  	<if test="beginTime != '' and  beginTime != null">AND left(t.createtime,10) &gt;= #{beginTime}</if>
+  	<if test="endTime != '' and  endTime != null">AND left(t.createtime,10) &lt;= #{endTime}</if>
+  	<if test="loginName != '' and loginName != null">AND u.login_name like '%${loginName}%'</if>
+  	
+  	<if test="auditingoper != '' and auditingoper != null">AND t.auditingoper = #{auditingoper}</if>
+  	<if test="auditingtime != null">AND t.auditingtime = #{auditingtime}</if>
+  	<if test="projectName != '' and projectName != null">AND t.project_name = #{projectName}</if>
+  	<if test="lesseeCusCode != '' and lesseeCusCode != null">AND t.lessee_cus_code = #{lesseeCusCode}</if>
+  	<if test="assureCusCode != '' and assureCusCode != null">AND t.assure_cus_code = #{assureCusCode}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CBusHt"
+		parameterType="com.lq.lss.model.CBusHt">
+		select
+			t.id id ,
+			t.htcode htcode ,
+			t.deptid deptid ,
+			t.com_name comName ,
+			t.com_address comAddress ,
+			t.com_linkman comLinkman ,
+			t.com_tel comTel ,
+			t.com_type comType ,
+			t.project_deposit projectDeposit ,
+			t.project_adress projectAdress ,
+			t.begin_date beginDate ,
+			t.end_date endDate ,
+			t.total_days totalDays ,
+			t.status status ,
+			if(t.status=0,10,t.status) s_status,
+			t.ht_type htType ,
+			t.createoper createoper ,
+			t.createtime createtime ,
+			t.auditingoper auditingoper ,
+			t.auditingtime auditingtime,
+			t.project_name projectName,
+			uu.login_name operName,
+			u.login_name loginName     FROM 
+        <include refid="tableName"/> t 
+			left join admin_user u on t.createoper=u.user_id
+			left join admin_user uu on t.auditingoper=uu.user_id
+		<include refid="pageConditions"/>
+		    order by s_status ,createtime desc
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		left join admin_user u on t.createoper=u.user_id
+		left join admin_user uu on t.auditingoper=uu.user_id
+		<include refid="pageConditions" />
+	</select>
+	
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="htcode != null">htcode = #{htcode},</if>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="comName != null">com_name = #{comName},</if>
+		  	<if test="comAddress != null">com_address = #{comAddress},</if>
+		  	<if test="comLinkman != null">com_linkman = #{comLinkman},</if>
+		  	<if test="comTel != null">com_tel = #{comTel},</if>
+		  	<if test="comType != null">com_type = #{comType},</if>
+		  	<if test="projectDeposit != null">project_deposit = #{projectDeposit},</if>
+		  	<if test="projectAdress != null">project_adress = #{projectAdress},</if>
+		  	<if test="beginDate != null">begin_date = #{beginDate},</if>
+		  	<if test="endDate != null">end_date = #{endDate},</if>
+		  	<if test="totalDays != null">total_days = #{totalDays},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="htType != null">ht_type = #{htType},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="createtime != null">createtime = #{createtime},</if>
+		  	<if test="auditingoper != null">auditingoper = #{auditingoper},</if>
+		  	<if test="auditingtime != null">auditingtime = #{auditingtime},</if>
+		  	<if test="projectName != null">project_name = #{projectName},</if>
+		  	<if test="lesseeCusCode != null">lessee_cus_code = #{lesseeCusCode},</if>
+		  	<if test="assureCusCode != null">assure_cus_code = #{assureCusCode}</if>
+			</set>
+		WHERE htcode = #{htcode}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CBusHt">
+		<include refid="update_sql"/>
+	</update>	
+	
+		
+	<select id="findCBusHtList" parameterType="java.lang.String" resultType="com.lq.lss.model.CBusHt">
+		<include refid="selectColumns"/>   
+		WHERE deptid = #{deptid} and status=0
+  	</select>
+
+</mapper>

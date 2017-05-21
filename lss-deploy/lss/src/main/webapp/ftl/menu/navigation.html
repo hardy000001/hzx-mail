@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <#include "../include_head.html">
+    <link rel="stylesheet" href="<@sp.static />/style/navigation.css?10">
+    
+    <style type="text/css">
+       .textP{
+             margin-top:10px;
+             margin-right:90px;
+             text-align: right;
+             color: gray;
+       }
+       .dateP{
+             margin-top:10px;
+             margin-right:8px;
+             text-align: right;
+             color: gray;
+       }
+       
+    </style>
+</head>
+<body>
+
+
+<script type="text/javascript">
+var baseAction = "<@sp.ctx />/user/sys/tNotice.htm"
+
+var url=baseAction+"?method=queryList"
+
+//$.post(url,{},function(msg){
+	//$("#showNoticeId").html(msg);
+//})
+
+var orderPrefix=['','CK','RK','CG','XS','DC','DR','SL','FL','ZC','TC','NBC','NBR']
+
+function getOrderType(serialno){
+	serialno=serialno.replace("TZC",'TC').replace("NBDC",'NBC').replace("NBDR",'NBR')   //解决如：ZC与TZC字母冲突
+	for ( var i = 1; i < orderPrefix.length; i++) {
+		if(serialno.indexOf(orderPrefix[i])>=0){
+			return i;
+		}
+	}
+}
+function createUpdateTab(serialno,userOper){
+	
+	switch (getOrderType(serialno)) {
+	case 1:
+		window.parent.open1('编辑出库申请单', "<@sp.ctx />/user/stock/stockOutUpdate.htm?id="+serialno);
+        break;
+	case 2:
+		window.parent.open1("入库申请单修改", "<@sp.ctx />/user/stock/stockInUpdate.htm?inSerialno="+serialno);
+        break;
+	case 3:
+		window.parent.open1("编辑采购申请单", "<@sp.ctx />/user/bus/busPurUpdate.htm?id="+serialno);
+        break;
+	case 4:
+		window.parent.open1("编辑销售申请单", "<@sp.ctx />/user/bus/busSaleUpdate.htm?id="+serialno);
+        break;
+	case 5:
+		window.parent.open1("修改中心调出单", "<@sp.ctx />/user/stock/centertransferEdit.htm?id="+serialno+"&loginName="+userOper);
+        break;
+	case 6:
+		window.parent.open1("修改中心调入单", "<@sp.ctx />/user/stock/centertransfer_inEdit.htm?id="+serialno+"&loginName="+userOper);
+		break;
+	case 7:
+		window.parent.open1("编辑收料单","<@sp.ctx />/user/stock/stockReceiptUpdate.htm?id="+serialno+"&loginName="+userOper);
+		break;
+	case 8:
+		window.parent.open1("修改发料单", "<@sp.ctx />/user/stock/stocksendupdate.htm?id="+serialno+"&loginName="+userOper);
+		break;
+	case 9:
+		window.parent.open1("暂存申请单修改", "<@sp.ctx />/user/stock/stocktemporaryinUpdate.htm?inSerialno="+serialno);
+		break;
+	case 10:
+		window.parent.open1("编辑提暂存申请单", "<@sp.ctx />/user/stock/stockTemporaryOutUpdate.htm?id="+serialno+"&loginName="+userOper);
+		break;
+	case 11:
+		 window.parent.open1("编辑中心内部调出申请单", "<@sp.ctx />/user/stock/transferOutUpdate.htm?tsfSerialno=" + serialno);
+		break;
+	case 12:
+		window.parent.open1("编辑中心内部调入申请单", "<@sp.ctx />/user/stock/transferInUpdate.htm?tsfSerialno=" + serialno);
+		break;
+	default:
+		break;
+	}
+	$('#view-dlg').dialog('close'); // close the dialog
+}
+
+function removePanel(_nId)
+{
+
+	    var flag=false;
+		$.messager.confirm('确定删除', '确定删除该数据吗?', function(r) {
+			if (r) {
+				var _panel = $('#showNoticeId').accordion('getSelected');
+				if (_panel){
+					var _index = $('#showNoticeId').accordion('getPanelIndex',_panel);
+				}
+				
+				$.post(baseAction + '?method=deleteNotice', {
+					nId : _nId
+				}, function(result) {
+					if (result.success) {
+						 flag=true;
+						 $('#showNoticeId').accordion('remove',parseInt(_index));
+					} else {
+						$.messager.alert('错误信息', result.errorMsg);
+					}
+				}, 'json');
+			}
+	   });
+       return flag;
+}
+
+function formatStatus(val, row) {
+	var vResult = "";
+	if (val == '0') {
+		vResult = '<span style="color:green;">未读</span>';
+	} else if (val == '1') {
+		vResult = '<span style="color:gray;">已读</span>';
+	} 
+	return vResult;
+}
+
+//详情查看 
+var dg_views_init = false;
+	var dg_titles_arr  ;
+	var dg_props_arr  ;
+	function initDgView(dgId){
+		dg_titles_arr = [];
+		dg_props_arr = [];
+		var props = $("th","#"+dgId);
+		for(var i=0;i<props.length;i++){
+			dg_props_arr.push($(props[i]).attr("field"));
+			dg_titles_arr.push($(props[i]).text());
+		}
+		dg_views_init = true;
+	}
+
+function comm_view(title,dgId){
+	
+	var row = $('#'+dgId).datagrid('getSelected');
+	if (!row) {
+		return;
+	}
+	if(! dg_views_init){
+		initDgView(dgId);	
+	}
+	
+	$('#view-dlg').dialog('open').dialog('setTitle',title);
+	var newHtml = "";
+	for(var i=0;i<dg_props_arr.length;i++){
+		var ti = dg_titles_arr[i];
+		var va = row[dg_props_arr[i]];
+		if(!va && va!=0){
+			va = "&nbsp;"
+		}
+		var sty = "border-bottom: solid 1px #fff;padding: 4px;margin:0px;" ;
+		var styB = "border-bottom: solid 1px #fff;padding: 4px;margin:0px;" ;
+		if(i%2 == 0){
+			sty += "background-color:#F0F0F0;";
+			styB += "background-color:#ECF5FF;";
+			
+		}else{
+			sty += "background-color:#ECF5FF;";
+			styB += "background-color:#F0F0F0;";
+		}
+		
+        var propertyId=dg_props_arr[i];
+			var dataId
+			if(propertyId=="receiptSerialno")
+			{
+				dataId=va;
+				$("#hide_id").val(va);
+			}
+			
+    	if(propertyId=="status"){
+    		selectStatus=va;
+    		va = formatStatus(va,'')
+    	}
+    	if(propertyId=="isrepair"){
+    		va = formatIsrepair(va,'')
+    	}
+        //文本显示
+		newHtml+="<div class=\"fitem\" style=\""+sty+"\"><label style=\"width: 100px;text-align:right\">"+ti+":</label> <label style=\"width: 200px;\">"+va+"</label></div>"
+        
+		//链接
+		if(i==dg_props_arr.length-1 && row.orderno!=null && row.orderno!='')
+		{
+			httpVal="javascript:createUpdateTab('"+row.orderno+"','"+row.loginName+"')";
+			newHtml+="<div class=\"fitem\" style=\""+styB+"\"><label style=\"width: 100px;text-align:right\">编辑单据:</label><a style=\"width: 200px;\" href=\""+httpVal+"\">"+row.orderno+"</a></div>"
+        }
+		
+		
+	}
+	
+	$('#view-dlg-content').html(newHtml);
+	
+}
+function destroyDg(){
+
+		var row = $('#dg').datagrid('getSelected');
+		if (!row) {
+			return;
+		}
+		
+		$.messager.confirm('确定删除', '确定删除该数据吗?', function(r) {
+			if (r) {
+				$.post(baseAction + '?method=deleteNotice', {
+					nId : row.nid
+				}, function(result) {
+					if (result.success) {
+						$('#dg').datagrid('reload'); // reload the user data
+					} else {
+						$.messager.alert('错误信息', result.errorMsg);
+					}
+				}, 'json');
+			}
+	   });
+	   
+}
+var read='1'; //已读
+function setRead()
+{
+		var row = $('#dg').datagrid('getSelected');
+		if (!row) {
+			return;
+		}
+		_isRead=row.status
+
+		if(_isRead==read)
+		{
+			return;
+		}
+		$.post(baseAction + '?method=setNoticeRead', {
+			nId : row.nid
+		}, function(result) {
+			
+			if (result.success) {
+				
+				$('#dg').datagrid('reload'); // reload the user data
+				
+			} else {
+				
+			}
+			return;
+		}, 'json');
+		
+}
+
+function viewDetail_(){
+    $("#btn_view_ok").hide();
+	$("#btn_view_no").hide();
+	comm_view('详情',"dg");
+	setRead()
+}
+function viewDetailNews_(){
+    $("#btn_view_ok").hide();
+	$("#btn_view_no").hide();
+	comm_view('详情',"dgNews");
+}
+
+function rowStyler(index,row){
+	if (row.status==read){
+		return 'color:gray;';
+	}
+}
+function onLoadSuccess(){
+	
+	var optObj=$('#dg').datagrid("getPager").data("pagination").options;
+	//alert(_da.total);
+	if(optObj.total<1){
+		$('#showNoticeId').accordion({
+		    //selected:false
+		});
+	}else{
+		$('#showNoticeId').accordion({
+		});
+	}
+	 
+
+}
+
+
+</script>
+
+<!-- 查看详情 -->
+     <div id="view-dlg" class="easyui-dialog" style="width:500px;height:400px;padding:10px 20px"  closed="true" buttons="#view-dlg-buttons">
+    	<div id="view-dlg-content"></div>
+    	<input type="hidden"  id="hide_id">
+    	<input type="hidden"  id="hide_mchcode">
+    </div>
+    <div id="view-dlg-buttons" >
+        <a href="javascript:void(0)" id="btn_view_ok" style="display: none;" class="easyui-linkbutton"  onclick="javascript:saveAudit(0)">审核通过</a>
+	    <a href="javascript:void(0)" id="btn_view_no" style="display: none" class="easyui-linkbutton"  onclick="javascript:saveAudit(2)">审核拒绝</a>
+    	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#view-dlg').dialog('close')">关闭</a>
+    </div>
+
+<div class="wrap">
+    <h2 style="margin-left: 20px">消息通知</h2>
+    <div style="margin:20px 0 10px 0;"></div>
+    <div style="height:500px;overflow:auto;" >
+    
+     <div id="toolbar">
+  		   
+		    <a id="del_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyDg()">删除</a>
+	  		<a id="view_detail"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="viewDetail_()">查看</a>
+	  		
+      </div>
+      
+       <#if noticeList?size gt 0>
+       <div id="systemNoticeId" class="easyui-accordion" data-options="multiple:true" style="margin:0 20px 20px 20px;">
+       
+        <#list noticeList as obj>
+        <div title="${obj.ntitle!''}" id="${obj_index}" data-options="collapsed:true" style="padding:10px;">
+            <p>${obj.notice!''}</p>
+            <p class="textP">发布人:&nbsp;&nbsp;${obj.fromName!''}</p>
+            <p class="dateP">时间:&nbsp;&nbsp;${obj.createtime?string('yyyy-MM-dd HH:mm:ss')!''}</p>
+        </div>
+        </#list>
+       
+        </div> 
+       </#if>
+     
+<!--      <div id="systemNoticeId" class="easyui-accordion" style="margin-left: 20px;margin-bottom: 20px"> -->
+        
+<!--         <table id="dgNews" title="发布消息管理" class="easyui-datagrid" style="height: auto,width:auto;" -->
+<!-- 			data-options="url:'<@sp.ctx />/user/sys/tNotice.htm?method=query&tooper=${userId!''}&type=1'" -->
+<!-- 			toolbar="#toolbar" pagination="true" -->
+<!-- 			rownumbers="true" fitColumns="true" singleSelect="true"> -->
+<!-- 			<thead> -->
+<!-- 				<tr> -->
+<!-- 					<th field="loginName" width="12%" >发送人</th> -->
+<!-- 					<th field="ntitle" width="20%" >标题</th> -->
+<!-- 					<th field="notice" width="40%" >内容</th> -->
+<!-- 					<th field="createtime" width="12%" >创建时间</th> -->
+<!-- 					<th field="status" formatter="formatStatus" width="10%" >状态</th> -->
+<!-- 				</tr> -->
+<!-- 			</thead> -->
+<!-- 		 </table> -->
+<!--     </div> -->
+     
+     <div id="showNoticeId"    style="margin:0 20px 20px 20px;">
+        
+        <table id="dg" title="消息管理" class="easyui-datagrid" style="height: auto,width:auto;"
+			data-options="url:'<@sp.ctx />/user/sys/tNotice.htm?method=query&tooper=${userId!''}&type=0&status=0',
+			rowStyler:rowStyler,onLoadSuccess:onLoadSuccess"
+			toolbar="#toolbar" pagination="true"
+			rownumbers="true" fitColumns="true" singleSelect="true">
+			<thead>
+				<tr>
+					<th field="fromName" width="12%" >发送人</th>
+					<th field="ntitle" width="20%" >标题</th>
+					<th field="notice" width="40%" >内容</th>
+					<th field="createtime" width="12%" >创建时间</th>
+					<th field="status" formatter="formatStatus" width="10%" >状态</th>
+				</tr>
+			</thead>
+		 </table>
+        
+    </div>
+    </div>
+<!--  
+    <div class="dispersed">
+        <div class="adm-dpd1 float">
+            <dl>
+                <dt>
+                    <a href="javascript:createNewTab('单位维护', '<@sp.ctx />/user/pe/inc/tjLnc.htm')">
+                        <img src="<@sp.static />/images/navigation/incmodify.png" alt="">
+                    </a>
+                </dt>
+                <dd>单位维护</dd>
+            </dl>
+        </div>
+        <div class="adm-dpd2 float">
+            <img src="<@sp.static />/images/navigation/right_.png" alt="">
+        </div>
+        <div class="adm-dpd3 float">
+            <dl>
+                <dt>
+                    <a href="javascript:createNewTab('单位分组', '<@sp.ctx />/user/pe/inc/tjLncgroup.htm')">
+                        <img src="<@sp.static />/images/navigation/incgroup.png" alt="">
+                    </a>
+                </dt>
+                <dd>单位分组</dd>
+            </dl>
+        </div>
+        <div class="adm-dpd4 float">
+            <img src="<@sp.static />/images/navigation/right_.png" alt="">
+        </div>
+        <div class="adm-dpd5 float">
+            <img src="<@sp.static />/images/navigation/right1_.png" alt="">
+        </div>
+        <div class="adm-dpd6 float">
+            <dl>
+                <dt>
+                    <a href="javascript:;">
+                        <img src="<@sp.static />/images/navigation/personrg.png" alt="">
+                    </a>
+                </dt>
+                <dd>个人登记</dd>
+            </dl>
+            <br>
+            <br>
+            <br>
+            <dl>
+                <dt>
+                    <a href="javascript:createNewTab('团体登记', '<@sp.ctx />/user/pe/inc/tjIncReg.htm')">
+                        <img src="<@sp.static />/images/navigation/grouprg.png" alt="">
+                    </a>
+                </dt>
+                <dd>团体登记</dd>
+            </dl>
+        </div>
+        <div class="adm-dpd7 float">
+            <img src="<@sp.static />/images/navigation/left_.png" alt="">
+        </div>
+        <div class="adm-dpd8 float">
+            <img src="<@sp.static />/images/navigation/right_.png" alt="">
+        </div>
+        <div class="adm-dpd9 float">
+            <dl>
+                <dt>
+                    <a href="javascript:createNewTab('条码打印', '<@sp.ctx />/user/pe/bar/barType.htm')">
+                        <img src="<@sp.static />/images/navigation/printbar.png" alt="">
+                    </a>
+                </dt>
+                <dd>条码打印</dd>
+            </dl>
+        </div>
+        <div class="adm-dpd10 float">
+            <img src="<@sp.static />/images/navigation/right_.png" alt="">
+        </div>
+        <div class="adm-dpd11 float">
+            <img src="<@sp.static />/images/navigation/right1_.png" alt="">
+        </div>
+        <div class="adm-dpd12 float">
+            <dl>
+                <dt>
+                    <a href="javascript:createNewTab('医生工作站', '<@sp.ctx />/user/pe/tj/resultInput.htm?pagepath=/pe/tj/doctor_working_station&')">
+                        <img src="<@sp.static />/images/navigation/doctor.png" alt="">
+                    </a>
+                </dt>
+                <dd>医生工作站</dd>
+            </dl>
+            <br>
+            <br>
+            <br>
+            <dl>
+                <dt>
+                    <a href="javascript:createNewTab('结果录入', '<@sp.ctx />/user/pe/tj/resultInput.htm')">
+                        <img src="<@sp.static />/images/navigation/resultwt.png" alt="">
+                    </a>
+                </dt>
+                <dd>结果录入</dd>
+            </dl>
+        </div>
+        <div class="adm-dpd13 float">
+            <img src="<@sp.static />/images/navigation/left_.png" alt="">
+        </div>
+        <div class="adm-dpd14 float">
+            <img src="<@sp.static />/images/navigation/right_.png" alt="">
+        </div>
+        <div class="adm-dpd15 float">
+            <dl>
+                <dt>
+                    <a href="javascript:javascript:createNewTab('主检审核', '<@sp.ctx />/user/pe/tj/primaryInspectionAudit.htm')">
+                        <img src="<@sp.static />/images/navigation/audit.png" alt="">
+                    </a>
+                </dt>
+                <dd>主检审核</dd>
+            </dl>
+        </div>
+        <div class="adm-dpd16 float">
+            <img src="<@sp.static />/images/navigation/right_.png" alt="">
+        </div>
+        <div class="adm-dpd17 float">
+            <dl>
+                <dt>
+                    <a href="javascript:createNewTab('打印报告', '<@sp.ctx />/user/pe/tj/tjReportPrint.htm')">
+                        <img src="<@sp.static />/images/navigation/report.png" alt="">
+                    </a>
+                </dt>
+                <dd>打印报告</dd>
+            </dl>
+        </div>
+    </div>
+    -->
+</div>
+	<script type="text/javascript">
+	
+		function createNewTab(title, url) {
+			window.parent.open1(title, url);
+		}
+		
+	</script>
+</body>
+</html>

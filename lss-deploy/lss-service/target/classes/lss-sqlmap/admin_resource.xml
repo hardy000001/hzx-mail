@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AdminResource">
+
+    <sql id="tableName" >
+        admin_resource
+    </sql>
+
+    <sql id="selectColumns">
+        select
+        id id ,
+        code code ,
+        app_id appId ,
+        type type ,
+        name name ,
+        menu_leaf_flag menuLeafFlag ,
+        menu_leaf_url menuLeafUrl ,
+        menu_leaf_mode menuLeafMode ,
+        pid pid ,
+        layer layer ,
+        order_no orderNo ,
+        remark remark ,
+        create_time createTime     FROM
+        <include refid="tableName"/> t
+    </sql>
+
+    <!-- 添加 -->
+    <insert id="create" parameterType="com.lq.lss.model.AdminResource" useGeneratedKeys="true"  keyProperty="id">
+        INSERT INTO <include refid="tableName"/>
+        (id,code,app_id,type,name,menu_leaf_flag,menu_leaf_url,menu_leaf_mode,pid,layer,order_no,remark,create_time)
+        VALUES
+        (#{id} ,#{code} ,#{appId} ,#{type} ,#{name} ,#{menuLeafFlag} ,#{menuLeafUrl} ,#{menuLeafMode} ,#{pid} ,#{layer} ,#{orderNo} ,#{remark} ,#{createTime} )
+    </insert>
+
+    <!-- 批量 添加 -->
+    <insert id="create_BATCH"  parameterType="List" >
+        INSERT INTO <include refid="tableName"/>
+        (id,code,app_id,type,name,menu_leaf_flag,menu_leaf_url,menu_leaf_mode,pid,layer,order_no,remark,create_time)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id} ,#{item.code} ,#{item.appId} ,#{item.type} ,#{item.name} ,#{item.menuLeafFlag} ,#{item.menuLeafUrl} ,#{item.menuLeafMode} ,#{item.pid} ,#{item.layer} ,#{item.orderNo} ,#{item.remark} ,#{item.createTime} )
+        </foreach>
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE id = #{id}
+    </delete>
+
+    <select id="loadAll" resultType="com.lq.lss.model.AdminResource">
+        <include refid="selectColumns" />
+    </select>
+
+    <select id="findById" resultType="com.lq.lss.model.AdminResource"
+            parameterType="java.lang.String">
+        <include refid="selectColumns"/>
+        where id = #{id}
+    </select>
+
+    <sql id="pageConditions">
+        WHERE 1=1
+        <if test="id != null">AND id = #{id}</if>
+        <if test="code != '' and code != null">AND code = #{code}</if>
+        <if test="appId != null">AND app_id = #{appId}</if>
+        <if test="type != null">AND type = #{type}</if>
+        <if test="name != '' and name != null">AND name = #{name}</if>
+        <if test="menuLeafFlag != null">AND menu_leaf_flag = #{menuLeafFlag}</if>
+        <if test="menuLeafUrl != '' and menuLeafUrl != null">AND menu_leaf_url = #{menuLeafUrl}</if>
+        <if test="menuLeafMode != null">AND menu_leaf_mode = #{menuLeafMode}</if>
+        <if test="pid != null">AND pid = #{pid}</if>
+        <if test="layer != null">AND layer = #{layer}</if>
+        <if test="orderNo != null">AND order_no = #{orderNo}</if>
+        <if test="remark != '' and remark != null">AND remark = #{remark}</if>
+        <if test="createTime != null">AND create_time = #{createTime}</if>
+    </sql>
+
+    <!-- 分页查询 -->
+    <select id="findPage" resultType="com.lq.lss.model.AdminResource"
+            parameterType="com.lq.lss.model.AdminResource">
+        <include refid="selectColumns"/>
+        <include refid="pageConditions"/>
+        <if test="orderStr != '' and orderStr != null">
+            order by ${orderStr}
+        </if>
+    </select>
+
+    <select id="findPage_COUNT" resultType="int">
+        select count(1) from
+        <include refid="tableName" />
+        <include refid="pageConditions" />
+    </select>
+
+    <sql id="update_sql">
+        UPDATE
+        <include refid="tableName"/>
+        <set>
+            <if test="code != null">code = #{code},</if>
+            <if test="appId != null">app_id = #{appId},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="menuLeafFlag != null">menu_leaf_flag = #{menuLeafFlag},</if>
+            <if test="menuLeafUrl != null">menu_leaf_url = #{menuLeafUrl},</if>
+            <if test="menuLeafMode != null">menu_leaf_mode = #{menuLeafMode},</if>
+            <if test="pid != null">pid = #{pid},</if>
+            <if test="layer != null">layer = #{layer},</if>
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime}</if>
+        </set>
+        WHERE id = #{id}
+    </sql>
+
+    <update id="update" parameterType="com.lq.lss.model.AdminResource">
+        <include refid="update_sql"/>
+    </update>
+
+
+    <!-- 用户登录后，加载的左导航菜单tree -->
+    <select id="selectUserRoleResource" resultType="com.lq.lss.model.AdminResource" parameterType="java.util.Map">
+        select
+        a.id id,
+        a.CODE code,
+        a.app_id appId,
+        a.type type,
+        a.layer layer,
+        a.NAME name,
+        a.menu_leaf_flag menuLeafFlag ,
+        a.menu_leaf_url menuLeafUrl,
+        a.menu_leaf_mode menuLeafMode,
+        a.pid pid,
+        a.order_no orderNo,
+        a.remark
+        remark,
+        a.create_time createTime
+        from admin_resource a
+
+        INNER join (
+        select DISTINCT(resource_id) resource_id from admin_role_resource
+        where role_id in
+        (SELECT permission_id from admin_user_permission where user_id=#{userId} and
+        permission_type = 1)
+        ) as b on a.id = b.resource_id
+        <where>
+            <if test="null != typeList and typeList.size > 0">
+                and a.type in
+                <foreach item="item" index="index" collection="typeList"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            order by a.order_no asc
+        </where>
+    </select>
+
+
+    <!-- 查询资源 -->
+    <select id="selectResource" resultType="com.lq.lss.model.AdminResource" parameterType="com.lq.lss.model.AdminResource">
+        <include refid="selectColumns"/>
+        <where>
+            <if test="id != null and id!=''">
+                and id =#{id}
+            </if>
+            <if test="name != null and name!=''">
+                and name =#{name}
+            </if>
+            <if test="code != null and code!=''">
+                and code =#{code}
+            </if>
+            <if test="type != null and type!=''">
+                and type = #{type}
+            </if>
+            <if test="pid != null and pid!=''">
+                and pid = #{pid}
+            </if>
+            <if test="appId != null and appId!=''">
+                and app_id = #{appId}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="selectAdminResourceMaxId" resultType="String" parameterType="Long">
+      select (max(id) + 1 ) as maxId from   <include refid="tableName"/>  where pid=#{pid}
+    </select>
+
+
+    <!-- roleResource 角色分配权限时 查询的菜单资源 -->
+    <select id="selectAdminRoleResource" resultType="java.util.Map" parameterType="java.util.Map">
+        select
+        a.id id,
+        a.CODE code,
+        a.app_id appId,
+        a.type type,
+        a.layer layer ,
+        a.NAME name,
+        a.menu_leaf_flag menuLeafFlag ,
+        a.menu_leaf_url menuLeafUrl,
+        a.menu_leaf_mode menuLeafMode,
+        a.pid pid,
+        a.order_no orderNo,
+        a.remark
+        remark,
+        a.create_time createTime,
+        case when b.id is null then '0' else '1' END as checked
+        from admin_resource a
+        left join admin_role_resource b on a.id = b.resource_id and
+        b.role_id=#{roleId}
+        <where>
+            <if test="pid != null and pid!=''">
+                and a.pid = #{pid}
+            </if>
+            <if test="appId != null and appId!=''">
+                and a.app_id = #{appId}
+            </if>
+            <if test="null != typeList and typeList.size > 0">
+                and a.type in
+                <foreach item="item" index="index" collection="typeList"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+        order by a.order_no asc
+    </select>
+
+    <!-- roleResource 角色分配权限时 选中菜单 的 action -->
+
+    <select id="selectAdminRoleResourceByPids" resultType="java.util.Map" parameterType="java.util.Map">
+        select
+        a.id id,
+        a.CODE code,
+        a.app_id appId,
+        a.type type,
+        a.layer layer ,
+        a.NAME name,
+        a.menu_leaf_flag menuLeafFlag ,
+        a.menu_leaf_url menuLeafUrl,
+        a.menu_leaf_mode menuLeafMode,
+        a.pid pid,
+        a.order_no orderNo,
+        a.remark
+        remark,
+        a.create_time createTime,
+        case when b.id is null then '' else 'true' END as checked
+        from admin_resource a
+        left join admin_role_resource b on a.id = b.resource_id and
+        b.role_id=#{roleId}
+        where a.type=2 and pid in
+        <foreach item="item" index="index" collection="pids" open="("
+                 separator="," close=")">
+            #{item}
+        </foreach>
+        order by a.order_no ,a.create_time asc
+
+    </select>
+
+
+</mapper>
+

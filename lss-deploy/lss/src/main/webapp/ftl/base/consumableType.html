@@ -1,0 +1,142 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <title>易耗品类别管理</title>
+     <#include "../include_head.html" />
+    </head>
+    <body>
+	<table id="dg" title="类别管理" class="easyui-treegrid"
+		data-options="url:'<@sp.ctx />/user/sys/conType.htm?method=getConTypeList&type=1',
+		lines:true,
+		method:'get',
+		rownumbers: true,
+		idField: 'id',
+		treeField: 'name',
+		showGroup:true,
+		scrollbarSize:0 "
+        toolbar="#toolbar" rownumbers="true" fitColumns="true" singleSelect="true">
+		<thead>
+			<tr>
+				<th field="name" width="50%">名称</th>
+				<th field="price" width="10%">单价</th>
+				<th field="unit" width="20%">单位</th>
+				<th field="position" width="10%">同级显示顺序</th>
+			</tr>
+		</thead>
+	</table>
+
+	<#include "../role_detail_inc.html">
+	<div id="dlg" class="easyui-dialog"
+		style="width: 400px; height: 350px; padding: 10px 20px" closed="true"
+		buttons="#dlg-buttons">
+		<div class="ftitle">添加</div>
+		<form id="fm" method="post" >
+			<div class="fitem" hidden="hidden">
+				<label>id:</label> <input name="typeid" class="easyui-validatebox">
+			</div>
+			<div class="fitem">
+				<label>上级类别:</label> 
+				<input name="parentid" id="parentid" class="easyui-combotree" >
+			</div>
+			<div class="fitem">
+				<label>名称:</label> <input name="name"  class="easyui-textbox" required="true" >
+			</div>
+			<div class="fitem">
+				<label>单价:</label> <input name="price"  class="easyui-textbox" required="true" >
+			</div>
+			<div class="fitem">
+				<label>单位:</label> <input name="unit" class="easyui-textbox"   >
+			</div>
+			<div class="fitem">
+				<label>同级显示顺序:</label> <input name="position" class="easyui-textbox" required="true" >
+			</div>
+		</form>
+	</div>
+	<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+    </div>
+    <script type="text/javascript">
+
+
+		var baseAction = "<@sp.ctx />/user/sys/conType.htm"
+		var url;
+
+		function addDg() {
+
+
+			$('#parentid').combotree({
+				url: baseAction + '?method=getConTypeList&type=2',
+				width: '150px'
+
+			});
+
+			$('#dlg').dialog('open').dialog('setTitle', '新增类别');
+			$('#fm').form('clear');
+
+			var row = $('#dg').treegrid('getSelected');
+			if (row != null) {
+				$('#parentid').combotree('setValue',row.id);
+			}
+
+			url = baseAction + '?method=save&_ajax';
+		}
+		function editDg() {
+
+			$('#parentid').combotree({
+				url: baseAction + '?method=getConTypeList&type=2',
+				width: '150px'
+
+			});
+
+			var row = $('#dg').treegrid('getSelected');
+
+			if (row) {
+				$('#dlg').dialog('open').dialog('setTitle', '修改类别信息');
+				$('#fm').form('load', row);
+				url = baseAction + '?method=update';
+			}
+
+
+		}
+		function save() {
+			$('#fm').form('submit', {
+				"url": url,
+				onSubmit: function () {
+					return $(this).form('validate');
+				},
+				success: function (result) {
+					var result = eval('(' + result + ')');
+					if (result.errorMsg) {
+						$.messager.alert('Error', result.errorMsg);
+					} else {
+						$('#dlg').dialog('close'); // close the dialog
+						$('#dg').treegrid('reload'); // reload the user data
+					}
+				}
+			});
+		}
+		function destroyDg() {
+			var row = $('#dg').treegrid('getSelected');
+			if (row) {
+				$.messager.confirm('确定删除', '确定删除选中数据吗?', function (r) {
+					if (r) {
+						$.post(baseAction + '?method=remove', {id: row.id}, function (result) {
+							if (result.success) {
+								$('#dg').treegrid('reload'); // reload the user data
+							} else {
+								$.messager.alert('Error', result.errorMsg
+								);
+							}
+						}, 'json');
+					}
+				});
+			}
+		}
+
+
+	</script>
+   
+    </body>
+    </html>

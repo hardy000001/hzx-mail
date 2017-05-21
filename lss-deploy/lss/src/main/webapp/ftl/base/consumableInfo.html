@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>易耗品信息管理</title>
+    <#include "../include_head.html">
+        </head>
+<body>
+
+<div class="easyui-layout" data-options="fit:true" style="padding:top:10px;">
+
+    <div data-options="region:'west',split:true" style="width:250px">
+        <ul id="kongbai" name="kongbai"></ul>
+        <ul id="ttCls" name="ttCls"></ul>
+    </div>
+    <div data-options="region:'center'">
+        <table id="dgResult" title="易耗品管理" style="height:98%;width:98%">
+            <thead>
+            <tr>
+                <th field="id" width="5%" sortable="true">顺序号</th>
+                <th field="name" width="10%" sortable="true">名称</th>
+                <th field="code" width="10%" sortable="true">编码</th>
+                <th field="price" width="5%" sortable="true">单价</th>
+                <th field="quantity" width="10%" sortable="true">库存数量</th>
+                <th field="unit" width="10%">单位</th>
+                <th field="status" width="10%">状态</th>
+                <th field="pyCode" width="10%">拼音码</th>
+                <th field="createtime" width="18%">创建时间</th>
+            </tr>
+            </thead>
+        </table>
+        <#include "../role_detail_inc.html">
+    </div>
+</div>
+
+
+<div id="dlg" class="easyui-dialog" style="width:400px;height:300px;padding:10px 20px"
+     closed="true" buttons="#dlg-buttons">
+
+    <form id="fm" method="post" novalidate>
+        <div class="fitem">
+            <label>名称:</label> <input name="name" id="name" class="easyui-textbox" required="true">
+        </div>
+        <div class="fitem">
+            <label>编码:</label> <input name="code" id="code" class="easyui-textbox" data-options="validType:'length[1,5]'"  required="true">
+        </div>
+        <div class="fitem">
+            <label>单价:</label> <input name="price" id="price" class="easyui-numberbox" required="true" precision="2"
+                                      max="99999.99" min="0">
+        </div>
+        <div class="fitem">
+            <label>库存数量:</label> <input name="quantity" id="quantity" class="easyui-numberbox" max="1000000" min="0">
+        </div>
+        <div class="fitem">
+            <label>单位:</label> <input name="unit" id="unit" class="easyui-textbox">
+        </div>
+        <div class="fitem">
+            <label>拼音码:</label> <input name="pyCode" id="pyCode" class="easyui-textbox" required="true">
+        </div>
+        <input name="typeid" id="typeid" type="hidden">
+        <input name="id" id="id" type="hidden">
+    </form>
+
+</div>
+
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"
+       onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+
+<script type="text/javascript">
+
+    var baseAction = "<@sp.ctx />/user/sys/consumInfo.htm"
+    $('#ttCls').tree({
+        url: baseAction + "?method=getConTypeList",
+        method: 'post',
+        onClick: function (node) {
+            $('#dlg').dialog('close'); // 关闭右侧新增弹出框
+            var parentNode = $('#ttCls').tree('getParent', node.target);
+            if (parentNode == null) { // 如果是一级节点，远程加载子节点
+                $('#ttCls').tree('expand', node.target);
+            } else {
+                // 如果是二级节点，给datagrid赋值
+                var url = "<@sp.ctx />/user/sys/consumInfo.htm?method=query&typeid=" + node.id;
+                $('#dgResult').datagrid("reload", url);
+            }
+        },
+        onDblClick: function (node) {
+            $('#ttCls').tree('collapse', node.target);
+        }
+    });
+
+
+    $('#dgResult').datagrid({
+        url: '<@sp.ctx />/user/sys/consumInfo.htm?method=query&typeid=-1',
+        toolbar: '#toolbar',
+        checkOnSelect: true,
+        pagination: true,
+        rownumbers: true,
+        fitColumns: true,
+        singleSelect: true,
+        onDblClickCell: function (index, row) {
+            //editDg();
+        }
+    });
+
+
+    function addDg() {
+        var node = $('#ttCls').tree('getSelected');
+        if (node == null) {
+            $.messager.alert('Error', "请选择左边类别");
+        }
+        var parentNode = $('#ttCls').tree('getParent', node.target);
+        if (parentNode != null) { // 如果是二级节点，打开添加弹出窗口
+            $('#dlg').dialog('open').dialog('setTitle', '新增 ' + node.text + " 类别易耗品");
+            $('#fm').form('clear');
+            $('#typeid').val(node.id);
+            url = baseAction + '?method=save';
+        }
+
+    }
+    function editDg() {
+        var row = $('#dgResult').datagrid('getSelected');
+        if (row) {
+            $('#dlg').dialog('open').dialog('setTitle', '修改');
+            $('#fm').form('load', row);
+            url = baseAction + '?method=update';
+        }
+    }
+    function save() {
+
+        $('#fm').form('submit', {
+            "url": url,
+            onSubmit: function () {
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var result = eval('(' + result + ')');
+                if (result.errorMsg) {
+                    $.messager.alert('Error', result.errorMsg);
+                } else {
+                    $('#dlg').dialog('close'); // close the dialog
+                    $('#dgResult').datagrid('reload'); // reload the user data
+                }
+            }
+        });
+    }
+
+
+    function destroyDg() {
+        var row = $('#dgResult').datagrid('getSelected');
+        if (row) {
+            $.messager.confirm('删除', '确定删除ID为' + row.id + '的该条数据吗?', function (r) {
+                if (r) {
+                    $.post(baseAction + '?method=remove', {id: row.id}, function (result) {
+                        if (result.success) {
+                            $('#dgResult').datagrid('reload'); // reload the user data
+                        } else {
+                            $.messager.alert('Error',
+                                    result.errorMsg
+                            );
+                        }
+                    }, 'json');
+                }
+            });
+        }
+    }
+
+
+</script>
+
+</body>
+</html>

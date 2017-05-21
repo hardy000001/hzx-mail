@@ -1,0 +1,9 @@
+*{ margin: 0;padding: 0; font-family:"微软雅黑",sans-serif;box-sizing:border-box; }html, body {height:100%;overflow: hidden;}.float{float: left}
+.wrap{width: 100%;height: 100%;}.dispersed{float: left;clear: both;width: 95%;margin-top: 100px;margin-left: 3%}
+.dispersed dl{width:90px}.dispersed dd{font-size: 18px;font-weight: bold;margin-top: 5px;text-align: center}.dispersed dt{width: 100%}
+.dispersed img{display: block;margin: auto}.dispersed div:not(:first-child){margin-left: -10px}.dispersed dt img:hover{cursor: pointer}
+.adm-dpd1,.adm-dpd3,.adm-dpd9,.adm-dpd15,.adm-dpd17{margin-top: 100px}.adm-dpd8,.adm-dpd14{padding-left: 15px}
+.adm-dpd2 img,.adm-dpd4 img,.adm-dpd8 img,.adm-dpd10 img,.adm-dpd14 img,.adm-dpd16 img{width: 48px;height: 30px;margin-top: 120px;}
+.adm-dpd5,.adm-dpd11{padding-left: 15px;margin-top: 38px}.adm-dpd7,.adm-dpd13{margin-top: 43px}
+.adm-dpd5 img,.adm-dpd11 img{width: 48px;height: 205px}.adm-dpd7 img,.adm-dpd13 img{width: 41px;height: 195px}
+.adm-dpd6 dl,.adm-dpd12 dl{padding-top: 20px}

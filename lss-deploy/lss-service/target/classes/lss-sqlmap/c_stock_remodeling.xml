@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockRemodeling">
+
+	<sql id="tableName" >
+		c_stock_remodeling
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	rem_serialNo remSerialNo,
+	deptid deptid ,
+	mchcode mchcode ,
+	total_s totalS ,
+	total_m totalM ,
+	total_t totalT ,
+	total_amt totalAmt ,
+	status status ,
+	createoper createoper ,
+	createtime createtime  ,
+	auditingoper auditingoper ,
+	auditingtime auditingtime      FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockRemodeling" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,rem_serialNo,deptid,mchcode,total_s,total_m,total_t,total_amt,status,createoper,createtime,auditingoper,auditingtime)
+		VALUES
+		(#{id} ,#{remSerialNo} ,#{deptid} ,#{mchcode} ,#{totalS} ,#{totalM} ,#{totalT} ,#{totalAmt} ,#{status},#{createoper} ,#{createtime},#{auditingoper} ,#{auditingtime} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,rem_serialNo,deptid,mchcode,total_s,total_m,total_t,total_amt,status,createoper,createtime,auditingoper,auditingtime)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{remSerialNo} ,#{item.deptid} ,#{item.mchcode} ,#{item.totalS} ,#{item.totalM} ,#{item.totalT} ,#{item.totalAmt} ,#{item.status},#{item.createoper} ,#{item.createtime},#{item.auditingoper} ,#{item.auditingtime} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE rem_serialNo = #{remSerialNo}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockRemodeling">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockRemodeling" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where rem_serialNo = #{remSerialNo}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="remSerialNo != null">AND t.rem_serialNo = #{remSerialNo}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="mchcode != '' and mchcode != null">AND t.mchcode = #{mchcode}</if>
+  	<if test="totalS != null">AND t.total_s = #{totalS}</if>
+  	<if test="totalM != null">AND t.total_m = #{totalM}</if>
+  	<if test="totalT != null">AND t.total_t = #{totalT}</if>
+  	<if test="totalAmt != null">AND t.total_amt = #{totalAmt}</if>
+  	<if test="status != '' and status != null">AND t.status = #{status}</if>
+  	<if test="createoper != '' and createoper != null">AND t.createoper = #{createoper}</if>
+  
+  	<if test="beginTime != '' and  beginTime != null">AND left(t.createtime,10) &gt;= #{beginTime}</if>
+  	<if test="endTime != '' and  endTime != null">AND left(t.createtime,10) &lt;= #{endTime}</if>
+  	<if test="loginName != '' and loginName != null">AND u.login_name like '%${loginName}%'</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockRemodeling"
+		parameterType="com.lq.lss.model.CStockRemodeling">
+		select
+				t.id id ,
+				t.rem_serialNo remSerialNo,
+				t.deptid deptid ,
+				t.mchcode mchcode ,
+				t.total_s totalS ,
+				t.total_m totalM ,
+				t.total_t totalT ,
+				t.total_amt totalAmt ,
+				t.status status ,
+				if(t.status=0,10,t.status) s_status,
+				t.createoper createoper ,
+				t.createtime createtime  ,
+				t.auditingoper auditingoper ,
+				t.auditingtime auditingtime ,
+				uu.login_name operName,
+				u.login_name loginName,
+				d.name centerName,
+				m.mchname mchname     FROM 
+			    <include refid="tableName"/> t
+			        left join admin_user u on t.createoper=u.user_id
+				    left join admin_user uu on t.auditingoper=uu.user_id
+				    left join admin_dept d on t.deptid=d.dept_id
+					left join mch_baseinfo m on t.mchcode=m.mchcode and t.deptid=m.deptid 
+					<include refid="pageConditions"/>
+			
+			order by s_status ,createtime desc
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName"/> t
+			        left join admin_user u on t.createoper=u.user_id
+				    left join admin_user uu on t.auditingoper=uu.user_id
+				    left join admin_dept d on t.deptid=d.dept_id
+					left join mch_baseinfo m on t.mchcode=m.mchcode
+					<include refid="pageConditions"/>
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+			<if test="remSerialNo != null">rem_serialNo = #{remSerialNo},</if>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="mchcode != null">mchcode = #{mchcode},</if>
+		  	<if test="totalS != null">total_s = #{totalS},</if>
+		  	<if test="totalM != null">total_m = #{totalM},</if>
+		  	<if test="totalT != null">total_t = #{totalT},</if>
+		  	<if test="totalAmt != null">total_amt = #{totalAmt},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="createtime != null">createtime = #{createtime},</if>
+	 	 	<if test="auditingoper != null">auditingoper = #{auditingoper},</if>
+		  	<if test="auditingtime != null">auditingtime = #{auditingtime}</if>
+			</set>
+		WHERE rem_serialNo = #{remSerialNo}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockRemodeling">
+		<include refid="update_sql"/>
+	</update>	
+		
+	<select id="findByRemSerialNo" parameterType="java.lang.String" resultType="com.lq.lss.model.CStockRemodeling">
+		<include refid="selectColumns"/>   
+		WHERE rem_serialNo = #{remSerialNo}
+  	</select>
+
+</mapper>

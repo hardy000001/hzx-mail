@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockInventoryDetail">
+
+	<sql id="tableName" >
+		c_stock_inventory_detail
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	t.id id ,
+	t.inventory_serialno inventorySerialno ,
+	t.materialcode materialcode ,
+	t.acc_total_s accTotalS ,
+	t.real_total_s realTotalS ,
+	t.diffrate diffrate ,
+	t.unit unit ,
+	b.name name,
+    b.covert_ratio covertRatio,
+	bt.typeId typeId,
+    bt.name fname, 
+    bt.account_flag accountFlag,
+	t.remark remark     FROM 
+    <include refid="tableName"/> t
+    left join b_material_info b on t.materialcode=b.code
+    left join b_material_type bt on b.typeId=bt.typeId
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockInventoryDetail" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,inventory_serialno,materialcode,acc_total_s,real_total_s,diffrate,unit,remark)
+		VALUES
+		(#{id} ,#{inventorySerialno} ,#{materialcode} ,#{accTotalS} ,#{realTotalS} ,#{diffrate} ,#{unit} ,#{remark} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,inventory_serialno,materialcode,acc_total_s,real_total_s,diffrate,unit,remark)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.inventorySerialno} ,#{item.materialcode} ,#{item.accTotalS} ,#{item.realTotalS} ,#{item.diffrate} ,#{item.unit} ,#{item.remark} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE inventory_serialNo = #{inventorySerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockInventoryDetail">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockInventoryDetail" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		WHERE inventory_serialNo = #{inventorySerialno}
+	</select>
+	
+	<select id="findInventoryDetail" resultType="com.lq.lss.dto.StockInventoryDetailDto" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		WHERE inventory_serialNo = #{inventorySerialno} 
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != '' and id != null">AND id = #{id}</if>
+  	<if test="inventorySerialno != '' and inventorySerialno != null">AND inventory_serialno = #{inventorySerialno}</if>
+  	<if test="materialcode != '' and materialcode != null">AND materialcode = #{materialcode}</if>
+  	<if test="accTotalS != null">AND acc_total_s = #{accTotalS}</if>
+  	<if test="realTotalS != null">AND real_total_s = #{realTotalS}</if>
+  	<if test="diffrate != null">AND diffrate = #{diffrate}</if>
+  	<if test="unit != '' and unit != null">AND unit = #{unit}</if>
+  	<if test="remark != '' and remark != null">AND remark = #{remark}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockInventoryDetail"
+		parameterType="com.lq.lss.model.CStockInventoryDetail">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="inventorySerialno != null">inventory_serialno = #{inventorySerialno},</if>
+		  	<if test="materialcode != null">materialcode = #{materialcode},</if>
+		  	<if test="accTotalS != null">acc_total_s = #{accTotalS},</if>
+		  	<if test="realTotalS != null">real_total_s = #{realTotalS},</if>
+		  	<if test="diffrate != null">diffrate = #{diffrate},</if>
+		  	<if test="unit != null">unit = #{unit},</if>
+		  	<if test="remark != null">remark = #{remark}</if>
+			</set>
+		WHERE inventory_serialNo = #{inventorySerialno}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockInventoryDetail">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UAdminUser">
+
+	<sql id="tableName" >
+		u_admin_user
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	user_id userId ,
+	login_name loginName ,
+	login_pwd loginPwd ,
+	real_name realName ,
+	status status ,
+	mobile mobile ,
+	email email ,
+	dept_id deptId ,
+	oper_code operCode ,
+	sex sex ,
+	py_code pyCode ,
+	wb_code wbCode ,
+	address address ,
+	create_time createTime ,
+	modify_time modifyTime ,
+	mch_code mchCode     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.UAdminUser" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(user_id,login_name,login_pwd,real_name,status,mobile,email,dept_id,oper_code,sex,py_code,wb_code,address,create_time,modify_time,mch_code)
+		VALUES
+		(#{userId} ,#{loginName} ,#{loginPwd} ,#{realName} ,#{status} ,#{mobile} ,#{email} ,#{deptId} ,#{operCode} ,#{sex} ,#{pyCode} ,#{wbCode} ,#{address} ,#{createTime} ,#{modifyTime} ,#{mchCode} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(user_id,login_name,login_pwd,real_name,status,mobile,email,dept_id,oper_code,sex,py_code,wb_code,address,create_time,modify_time,mch_code)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.userId} ,#{item.loginName} ,#{item.loginPwd} ,#{item.realName} ,#{item.status} ,#{item.mobile} ,#{item.email} ,#{item.deptId} ,#{item.operCode} ,#{item.sex} ,#{item.pyCode} ,#{item.wbCode} ,#{item.address} ,#{item.createTime} ,#{item.modifyTime} ,#{item.mchCode} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE user_id = #{userId}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.UAdminUser">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.UAdminUser" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where user_id = #{userId}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="userId != '' and userId != null">AND user_id = #{userId}</if>
+  	<if test="loginName != '' and loginName != null">AND login_name = #{loginName}</if>
+  	<if test="loginPwd != '' and loginPwd != null">AND login_pwd = #{loginPwd}</if>
+  	<if test="realName != '' and realName != null">AND real_name = #{realName}</if>
+  	<if test="status != null">AND status = #{status}</if>
+  	<if test="mobile != '' and mobile != null">AND mobile = #{mobile}</if>
+  	<if test="email != '' and email != null">AND email = #{email}</if>
+  	<if test="deptId != '' and deptId != null">AND dept_id = #{deptId}</if>
+  	<if test="operCode != '' and operCode != null">AND oper_code = #{operCode}</if>
+  	<if test="sex != '' and sex != null">AND sex = #{sex}</if>
+  	<if test="pyCode != '' and pyCode != null">AND py_code = #{pyCode}</if>
+  	<if test="wbCode != '' and wbCode != null">AND wb_code = #{wbCode}</if>
+  	<if test="address != '' and address != null">AND address = #{address}</if>
+  	<if test="createTime != null">AND create_time = #{createTime}</if>
+  	<if test="modifyTime != null">AND modify_time = #{modifyTime}</if>
+  	<if test="mchCode != '' and mchCode != null">AND mch_code = #{mchCode}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.UAdminUser"
+		parameterType="com.lq.lss.model.UAdminUser">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="loginName != null">login_name = #{loginName},</if>
+		  	<if test="loginPwd != null">login_pwd = #{loginPwd},</if>
+		  	<if test="realName != null">real_name = #{realName},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="mobile != null">mobile = #{mobile},</if>
+		  	<if test="email != null">email = #{email},</if>
+		  	<if test="deptId != null">dept_id = #{deptId},</if>
+		  	<if test="operCode != null">oper_code = #{operCode},</if>
+		  	<if test="sex != null">sex = #{sex},</if>
+		  	<if test="pyCode != null">py_code = #{pyCode},</if>
+		  	<if test="wbCode != null">wb_code = #{wbCode},</if>
+		  	<if test="address != null">address = #{address},</if>
+		  	<if test="createTime != null">create_time = #{createTime},</if>
+		  	<if test="modifyTime != null">modify_time = #{modifyTime},</if>
+		  	<if test="mchCode != null">mch_code = #{mchCode}</if>
+			</set>
+		WHERE user_id = #{userId}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.UAdminUser">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+    <select id="findByLoginName" resultType="com.lq.lss.model.UAdminUser" parameterType="String">
+		<include refid="selectColumns"/>
+		where login_name = #{loginName}
+	</select>
+	
+    <select id="existsLoginName" resultType="int" parameterType="map">
+		select  IFNULL(count(1),0) from <include refid="tableName"/> t where t.login_name = #{loginName}
+		<if test="excludeUserId != '' and excludeUserId != null">AND t.user_Id != #{excludeUserId}</if>
+	</select>
+	
+    <update id="updateUserCnt" parameterType="map">
+	    UPDATE u_admin_role A SET A.user_cnt=(select count(permission_id) 
+        FROM u_admin_user_permission B 
+        WHERE A.id=B.permission_id)
+	</update>
+    
+    
+</mapper>

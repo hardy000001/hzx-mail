@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CBusHtSettlement">
+
+	<sql id="tableName" >
+		c_bus_ht_settlement
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	htcode htcode ,
+	geton_fee getonFee ,
+	getoff_fee getoffFee ,
+	transport_fee transportFee ,
+	deposit deposit ,
+	late_fee lateFee ,
+	bag_fee bagFee ,
+	late_begdate lateBegdate ,
+	zxfee_belong zxfeeBelong ,
+	transportfee_belong transportfeeBelong ,
+	otherfee_belong otherfeeBelong ,
+	settlement_type settlementType     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CBusHtSettlement" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,htcode,geton_fee,getoff_fee,transport_fee,deposit,late_fee,bag_fee,late_begdate,zxfee_belong,transportfee_belong,otherfee_belong,settlement_type)
+		VALUES
+		(#{id} ,#{htcode} ,#{getonFee} ,#{getoffFee} ,#{transportFee} ,#{deposit} ,#{lateFee} ,#{bagFee} ,#{lateBegdate} ,#{zxfeeBelong} ,#{transportfeeBelong} ,#{otherfeeBelong} ,#{settlementType} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,htcode,geton_fee,getoff_fee,transport_fee,deposit,late_fee,bag_fee,late_begdate,zxfee_belong,transportfee_belong,otherfee_belong,settlement_type)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.htcode} ,#{item.getonFee} ,#{item.getoffFee} ,#{item.transportFee} ,#{item.deposit} ,#{item.lateFee} ,#{item.bagFee} ,#{item.lateBegdate} ,#{item.zxfeeBelong} ,#{item.transportfeeBelong} ,#{item.otherfeeBelong} ,#{item.settlementType} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE htcode = #{htcode}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CBusHtSettlement">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CBusHtSettlement" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where htcode = #{htcode}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != '' and id != null">AND id = #{id}</if>
+  	<if test="htcode != '' and htcode != null">AND htcode = #{htcode}</if>
+  	<if test="getonFee != null">AND geton_fee = #{getonFee}</if>
+  	<if test="getoffFee != null">AND getoff_fee = #{getoffFee}</if>
+  	<if test="transportFee != null">AND transport_fee = #{transportFee}</if>
+  	<if test="deposit != null">AND deposit = #{deposit}</if>
+  	<if test="lateFee != null">AND late_fee = #{lateFee}</if>
+  	<if test="bagFee != null">AND bag_fee = #{bagFee}</if>
+  	<if test="lateBegdate != null">AND late_begdate = #{lateBegdate}</if>
+  	<if test="zxfeeBelong != '' and zxfeeBelong != null">AND zxfee_belong = #{zxfeeBelong}</if>
+  	<if test="transportfeeBelong != '' and transportfeeBelong != null">AND transportfee_belong = #{transportfeeBelong}</if>
+  	<if test="otherfeeBelong != '' and otherfeeBelong != null">AND otherfee_belong = #{otherfeeBelong}</if>
+  	<if test="settlementType != '' and settlementType != null">AND settlement_type = #{settlementType}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CBusHtSettlement"
+		parameterType="com.lq.lss.model.CBusHtSettlement">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="htcode != null">htcode = #{htcode},</if>
+		  	<if test="getonFee != null">geton_fee = #{getonFee},</if>
+		  	<if test="getoffFee != null">getoff_fee = #{getoffFee},</if>
+		  	<if test="transportFee != null">transport_fee = #{transportFee},</if>
+		  	<if test="deposit != null">deposit = #{deposit},</if>
+		  	<if test="lateFee != null">late_fee = #{lateFee},</if>
+		  	<if test="bagFee != null">bag_fee = #{bagFee},</if>
+		  	<if test="lateBegdate != null">late_begdate = #{lateBegdate},</if>
+		  	<if test="zxfeeBelong != null">zxfee_belong = #{zxfeeBelong},</if>
+		  	<if test="transportfeeBelong != null">transportfee_belong = #{transportfeeBelong},</if>
+		  	<if test="otherfeeBelong != null">otherfee_belong = #{otherfeeBelong},</if>
+		  	<if test="settlementType != null">settlement_type = #{settlementType}</if>
+			</set>
+		WHERE htcode = #{htcode}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CBusHtSettlement">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

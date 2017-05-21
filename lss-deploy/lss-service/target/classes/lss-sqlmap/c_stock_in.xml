@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockIn">
+
+	<sql id="tableName" >
+		c_stock_in
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	t.in_serialno inSerialno ,
+	t.deptid deptid ,
+	t.mchcode mchcode ,
+    m.mchName mchname,
+    t.out_operator outOperator ,
+	t.in_operator inOperator ,
+	d.name deptname,
+	t.total_m totalM ,
+	t.total_s totalS ,
+	t.total_t totalT ,
+	t.zx_fee zxFee ,
+	t.other_fee otherFee ,
+	t.transport_fee transportFee ,
+	t.status status ,
+	if(t.status=0,10,t.status) s_status,
+	t.createoper createoper ,
+	t.createtime createtime ,
+	t.auditingoper auditingoper ,
+	t.auditingtime auditingtime,
+	t.remark remark,
+	t.trans_date transDate,
+	t.car_no carNo ,
+	t.isrepair isrepair,
+	t.car_driver carDriver 
+	     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  		
+	<sql id="selectColumnssin">
+	select
+	t.in_serialno inSerialno ,
+	t.deptid deptid ,
+	t.mchcode mchcode ,
+	t.out_operator outOperator ,
+	t.in_operator inOperator ,
+	t.total_m totalM ,
+	t.total_s totalS ,
+	t.total_t totalT ,
+	t.zx_fee zxFee ,
+	t.other_fee otherFee ,
+	t.transport_fee transportFee ,
+	t.status status ,
+	t.createoper createoper ,
+	t.createtime createtime ,
+	t.auditingoper auditingoper ,
+	t.auditingtime auditingtime ,
+	t.remark remark,
+	t.trans_date transDate,
+	t.car_no carNo ,
+	t.isrepair isrepair,
+	u.user_id operId, 
+	t.car_driver carDriver     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockIn" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(in_serialno,deptid,mchcode,total_m,total_s,total_t,zx_fee,other_fee,status,createoper,createtime,auditingoper,auditingtime,transport_fee,in_operator,out_operator,remark,trans_date,car_no,car_driver,isrepair)
+		VALUES
+		(#{inSerialno} ,#{deptid} ,#{mchcode} ,#{totalM} ,#{totalS} ,#{totalT} ,#{zxFee} ,#{otherFee} ,#{status} ,#{createoper} ,#{createtime} ,#{auditingoper} ,#{auditingtime} ,#{transportFee} ,#{inOperator} ,#{outOperator} ,#{remark} ,#{transDate} ,#{carNo} ,#{carDriver} ,#{isrepair} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(in_serialno,deptid,mchcode,total_m,total_s,total_t,zx_fee,other_fee,status,createoper,createtime,auditingoper,auditingtime,transport_fee,in_operator,out_operator,remark,trans_date,car_no,car_driver,isrepair)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.inSerialno} ,#{item.deptid} ,#{item.mchcode} ,#{item.totalM} ,#{item.totalS} ,#{item.totalT} ,#{item.zxFee} ,#{item.otherFee} ,#{item.status} ,#{item.createoper} ,#{item.createtime} ,#{item.auditingoper} ,#{item.auditingtime} ,#{item.transportFee} ,#{item.inOperator} ,#{item.outOperator} ,#{item.remark} ,#{item.transDate} ,#{item.carNo} ,#{item.carDriver} ,#{item.isrepair} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE in_serialno = #{inSerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockIn">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockIn" 
+	parameterType="java.lang.String">
+		<include refid="selectColumnssin"/>   
+		left join admin_user u on t.createoper=u.login_name
+		where in_serialno = #{inSerialno}
+		
+	</select>
+	
+	
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="inSerialno != null">AND in_serialno = #{inSerialno}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="mchcode != '' and mchcode != null">AND t.mchcode = #{mchcode}</if>
+    <if test="outOperator != '' and outOperator != null">AND out_operator = #{outOperator}</if>
+  	<if test="inOperator != '' and inOperator != null">AND in_operator = #{inOperator}</if>
+  	
+  	
+  	<if test="totalM != null">AND total_m = #{totalM}</if>
+  	<if test="totalS != null">AND total_s = #{totalS}</if>
+  	<if test="totalT != null">AND total_t = #{totalT}</if>
+  	<if test="zxFee != null">AND zx_fee = #{zxFee}</if>
+  	<if test="otherFee != null">AND other_fee = #{otherFee}</if>
+  	<if test="transportFee != null">AND transport_fee = #{transportFee}</if>
+  	
+  	<if test="status != '' and status != null">AND t.status = #{status}</if>
+  	<if test="createoper != '' and createoper != null">AND createoper = #{createoper}</if>
+  	
+  	<if test="createDate != '' and  createDate != null">AND left(t.createtime,10) = #{createDate}</if>
+  	<if test="dealDate != '' and  dealDate != null">AND left(t.trans_date,10)  = #{dealDate}</if>
+  	
+  	
+  	<if test="createtime != null">AND createtime = #{createtime}</if>
+  	<if test="auditingoper != '' and auditingoper != null">AND auditingoper = #{auditingoper}</if>
+  	<if test="auditingtime != null">AND auditingtime = #{auditingtime}</if>
+  	
+  	<if test="cusType != '' and cusType != null">	and m.cusType=#{cusType}    </if>
+  		
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockIn"
+		parameterType="com.lq.lss.model.CStockIn">
+		<include refid="selectColumns"/> 
+		
+	    INNER JOIN admin_dept d ON t.deptId=d.dept_id
+        LEFT JOIN mch_cus_view m ON (m.mchCode=t.mchCode  AND  m.deptid=t.deptid )
+		
+		<include refid="pageConditions"/>
+				order by s_status ,createtime desc
+		
+	</select>
+	
+	
+	
+	<select id="pagerListinPage" resultType="com.lq.lss.model.CStockIn"
+		parameterType="com.lq.lss.model.CStockIn">
+		<include refid="selectColumns"/> 
+		
+	    INNER JOIN admin_dept d ON t.deptId=d.dept_id
+        LEFT JOIN mch_cus_view m ON (m.mchCode=t.mchCode  AND  m.deptid=t.deptid )
+		
+		<include refid="pageConditions"/> 
+				order by s_status ,createtime desc
+		
+	</select>
+	
+	
+	<select id="incount" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		      INNER JOIN admin_dept d ON t.deptId=d.dept_id
+       		  LEFT JOIN mch_cus_view m ON (m.mchCode=t.mchCode  AND  m.deptid=t.deptid )
+		
+		<include refid="pageConditions" />
+	</select>
+	
+	
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		      INNER JOIN admin_dept d ON t.deptId=d.dept_id
+       		  LEFT JOIN mch_cus_view m ON (m.mchCode=t.mchCode  AND  m.deptid=t.deptid )
+		
+		
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="mchcode != null">mchcode = #{mchcode},</if>
+		  	<if test="outOperator != null">out_operator = #{outOperator},</if>
+		  	<if test="inOperator != null">in_operator = #{inOperator},</if>
+		  	<if test="totalM != null">total_m = #{totalM},</if>
+		  	<if test="totalS != null">total_s = #{totalS},</if>
+		  	<if test="totalT != null">total_t = #{totalT},</if>
+		  	<if test="zxFee != null">zx_fee = #{zxFee},</if>
+		  	<if test="otherFee != null">other_fee = #{otherFee},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="createtime != null">createtime = #{createtime},</if>
+		  	auditingoper = #{auditingoper},
+		  	auditingtime = #{auditingtime},
+		  	<if test="remark != null">remark = #{remark},</if>
+		  	<if test="transDate != null">trans_date = #{transDate},</if>
+		  	<if test="carNo != null">car_no = #{carNo},</if>
+		  	<if test="isrepair != null">isrepair = #{isrepair},</if>
+		  	<if test="carDriver != null">car_driver = #{carDriver}</if>
+			</set>
+		WHERE in_serialno = #{inSerialno}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockIn">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

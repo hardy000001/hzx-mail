@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>部门管理</title>
+    <#include "../include_head.html" />
+</head>
+<body>
+<table id="dg" title="用户" class="easyui-treegrid" style="width:auto;height:auto"
+       data-options="url:'<@sp.ctx />/user/adminDept.htm?method=getDeptList&type=1',lines:true,method:'get',rownumbers: true,idField: 'id',treeField: 'name'"
+       toolbar="#toolbar"
+       rownumbers="true" fitColumns="true" singleSelect="true">
+    <thead>
+    <tr>
+        <th field="name" width="50%">部门名称</th>
+        <th field="position" width="20%">同级显示顺序</th>
+        <th field="createTime" width="26%">创建时间</th>
+    </tr>
+    </thead>
+</table>
+<#include "../role_detail_inc.html">
+<div id="dlg" class="easyui-dialog"
+     style="width: 400px; height: 350px; padding: 10px 20px" closed="true"
+     buttons="#dlg-buttons">
+    <div class="ftitle">添加</div>
+    <form id="fm" method="post" novalidate>
+        <div class="fitem" hidden="hidden">
+            <label>id:</label> <input name="deptId" class="easyui-validatebox">
+        </div>
+        <div class="fitem">
+            <label>上级部门:</label>
+            <input name="parentId" id="parentId" class="easyui-combotree">
+        </div>
+        <div class="fitem">
+            <label>部门名称:</label> <input name="name" style="width: 150px; class=" easyui-validatebox" required="true">
+        </div>
+        <div class="fitem">
+            <label>同级显示顺序:</label> <input name="position" style="width: 150px; class=" easyui-validatebox" required="true">
+        </div>
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+<script type="text/javascript">
+
+
+    var baseAction = "<@sp.ctx />/user/adminDept.htm"
+    var url;
+
+    function addDg() {
+        $('#parentId').combotree({
+            url: baseAction + '?method=getDeptList&type=2',
+            width: '150px'
+
+        });
+        $('#dlg').dialog('open').dialog('setTitle', '新增部门');
+        $('#fm').form('clear');
+        url = baseAction + '?method=save&_ajax';
+    }
+    function editDg() {
+
+        $('#parentId').combotree({
+            url: baseAction + '?method=getDeptList&type=2',
+            width: '150px'
+
+        });
+
+        var row = $('#dg').treegrid('getSelected');
+
+        if (row) {
+            $('#dlg').dialog('open').dialog('setTitle', '修改部门信息');
+            $('#fm').form('load', row);
+            url = baseAction + '?method=update';
+        }
+
+
+    }
+    function save() {
+        $('#fm').form('submit', {
+            "url": url,
+            onSubmit: function () {
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var result = eval('(' + result + ')');
+                if (result.errorMsg) {
+                    $.messager.alert('Error', result.errorMsg);
+                } else {
+                    $('#dlg').dialog('close'); // close the dialog
+                    $('#dg').treegrid('reload'); // reload the user data
+                }
+            }
+        });
+    }
+    function destroyDg() {
+        var row = $('#dg').treegrid('getSelected');
+        if (row) {
+            $.messager.confirm('确定删除', '确定删除选中数据吗?', function (r) {
+                if (r) {
+                    $.post(baseAction + '?method=remove', {id: row.id}, function (result) {
+                        if (result.success) {
+                            $('#dg').treegrid('reload'); // reload the user data
+                        } else {
+                            $.messager.alert('Error', result.errorMsg
+                            );
+                        }
+                    }, 'json');
+                }
+            });
+        }
+    }
+
+    function exportFile() {
+        var props = $("th", "#dg");
+        var propStr = "";
+        var propTiles = "";
+        for (var i = 0; i < props.length; i++) {
+            propStr += ($(props[i]).attr("field"));
+            propTiles += ($(props[i]).text());
+            if (i != props.length - 1) {
+                propStr += ",";
+                propTiles += ",";
+            }
+        }
+        var prms = $('#fm').serialize();
+        var exportUrl = baseAction + "?method=export&titles=" + propTiles + "&props=" + propStr + "&" + prms;
+        location.href = exportUrl;
+    }
+
+
+</script>
+
+</body>
+</html>

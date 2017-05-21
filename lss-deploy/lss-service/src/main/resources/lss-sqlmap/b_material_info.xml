@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="BMaterialInfo">
+
+	<sql id="tableName" >
+		b_material_info
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	t.name name ,
+    y.name typeName,
+	t.typeid typeid ,
+	code code ,
+	price price ,
+	t.account_flag accountFlag ,
+	t.convert_flag convertFlag ,
+	covert_ratio covertRatio ,
+	compensate_flag compensateFlag ,
+	compensate_ratio compensateRatio ,
+	express_flag expressFlag ,
+	express_ratio expressRatio ,
+	express_price expressPrice ,
+	
+    transfer_flag transferFlag ,
+	transfer_price transferPrice ,
+	
+	
+	zx_price zxPrice ,
+	py_code pyCode ,
+	t.status status     FROM 
+    <include refid="tableName"/> t
+    left join b_material_type y
+    on t.typeId=y.typeId
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.BMaterialInfo" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,name,typeid,code,price,account_flag,convert_flag,covert_ratio,compensate_flag,compensate_ratio,express_flag,express_ratio,express_price,transfer_flag,transfer_price,zx_price,py_code,status,position)
+		VALUES
+		(#{id} ,#{name} ,#{typeid} ,#{code} ,#{price} ,#{accountFlag} ,#{convertFlag} ,#{covertRatio} ,#{compensateFlag} ,#{compensateRatio} ,#{expressFlag} ,#{expressRatio} ,#{expressPrice} ,#{transferFlag} ,#{transferPrice} ,#{zxPrice} ,#{pyCode} ,#{status}, #{code} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,name,typeid,code,price,account_flag,convert_flag,covert_ratio,compensate_flag,compensate_ratio,express_flag,express_ratio,express_price,transfer_flag,transfer_price,zx_price,py_code,status,position)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.name} ,#{item.typeid} ,#{item.code} ,#{item.price} ,#{item.accountFlag} ,#{item.convertFlag} ,#{item.covertRatio} ,#{item.compensateFlag} ,#{item.compensateRatio} ,#{item.expressFlag} ,#{item.expressRatio} ,#{item.expressPrice},#{item.transferFlag} ,#{item.transferPrice} ,#{item.zxPrice} ,#{item.pyCode} ,#{item.status} ,#{item.code} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.Integer">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE code = #{id}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.BMaterialInfo">
+		<include refid="selectColumns" />
+		 where t.status!=9 order by  t.position desc
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.BMaterialInfo" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where id = #{id}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="name != '' and name != null">AND name = #{name}</if>
+  	<if test="typeid != null">AND typeid = #{typeid}</if>
+  	<if test="code != '' and code != null">AND code = #{code}</if>
+  	<if test="price != null">AND price = #{price}</if>
+  	<if test="accountFlag != '' and accountFlag != null">AND account_flag = #{accountFlag}</if>
+  	<if test="convertFlag != '' and convertFlag != null">AND convert_flag = #{convertFlag}</if>
+  	<if test="covertRatio != null">AND covert_ratio = #{covertRatio}</if>
+  	<if test="compensateFlag != '' and compensateFlag != null">AND compensate_flag = #{compensateFlag}</if>
+  	<if test="compensateRatio != null">AND compensate_ratio = #{compensateRatio}</if>
+  	<if test="expressFlag != '' and expressFlag != null">AND express_flag = #{expressFlag}</if>
+  	<if test="expressRatio != null">AND express_ratio = #{expressRatio}</if>
+  	<if test="expressPrice != null">AND express_price = #{expressPrice}</if>
+  	<if test="zxPrice != null">AND zx_price = #{zxPrice}</if>
+  	<if test="pyCode != '' and pyCode != null">AND py_code = #{pyCode}</if>
+  	<if test="status != '' and status != null">AND status = #{status}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.BMaterialInfo"
+		parameterType="com.lq.lss.model.BMaterialInfo">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="name != null">name = #{name},</if>
+		  	<if test="typeid != null">typeid = #{typeid},</if>
+		  	<if test="code != null">code = #{code},</if>
+		  	<if test="price != null">price = #{price},</if>
+		  	<if test="accountFlag != null">account_flag = #{accountFlag},</if>
+		  	<if test="convertFlag != null">convert_flag = #{convertFlag},</if>
+		  	<if test="covertRatio != null">covert_ratio = #{covertRatio},</if>
+		  	<if test="compensateFlag != null">compensate_flag = #{compensateFlag},</if>
+		  	<if test="compensateRatio != null">compensate_ratio = #{compensateRatio},</if>
+		  	<if test="expressFlag != null">express_flag = #{expressFlag},</if>
+		  	<if test="expressRatio != null">express_ratio = #{expressRatio},</if>
+		  	<if test="expressPrice != null">express_price = #{expressPrice},</if>
+		    <if test="transferFlag != null">transfer_flag = #{transferFlag},</if>
+		  	<if test="transferPrice != null">transfer_price = #{transferPrice},</if>
+		  	
+		  	
+		  	<if test="zxPrice != null">zx_price = #{zxPrice},</if>
+		  	<if test="pyCode != null">py_code = #{pyCode},</if>
+		  	<if test="status != null">status = #{status}</if>
+			</set>
+		WHERE id = #{id}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.BMaterialInfo">
+		<include refid="update_sql"/>
+	</update>	
+		
+   <select id="findByTypeId" resultType="com.lq.lss.model.BMaterialInfo" parameterType="java.lang.Integer">
+		<include refid="selectColumns"/>   
+		where t.typeid = #{typeid}
+	</select>
+
+</mapper>

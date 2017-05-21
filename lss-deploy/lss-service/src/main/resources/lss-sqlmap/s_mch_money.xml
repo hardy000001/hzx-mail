@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SMchMoney">
+
+	<sql id="tableName" >
+		s_mch_money
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	deptid deptid ,
+	mchcode mchcode ,
+	transfer_fee transferFee ,
+	rent_fee rentFee ,
+	repair_fee repairFee ,
+	redress_fee redressFee ,
+	transport_fee transportFee ,
+	zx_fee zxFee ,
+	other_fee otherFee ,
+	stop_fee stopFee ,
+	total_fee totalFee ,
+	due_fee dueFee ,
+	received_fee receivedFee ,
+	settle_month settleMonth ,
+	creattime creattime     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.SMchMoney" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,deptid,mchcode,transfer_fee,rent_fee,repair_fee,redress_fee,transport_fee,zx_fee,other_fee,stop_fee,total_fee,due_fee,received_fee,settle_month,creattime)
+		VALUES
+		(#{id} ,#{deptid} ,#{mchcode} ,#{transferFee} ,#{rentFee} ,#{repairFee} ,#{redressFee} ,#{transportFee} ,#{zxFee} ,#{otherFee} ,#{stopFee} ,#{totalFee} ,#{dueFee} ,#{receivedFee} ,#{settleMonth} ,#{creattime} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,deptid,mchcode,transfer_fee,rent_fee,repair_fee,redress_fee,transport_fee,zx_fee,other_fee,stop_fee,total_fee,due_fee,received_fee,settle_month,creattime)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.deptid} ,#{item.mchcode} ,#{item.transferFee} ,#{item.rentFee} ,#{item.repairFee} ,#{item.redressFee} ,#{item.transportFee} ,#{item.zxFee} ,#{item.otherFee} ,#{item.stopFee} ,#{item.totalFee} ,#{item.dueFee} ,#{item.receivedFee} ,#{item.settleMonth} ,#{item.creattime} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE id = #{id}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.SMchMoney">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.SMchMoney" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where id = #{id}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != '' and id != null">AND id = #{id}</if>
+  	<if test="deptid != null">AND deptid = #{deptid}</if>
+  	<if test="cuscode != '' and cuscode != null">AND mchcode = #{mchcode}</if>
+  	<if test="transferFee != null">AND transfer_fee = #{transferFee}</if>
+  	<if test="rentFee != null">AND rent_fee = #{rentFee}</if>
+  	<if test="repairFee != null">AND repair_fee = #{repairFee}</if>
+  	<if test="redressFee != null">AND redress_fee = #{redressFee}</if>
+  	<if test="transportFee != null">AND transport_fee = #{transportFee}</if>
+  	<if test="zxFee != null">AND zx_fee = #{zxFee}</if>
+  	<if test="otherFee != null">AND other_fee = #{otherFee}</if>
+  	<if test="stopFee != null">AND stop_fee = #{stopFee}</if>
+  	<if test="totalFee != null">AND total_fee = #{totalFee}</if>
+  	<if test="dueFee != null">AND due_fee = #{dueFee}</if>
+  	<if test="receivedFee != null">AND received_fee = #{receivedFee}</if>
+  	<if test="settleMonth != '' and settleMonth != null">AND settle_month = #{settleMonth}</if>
+  	<if test="creattime != null">AND creattime = #{creattime}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.SMchMoney"
+		parameterType="com.lq.lss.model.STransferMoney">
+		select
+			t.id id ,
+			t.deptid deptid ,
+			t.mchcode mchcode ,
+			t.transfer_fee transferFee ,
+			t.rent_fee rentFee ,
+			t.repair_fee repairFee ,
+			t.redress_fee redressFee ,
+			t.transport_fee transportFee ,
+			t.zx_fee zxFee ,
+			t.other_fee otherFee ,
+			t.stop_fee stopFee ,
+			t.total_fee totalFee ,
+			t.due_fee dueFee ,
+			t.received_fee receivedFee ,
+			t.settle_month settleMonth ,
+			t.creattime creattime,
+		    ci.mchName mchName,
+			d.name centerName      FROM 
+		    <include refid="tableName"/> t
+		    left join mch_baseinfo ci on (t.mchCode=ci.mchCode and t.deptid=ci.deptId)      
+		    left join admin_dept d on t.deptid=d.dept_id
+		    <include refid="pageConditions" />
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName"/> t
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="cuscode != null">mchcode = #{mchcode},</if>
+		  	<if test="transferFee != null">transfer_fee = #{transferFee},</if>
+		  	<if test="rentFee != null">rent_fee = #{rentFee},</if>
+		  	<if test="repairFee != null">repair_fee = #{repairFee},</if>
+		  	<if test="redressFee != null">redress_fee = #{redressFee},</if>
+		  	<if test="transportFee != null">transport_fee = #{transportFee},</if>
+		  	<if test="zxFee != null">zx_fee = #{zxFee},</if>
+		  	<if test="otherFee != null">other_fee = #{otherFee},</if>
+		  	<if test="stopFee != null">stop_fee = #{stopFee},</if>
+		  	<if test="totalFee != null">total_fee = #{totalFee},</if>
+		  	<if test="dueFee != null">due_fee = #{dueFee},</if>
+		  	<if test="receivedFee != null">received_fee = #{receivedFee},</if>
+		  	<if test="settleMonth != null">settle_month = #{settleMonth},</if>
+		  	<if test="creattime != null">creattime = #{creattime}</if>
+			</set>
+		WHERE id = #{id}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.SMchMoney">
+		<include refid="update_sql"/>
+	</update>	
+	
+		<delete id="deleteBySetDate" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE settle_month = #{settleMonth}
+  	</delete>
+		
+		
+		
+			
+	 <!-- 批量 修改 -->
+    <update id="update_BATCH" parameterType="List">
+   
+		<foreach collection="list" item="item" index="index" close="" separator=";">
+				UPDATE 
+	           <include refid="tableName"/> 
+                <set>
+		  	   transfer_fee = (#{item.transferFee}+transfer_fee),
+		  	   transport_fee = (#{item.transportFee}+transport_fee),
+		  	   zx_fee = (#{item.zxFee}+zx_fee),
+		  	   other_fee = (#{item.otherFee}+other_fee),
+		  	   due_fee=(#{item.transferFee}+transfer_fee+#{item.transportFee}+#{item.zxFee}+#{item.otherFee})
+                
+                </set>
+               WHERE mchcode = #{item.mchcode} 
+		       and deptid = #{item.deptid}
+		       and settle_month = #{item.settleMonth}
+		</foreach>
+		
+		
+	</update>
+	
+
+</mapper>

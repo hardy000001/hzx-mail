@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project  default="dist" basedir="." >
+<property name="pjName" value="cp-sys-jt" />
+<property name="wwwDir" value="/var/local/www/statics" />
+<property name="destLocation" value="."/>   
+
+<target name="dist">
+	<delete file="${destLocation}/${pjName}.zip" ></delete>	
+	<zip destfile="${destLocation}/${pjName}.zip"  duplicate="preserve"  >
+		<zipfileset dir="${basedir}/" prefix=""  >
+			<exclude name="build.xml" />
+		</zipfileset>
+	</zip>
+	 <copy tofile="${wwwDir}/${pjName}.zip">
+			 <fileset dir="${basedir}" includes="${pjName}.zip" />
+	</copy>
+	<deltree dir="${wwwDir}/${pjName}"  />
+	<unzip src="${wwwDir}/${pjName}.zip" dest="${wwwDir}/${pjName}" encoding="utf-8" />
+	
+</target>
+
+</project>

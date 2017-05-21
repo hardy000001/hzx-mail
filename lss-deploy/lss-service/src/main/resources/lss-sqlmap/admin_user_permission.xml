@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AdminUserPermission">
+
+    <sql id="tableName">
+		admin_user_permission
+	</sql>
+
+    <sql id="selectColumns">
+        select
+        id id ,
+        user_id userId ,
+        permission_type permissionType ,
+        permission_id permissionId ,
+        create_time createTime FROM
+        <include refid="tableName"/>
+        t
+    </sql>
+
+    <!-- 添加 -->
+    <insert id="create" parameterType="com.lq.lss.model.AdminUserPermission" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id,user_id,permission_type,permission_id,create_time)
+        VALUES
+        (#{id} ,#{userId} ,#{permissionType} ,#{permissionId} ,#{createTime} )
+    </insert>
+
+    <!-- 批量 添加 -->
+    <insert id="create_BATCH" parameterType="List">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id,user_id,permission_type,permission_id,create_time)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id} ,#{item.userId} ,#{item.permissionType} ,#{item.permissionId} ,#{item.createTime} )
+        </foreach>
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE user_id = #{userId}
+    </delete>
+
+    <select id="loadAll" resultType="com.lq.lss.model.AdminUserPermission">
+        <include refid="selectColumns"/>
+    </select>
+
+    <select id="findById" resultType="com.lq.lss.model.AdminUserPermission"
+            parameterType="java.lang.String">
+        <include refid="selectColumns"/>
+        where id = #{id}
+    </select>
+
+    <sql id="pageConditions">
+        WHERE 1=1
+        <if test="id != null">AND id = #{id}</if>
+        <if test="userId != null">AND user_id = #{userId}</if>
+        <if test="permissionType != null">AND permission_type = #{permissionType}</if>
+        <if test="permissionId != null">AND permission_id = #{permissionId}</if>
+        <if test="createTime != null">AND create_time = #{createTime}</if>
+    </sql>
+
+    <!-- 分页查询 -->
+    <select id="findPage" resultType="com.lq.lss.model.AdminUserPermission"
+            parameterType="com.lq.lss.model.AdminUserPermission">
+        <include refid="selectColumns"/>
+        <include refid="pageConditions"/>
+        <if test="orderStr != '' and orderStr != null">
+            order by ${orderStr}
+        </if>
+    </select>
+
+    <select id="findPage_COUNT" resultType="int">
+        select count(1) from
+        <include refid="tableName"/>
+        <include refid="pageConditions"/>
+    </select>
+
+    <sql id="update_sql">
+        UPDATE
+        <include refid="tableName"/>
+        <set>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="permissionType != null">permission_type = #{permissionType},</if>
+            <if test="permissionId != null">permission_id = #{permissionId},</if>
+            <if test="createTime != null">create_time = #{createTime}</if>
+        </set>
+        WHERE id = #{id}
+    </sql>
+
+    <update id="update" parameterType="com.lq.lss.model.AdminUserPermission">
+        <include refid="update_sql"/>
+    </update>
+
+    <select id="selectUserHasRoles" resultType="java.lang.Long" parameterType="java.lang.Integer">
+        SELECT  permission_id from admin_user_permission where permission_type =1 and user_id=#{userId}
+	</select>
+
+    <select id="selectUserHasResources" resultType="java.lang.Long" parameterType="java.lang.Integer">
+
+     SELECT DISTINCT(resource_id) resourceId  from admin_role_resource
+     where role_id  in  (SELECT  permission_id from admin_user_permission where permission_type =1 and user_id=#{userId} );
+
+    </select>
+
+
+</mapper>

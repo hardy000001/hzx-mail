@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockTransfer">
+
+    <sql id="tableName">
+		c_stock_transfer
+	</sql>
+
+    <sql id="selectColumns">
+        select
+        t.tsf_serialno tsfSerialno ,
+        t.from_deptid fromDeptid ,
+        t.from_mchcode fromMchcode ,
+        t.to_deptid toDeptid ,
+        t.to_mchcode toMchcode ,
+        t.total_m totalM ,
+        t.total_s totalS ,
+        if(t.status=0,10,t.status) s_status,
+        t.total_t totalT ,
+        t.zx_fee zxFee ,
+        t.other_fee otherFee ,
+        t.transport_fee transportFee ,
+        t.tsf_sdate tsfSdate ,
+        t.tsf_edate tsfEdate ,
+        t.status status ,
+        t.others others ,
+        t.createoper createoper ,
+        t.createtime createtime ,
+        t.auditingoper auditingoper ,
+        t.auditingtime auditingtime ,
+        t.tra_out_oper traOutOper ,
+        t.tra_in_oper traInOper,
+        t.tra_type traType,
+        mf.mchName fromMchName,
+        mt.mchName toMchName,
+        df.name fromDeptName,
+        dt.name toDeptName,
+        uu.login_name operName,
+		u.login_name loginName
+        FROM
+        <include refid="tableName"/>
+        t
+        LEFT JOIN mch_baseinfo mf ON mf.mchCode = t.from_mchcode AND mf.deptId = t.from_deptid
+        LEFT JOIN mch_baseinfo mt ON mt.mchCode = t.to_mchcode AND mt.deptId = t.to_deptid
+        LEFT JOIN admin_dept df ON df.dept_id = t.from_deptid
+        LEFT JOIN admin_dept dt ON dt.dept_id = t.to_deptid
+        left join admin_user u on t.createoper=u.user_id
+		left join admin_user uu on t.auditingoper=uu.user_id
+    </sql>
+
+    <!-- 添加 -->
+    <insert id="create" parameterType="com.lq.lss.model.CStockTransfer" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tableName"/>
+        (tsf_serialno,from_deptid,from_mchcode,to_deptid,to_mchcode,total_m,total_s,total_t,zx_fee,other_fee,transport_fee,tsf_sdate,tsf_edate,status,others,createoper,createtime,auditingoper,auditingtime,tra_out_oper,tra_in_oper,tra_type)
+        VALUES
+        (#{tsfSerialno} ,#{fromDeptid} ,#{fromMchcode} ,#{toDeptid} ,#{toMchcode} ,#{totalM} ,#{totalS} ,#{totalT} ,#{zxFee}
+        ,#{otherFee},#{transportFee} ,#{tsfSdate} ,#{tsfEdate} ,#{status} ,#{others} ,#{createoper} ,#{createtime} ,#{auditingoper}
+        ,#{auditingtime} ,#{traOutOper} ,#{traInOper},#{traType} )
+    </insert>
+
+    <!-- 批量 添加 -->
+    <insert id="create_BATCH" parameterType="List">
+        INSERT INTO
+        <include refid="tableName"/>
+        (tsf_serialno,from_deptid,from_mchcode,to_deptid,to_mchcode,total_m,total_s,total_t,zx_fee,other_fee,transport_fee,tsf_sdate,tsf_edate,status,others,createoper,createtime,auditingoper,auditingtime,tra_out_oper,tra_in_oper,tra_type)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.tsfSerialno} ,#{item.fromDeptid} ,#{item.fromMchcode} ,#{item.toDeptid} ,#{item.toMchcode} ,#{item.totalM}
+            ,#{item.totalS} ,#{item.totalT} ,#{item.zxFee} ,#{item.otherFee} ,#{transportFee},#{item.tsfSdate} ,#{item.tsfEdate}
+            ,#{item.status} ,#{item.others} ,#{item.createoper} ,#{item.createtime} ,#{item.auditingoper} ,#{item.auditingtime}
+            ,#{item.traOutOper} ,#{item.traInOper},#{item.traType}  )
+        </foreach>
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.String">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE tsf_serialno = #{tsfSerialno}
+    </delete>
+
+    <select id="loadAll" resultType="com.lq.lss.model.CStockTransfer">
+        <include refid="selectColumns"/>
+    </select>
+
+    <select id="findById" resultType="com.lq.lss.model.CStockTransfer"
+            parameterType="java.lang.String">
+        <include refid="selectColumns"/>
+        where tsf_serialno = #{tsfSerialno}
+    </select>
+
+    <sql id="pageConditions">
+        WHERE 1=1
+        <if test="tsfSerialno != null">AND t.tsf_serialno = #{tsfSerialno}</if>
+        <if test="fromDeptid != null">AND t.from_deptid = #{fromDeptid}</if>
+        <if test="fromMchcode != '' and fromMchcode != null">AND t.from_mchcode = #{fromMchcode}</if>
+        <if test="toDeptid != null">AND t.to_deptid = #{toDeptid}</if>
+        <if test="toMchcode != '' and toMchcode != null">AND t.to_mchcode = #{toMchcode}</if>
+        <if test="totalM != null">AND t.total_m = #{totalM}</if>
+        <if test="totalS != null">AND t.total_s = #{totalS}</if>
+        <if test="totalT != null">AND t.total_t = #{totalT}</if>
+        <if test="zxFee != null">AND t.zx_fee = #{zxFee}</if>
+        <if test="traType != '' and traType != null">AND t.tra_type = #{traType}</if>
+        <if test="otherFee != null">AND t.other_fee = #{otherFee}</if>
+        <if test="transportFee != null">AND t.transport_fee = #{transportFee}</if>
+        <if test="dealDate != null"> and  left(t.tsf_sdate,10) = #{dealDate} </if>
+      
+        <if test="status != '' and status != null">AND  t.status = #{status}</if>
+        <if test="others != '' and others != null">AND  t.others = #{others}</if>
+        <if test="createoper != '' and createoper != null">AND  t.createoper = #{createoper}</if>
+        <if test="createDate != '' and  createDate != null">AND left(t.createtime,10) = #{createDate}</if>
+        <if test="auditingoper != '' and auditingoper != null">AND  t.auditingoper = #{auditingoper}</if>
+        <if test="auditingtime != null">AND  t.auditingtime = #{auditingtime}</if>
+        <if test="traOutOper != '' and traOutOper != null">AND  t.tra_out_oper = #{traOutOper}</if>
+        <if test="traInOper != '' and traInOper != null">AND  t.tra_in_oper = #{traInOper}</if>
+       
+    </sql>
+
+    <!-- 分页查询 -->
+    <select id="findPage" resultType="com.lq.lss.model.CStockTransfer"
+            parameterType="com.lq.lss.model.CStockTransfer">
+        <include refid="selectColumns"/>
+        <include refid="pageConditions"/>
+        order by s_status ,createtime desc
+    </select>
+
+    <select id="findPage_COUNT" resultType="int">
+        select count(1) from
+        <include refid="tableName"/>
+        t
+        <include refid="pageConditions"/>
+    </select>
+
+    <sql id="update_sql">
+        UPDATE
+        <include refid="tableName"/>
+        <set>
+            <if test="fromDeptid != null">from_deptid = #{fromDeptid},</if>
+            <if test="fromMchcode != null">from_mchcode = #{fromMchcode},</if>
+            <if test="toDeptid != null">to_deptid = #{toDeptid},</if>
+            <if test="toMchcode != null">to_mchcode = #{toMchcode},</if>
+            <if test="totalM != null">total_m = #{totalM},</if>
+            <if test="totalS != null">total_s = #{totalS},</if>
+            <if test="totalT != null">total_t = #{totalT},</if>
+            <if test="zxFee != null">zx_fee = #{zxFee},</if>
+            <if test="otherFee != null">other_fee = #{otherFee},</if>
+            <if test="transportFee != null">transport_fee = #{transportFee},</if>
+            <if test="tsfSdate != null">tsf_sdate = #{tsfSdate},</if>
+            <if test="tsfEdate != null">tsf_edate = #{tsfEdate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="others != null">others = #{others},</if>
+            <if test="createoper != null">createoper = #{createoper},</if>
+            <if test="createtime != null">createtime = #{createtime},</if>
+            auditingoper = #{auditingoper},
+		  	auditingtime = #{auditingtime},
+            <if test="traOutOper != null">tra_out_oper = #{traOutOper},</if>
+            <if test="traInOper != null">tra_in_oper = #{traInOper},</if>
+            <if test="traType != null">tra_type = #{traType}</if>
+        </set>
+        WHERE tsf_serialno = #{tsfSerialno}
+    </sql>
+
+    <update id="update" parameterType="com.lq.lss.model.CStockTransfer">
+        <include refid="update_sql"/>
+    </update>
+
+
+</mapper>

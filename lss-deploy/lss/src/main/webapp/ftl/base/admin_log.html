@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+ <title>发料单管理</title> 
+ <#include "../include_head.html">
+</head>
+<body>
+	
+	
+	<table id="dg" title="用户" class="easyui-datagrid" style="height: 400px"
+		data-options="url:'<@sp.ctx />/user/adminlog.htm?method=query'"
+		toolbar="#toolbar" pagination="true"
+		rownumbers="true" fitColumns="true" singleSelect="true">
+		<thead>
+			<tr>
+				<th field="id" width="25%" sortable="true">id</th>
+				<th field="name" width="25%">操作人</th>
+				<th field="operateDesc" width="25%">操作</th>	
+				<th field="createTime" width="25%">操作时间</th>
+			</tr>
+		</thead>
+	</table>
+
+	
+	<script type="text/javascript">
+		
+		
+				 
+	</script>
+	
+	
+	
+	
+
+</body>
+</html>

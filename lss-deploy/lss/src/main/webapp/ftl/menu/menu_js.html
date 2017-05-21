@@ -1,0 +1,328 @@
+
+
+<script language="javascript">
+
+
+    var baseAction = "<@sp.ctx />/user/adminResource.htm";
+
+    $('#tt').tree({
+        url: baseAction + '?method=queryUserMenuList',
+        onClick: function (node) {
+            if (node.attributes.url != null && node.attributes.url != "" && node.attributes.url != "undefined" && node.attributes.url != "null" ) {
+                open1(node.text, node.attributes.url);
+            } else {
+                $('#tt').tree('expand', node.target);
+            }
+        },
+        onDblClick: function (node) {
+            $('#tt').tree('collapse', node.target);
+        },
+        onContextMenu: function (e, node) {
+            e.preventDefault();
+            // 有资源操作权限的绑定右键菜单 ---超级管理员
+            if (${isAdmin!''} =='1')
+            {
+                $('#tt').tree('select', node.target);
+                $('#treeMM').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+
+
+
+        }
+
+
+    });
+
+    //新增菜单
+    function menuAppend() {
+        var node = $('#tt').tree('getSelected');
+
+        $('#dlgResource').dialog('open').dialog('setTitle', '新增资源');
+        $('#fmResource').form('clear');
+        $('#menuItem').hide();
+        $('#pid').val(node.id);
+
+        $.ajax({
+            url: baseAction + '?method=queryResMaxId',
+            type: "post",
+            async: false,
+            data:{ pid : node.id},
+            dataType: "json",
+            success: function (result) {
+                $("#id").textbox("setValue",result.paramObj);
+            }
+        });
+
+        $('#type').combobox({
+            valueField: 'id',
+            textField: 'text',
+            data: [{id: '1', text: '菜单'}, {id: '2', text: '按钮或操作'}, {id: '3', text: '虚拟菜单'}]
+        });
+        $('#menuLeafFlag').combobox({
+            valueField: 'id',
+            textField: 'text',
+            data: [{id: '0', text: '否'}, {id: '1', text: '是'}],
+            onChange: function (newValue, oldValue) {
+                if (newValue == 1) {
+                    $('#menuItem').show();
+                } else {
+                    $('#menuItem').hide();
+                }
+            }
+        });
+
+        $("#layer").val((Number(node.attributes.layer)+1));
+        $("#id").textbox("readonly", false);
+        $('#doType').val('create');
+
+    }
+    //修改菜单
+    function menuEdit() {
+        var node = $('#tt').tree('getSelected');
+
+        $('#type').combobox({
+            valueField: 'id',
+            textField: 'text',
+            data: [{id: '1', text: '菜单'}, {id: '2', text: '按钮或操作'}, {id: '3', text: '虚拟菜单'}]
+        });
+        $('#menuLeafFlag').combobox({
+            valueField: 'id',
+            textField: 'text',
+            data: [{id: '0', text: '否'}, {id: '1', text: '是'}],
+            onChange: function (newValue, oldValue) {
+                if (newValue == 1) {
+                    $('#menuItem').show();
+                } else {
+                    $('#menuItem').hide();
+                }
+            }
+        });
+
+
+        $('#dlgResource').dialog('open').dialog('setTitle', '修改资源');
+        $('#fmResource').form('load', node);
+
+        $("#name").textbox('setValue', node.text);
+        $("#id").textbox("readonly", true);
+
+
+        if (node.attributes.remark != null && node.attributes.remark != "" && node.attributes.remark != "null") {
+            $("#remark").textbox('setValue', node.attributes.remark);
+        } else {
+            $("#remark").textbox('setValue', '');
+        }
+        //
+        if (node.attributes.url != null && node.attributes.url != "") {
+            $("#menuLeafUrl").textbox('setValue', node.attributes.url);
+        } else {
+            $("#menuLeafUrl").textbox('setValue', '');
+        }
+        if (node.attributes.menuLeafFlag != null && node.attributes.menuLeafFlag != "") {
+            if (node.attributes.menuLeafFlag == 1) {
+                $('#menuItem').show();
+                if (node.attributes.menuLeafMode != null) {
+                    $("#menuLeafMode").combobox('setValue', node.attributes.menuLeafMode);
+                }
+            } else {
+                $('#menuItem').hide();
+            }
+            $("#menuLeafFlag").combobox('setValue', node.attributes.menuLeafFlag);
+        }
+        if (node.attributes.type != null) {
+            $("#type").combobox('setValue', node.attributes.type);
+        }
+        if (node.attributes.orderNo != null) {
+            $("#orderNo").textbox("setValue", node.attributes.orderNo);
+        }
+        if (node.attributes.code != null) {
+            $("#code").textbox("setValue", node.attributes.code);
+        }
+        if (node.attributes.layer != null) {
+            $("#layer").val(node.attributes.layer);
+        }
+
+        $('#doType').val('modify');
+    }
+    //删除菜单
+    function menuRemove() {
+
+        var node = $('#tt').tree('getSelected');
+        var childNode = $('#tt').tree('getChildren', node.target);
+        if (childNode.length > 0) {
+            $.messager.alert('提示信息', '不能删除包含子节点的菜单', 'info');
+            return false;
+        }
+        $.messager.confirm('提示信息', '确定删除选中数据吗?', function (r) {
+            if (r) {
+                $.post(baseAction + '?method=delete', {
+                    id: node.id
+                }, function (result) {
+                    if (result.success) {
+                        $.messager.alert('提示信息', '操作成功', 'info', function () {
+                            $('#tt').tree('reload');
+                        });
+                    } else {
+                        $.messager.alert('错误信息', result.message, 'error');
+                    }
+                }, 'json');
+            }
+        });
+
+    }
+
+    var javaConstName = new RegExp("^[_A-Z][_A-Z0-9]*$");
+
+    //保存菜单
+    function saveResource() {
+        if ($('#fmResource').form('validate')) {
+
+            var code = $('#code').textbox('getValue');
+            if (!javaConstName.test(code)) {
+                $.messager.alert('提示', '编码不符合规则:<br>大写字母、数字、下划线组成，且不能数字打头!', 'error');
+                return;
+            }
+
+            $.messager.confirm('提示信息', '确定要执行操作吗?', function (r) {
+                if (r) {
+                    $.ajax({
+                        url: baseAction + "?method=" + $('#doType').val(),
+                        type: "post",
+                        data: $("#fmResource").serialize(),
+                        dataType: "json",
+                        success: function (result) {
+                            if (result.success) {
+                                $.messager.alert('提示信息', '操作成功', 'info', function () {
+                                    $('#dlgResource').dialog('close');
+                                    window.parent.$('#tt').tree('reload');
+                                });
+                            } else {
+                                $.messager.alert('错误信息', result.errorMsg, 'error');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+    }
+
+    // 打开操作&按钮列表管理
+    function menuResource() {
+        var node = $('#tt').tree('getSelected');
+        $('#dlgAciton').dialog('open').dialog('setTitle', '按钮&操作');
+        var queryMap = {};
+        queryMap['pid'] = node.id;
+        $('#dgItem').datagrid({
+            queryParams: queryMap,
+            url: baseAction + '?method=queryResourceList',
+            singleSelect: true,
+            toolbar: '#tb'
+        });
+
+    }
+
+
+    //添加操作
+    function append() {
+        var node = $('#tt').tree('getSelected');
+        $('#dlgAciton_dlg').dialog('open').dialog('setTitle', '新增操作');
+        $('#fmAction').form('clear');
+        var node2 = {};
+        node2.appId = node.attributes.appId;
+        node2.pid = node.id;
+        node2.code = "";
+        node2.name = "";
+        node2.id = "";
+        node2.type = "2";
+        node2.orderNo = "0";
+        node2.layer="99";
+
+        $.ajax({
+            url: baseAction + '?method=queryResMaxId',
+            type: "post",
+            async: false,
+            data: {pid: node.id},
+            dataType: "json",
+            success: function (result) {
+                node2.id = result.paramObj;
+            }
+        });
+
+        $('#fmAction').form('load', node2);
+        $('#doActionType').val('create');
+
+    }
+    // 修改操作
+    function modify() {
+        var row = $('#dgItem').datagrid('getSelected');
+        if (row == null) {
+            $.messager.alert('提示信息', '请选择要修改的行', 'info');
+            return false;
+        }
+        if (row) {
+            $('#dlgAciton_dlg').dialog('open').dialog('setTitle', '修改操作');
+            $('#fmAction').form('load', row);
+        }
+        $('#doActionType').val('update');
+
+    }
+    // 删除操作
+    function removeit() {
+        var row = $('#dgItem').datagrid('getSelected');
+        if (row == null) {
+            $.messager.alert('提示信息', '请选择要删除的行', 'info');
+            return false;
+        }
+        $.messager.confirm('提示信息', '确定删除选中数据吗?', function (r) {
+            if (r) {
+                $.post(baseAction + '?method=delete', {
+                    id: row.id
+                }, function (result) {
+                    if (result.success) {
+                        $.messager.alert('提示', '操作成功', 'info', function () {
+                            $('#dgItem').datagrid('reload');
+                        });
+                    } else {
+                        $.messager.alert('提示信息', result.errorMsg, 'error');
+                    }
+                }, 'json');
+            }
+        });
+
+    }
+    // 保存操作
+    function saveAction() {
+        if ($('#fmAction').form('validate')) {
+            $.messager.confirm('提示信息', '确定要执行操作吗?', function (r) {
+                if (r) {
+                    $.ajax({
+                        url: baseAction + "?method=" + $('#doActionType').val(),
+                        type: "post",
+                        data: $("#fmAction").serialize(),
+                        dataType: "json",
+                        success: function (result) {
+                            if (result.success) {
+                                $.messager.alert('提示信息', '操作成功', 'info', function () {
+                                    $('#dlgAciton_dlg').dialog('close');
+                                    $('#dgItem').datagrid('reload');
+                                });
+
+                            } else {
+                                $.messager.alert('提示信息', response.errorMsg, 'error');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+    }
+
+
+</script>
+
+
+

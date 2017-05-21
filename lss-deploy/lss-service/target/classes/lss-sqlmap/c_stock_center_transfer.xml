@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockCenterTransfer">
+
+	<sql id="tableName" >
+		c_stock_center_transfer
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	t.tsf_serialno tsfSerialno ,
+	t.from_deptid fromDeptid ,
+	t.from_mchcode fromMchcode ,
+	t.to_depid toDepid ,
+	t.to_mchcode toMchcode ,
+	t.zx_fee zxFee ,
+	t.transport_fee transportFee ,
+	t.other_fee otherFee ,
+	t.tsf_sdate tsfSdate ,
+	t.tsf_edate tsfEdate ,
+	t.status status ,
+	t.others others ,
+	t.createoper createoper ,
+	t.createtime createtime ,
+	t.auditingoper auditingoper ,
+	t.auditingtime auditingtime ,
+	t.tra_out_oper traOutOper ,
+	t.tra_in_oper traInOper,
+	t.tradetype tradetype,
+	t.tradeinfo tradeinfo,
+	t.mch_orderNo mchOrderNo,
+	t.remark remark,
+	t.car_no carNo ,
+	t.car_driver carDriver ,
+	uu.login_name operName,
+	u.login_name loginName,
+	d.name centerName,
+	m.mchname fromname,
+	c.cusname tomname
+	     FROM 
+    <include refid="tableName"/> t
+      left join admin_user u on t.createoper=u.user_id
+	  left join admin_user uu on t.auditingoper=uu.user_id
+	  left join admin_dept d on t.from_deptid=d.dept_id
+	  left join admin_dept dd on t.to_depid=dd.dept_id
+	  left join mch_baseinfo m on t.from_mchcode=m.mchcode  and t.from_deptid=m.deptId
+      left join customer_info c on t.to_mchcode=c.cuscode  and t.to_depid=c.deptId  
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockCenterTransfer" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(tsf_serialno,from_deptid,from_mchcode,to_depid,to_mchcode,zx_fee,transport_fee,other_fee,tsf_sdate,tsf_edate,status,others,createoper,createtime,auditingoper,auditingtime,tra_out_oper,tra_in_oper,tradetype,tradeinfo,mch_orderNo,remark,car_no,car_driver)
+		VALUES
+		(#{tsfSerialno} ,#{fromDeptid} ,#{fromMchcode} ,#{toDepid} ,#{toMchcode} ,#{zxFee} ,#{transportFee} ,#{otherFee} ,#{tsfSdate} ,#{tsfEdate} ,#{status} ,#{others} ,#{createoper} ,#{createtime} ,#{auditingoper} ,#{auditingtime} ,#{traOutOper} ,#{traInOper},#{tradetype},#{tradeinfo},#{mchOrderNo},#{remark},#{carNo},#{carDriver})
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(tsf_serialno,from_deptid,from_mchcode,to_depid,to_mchcode,zx_fee,transport_fee,other_fee,tsf_sdate,tsf_edate,status,others,createoper,createtime,auditingoper,auditingtime,tra_out_oper,tra_in_oper,tradetype,tradeinfo,mch_orderNo,remark,car_no,car_driver)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.tsfSerialno} ,#{item.fromDeptid} ,#{item.fromMchcode} ,#{item.toDepid} ,#{item.toMchcode} ,#{item.zxFee} ,#{item.transportFee} ,#{item.otherFee} ,#{item.tsfSdate} ,#{item.tsfEdate} ,#{item.status} ,#{item.others} ,#{item.createoper} ,#{item.createtime} ,#{item.auditingoper} ,#{item.auditingtime} ,#{item.traOutOper} ,#{item.traInOper},#{item.tradetype},#{item.tradeinfo},#{item.mchOrderNo},#{item.remark},#{item.carNo},#{item.carDriver} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE tsf_serialno = #{tsfSerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockCenterTransfer">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockCenterTransfer" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where tsf_serialno = #{tsfSerialno}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="tsfSerialno != '' and tsfSerialno != null">AND tsf_serialno = #{tsfSerialno}</if>
+  	<if test="fromDeptid != null">AND from_deptid = #{fromDeptid}</if>
+  	<if test="fromMchcode != '' and fromMchcode != null">AND from_mchcode = #{fromMchcode}</if>
+  	<if test="toDepid != null">AND to_depid = #{toDepid}</if>
+  	<if test="toMchcode != '' and toMchcode != null">AND to_mchcode = #{toMchcode}</if>
+  	<if test="zxFee != null">AND zx_fee = #{zxFee}</if>
+  	<if test="transportFee != null">AND transport_fee = #{transportFee}</if>
+  	<if test="otherFee != null">AND other_fee = #{otherFee}</if>
+  	<if test="tsfSdate != null">AND tsf_sdate = #{tsfSdate}</if>
+  	<if test="tsfEdate != null">AND tsf_edate = #{tsfEdate}</if>
+  	<if test="status != '' and status != null">AND t.status = #{status}</if>
+  	<if test="others != '' and others != null">AND others = #{others}</if>
+  	<if test="createoper != '' and createoper != null">AND createoper = #{createoper}</if>
+  	<if test="createtime != null">AND createtime = #{createtime}</if>
+  	<if test="auditingoper != '' and auditingoper != null">AND auditingoper = #{auditingoper}</if>
+  	<if test="auditingtime != null">AND auditingtime = #{auditingtime}</if>
+  	<if test="traOutOper != '' and traOutOper != null">AND tra_out_oper = #{traOutOper}</if>
+  	<if test="traInOper != '' and traInOper != null">AND tra_in_oper = #{traInOper}</if>
+  	<if test="tradetype != '' and tradetype != null">AND tradetype = #{tradetype}</if>
+  	<if test="tradeinfo != '' and tradeinfo != null">AND tradeinfo = #{tradeinfo}</if>
+  	<if test="mchOrderNo != '' and mchOrderNo != null">AND mch_orderNo = #{mchOrderNo}</if>
+  	<if test="remark != '' and remark != null">AND t.remark = #{remark}</if>
+  	
+  	<if test="createDate != '' and  createDate != null">AND left(t.createtime,10) = #{createDate}</if>
+  	<if test="dealDate != '' and  dealDate != null">AND left(t.tsf_sdate,10)  = #{dealDate}</if>
+  	
+  	
+  	<if test="beginTime != '' and  beginTime != null">AND left(t.createtime,10) &gt;= #{beginTime}</if>
+  	<if test="endTime != '' and  endTime != null">AND left(t.createtime,10) &lt;= #{endTime}</if>
+  	<if test="loginName != '' and loginName != null">AND u.login_name like '%${loginName}%'</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="pagerListinPage" resultType="com.lq.lss.model.CStockCenterTransfer"
+		parameterType="com.lq.lss.model.CStockCenterTransfer">
+			select
+			t.tsf_serialno tsfSerialno ,
+			t.from_deptid fromDeptid ,
+			t.from_mchcode fromMchcode ,
+			t.to_depid toDepid ,
+			t.to_mchcode toMchcode ,
+			t.zx_fee zxFee ,
+			t.transport_fee transportFee ,
+			t.other_fee otherFee ,
+			t.tsf_sdate tsfSdate ,
+			t.tsf_edate tsfEdate ,
+			t.status status ,
+			if(t.status=0,10,t.status) s_status,
+			t.others others ,
+			t.createoper createoper ,
+			t.createtime createtime ,
+			t.auditingoper auditingoper ,
+			t.auditingtime auditingtime ,
+			t.tra_out_oper traOutOper ,
+			t.tra_in_oper traInOper,
+			t.tradetype tradetype,
+			t.tradeinfo tradeinfo,
+			t.mch_orderNo mchOrderNo,
+			t.remark remark,
+			t.car_no carNo ,
+			t.car_driver carDriver ,
+			uu.login_name operName,
+			u.login_name loginName,
+			d.name centerName,
+			m.mchname tomname,
+			c.cusname fromname
+
+			     FROM 
+		    <include refid="tableName"/> t
+		      left join admin_user u on t.createoper=u.user_id
+			  left join admin_user uu on t.auditingoper=uu.user_id
+			  left join admin_dept d on t.from_deptid=d.dept_id
+			  left join admin_dept dd on t.to_depid=dd.dept_id
+			  left join customer_info c on t.from_mchcode=c.cuscode  and t.from_deptid=c.deptId
+		      left join mch_baseinfo m on t.to_mchcode=m.mchcode  and t.to_depid=m.deptId  
+		     
+		    <include refid="pageConditions"/>
+			
+			order by s_status ,createtime desc
+	</select>
+	
+	<select id="incount" resultType="int">
+		select count(1) from
+		<include refid="tableName"/> t
+		      left join admin_user u on t.createoper=u.user_id
+			  left join admin_user uu on t.auditingoper=uu.user_id
+			  left join admin_dept d on t.from_deptid=d.dept_id
+			  left join admin_dept dd on t.to_depid=dd.dept_id
+			  left join mch_baseinfo m on t.from_mchcode=m.mchcode  and t.from_deptid=m.deptId
+		      left join customer_info c on t.to_mchcode=c.cuscode  and t.to_depid=c.deptId  
+		<include refid="pageConditions"/>
+	</select>
+	
+		<!-- 分页查询 -->
+	<select id="pagerListoutPage" resultType="com.lq.lss.model.CStockCenterTransfer"
+		parameterType="com.lq.lss.model.CStockCenterTransfer">
+			select
+			t.tsf_serialno tsfSerialno ,
+			t.from_deptid fromDeptid ,
+			t.from_mchcode fromMchcode ,
+			t.to_depid toDepid ,
+			t.to_mchcode toMchcode ,
+			t.zx_fee zxFee ,
+			t.transport_fee transportFee ,
+			t.other_fee otherFee ,
+			t.tsf_sdate tsfSdate ,
+			t.tsf_edate tsfEdate ,
+			t.status status ,
+			if(t.status=0,10,t.status) s_status,
+			t.others others ,
+			t.createoper createoper ,
+			t.createtime createtime ,
+			t.auditingoper auditingoper ,
+			t.auditingtime auditingtime ,
+			t.tra_out_oper traOutOper ,
+			t.tra_in_oper traInOper,
+			t.tradetype tradetype,
+			t.tradeinfo tradeinfo,
+			t.mch_orderNo mchOrderNo,
+			t.remark remark,
+			t.car_no carNo ,
+			t.car_driver carDriver ,
+			uu.login_name operName,
+			u.login_name loginName,
+			d.name centerName,
+			m.mchname fromname,
+			c.cusname tomname
+
+			     FROM 
+		    <include refid="tableName"/> t
+		      left join admin_user u on t.createoper=u.user_id
+			  left join admin_user uu on t.auditingoper=uu.user_id
+			  left join admin_dept d on t.from_deptid=d.dept_id
+			  left join admin_dept dd on t.to_depid=dd.dept_id
+			  left join mch_baseinfo m on t.from_mchcode=m.mchcode  and t.from_deptid=m.deptId
+		      left join customer_info c on t.to_mchcode=c.cuscode  and t.to_depid=c.deptId  
+		    <include refid="pageConditions"/>
+			
+			order by s_status ,createtime desc
+	</select>
+	
+	<select id="outcount" resultType="int">
+		select count(1) from
+		<include refid="tableName"/> t
+		      left join admin_user u on t.createoper=u.user_id
+			  left join admin_user uu on t.auditingoper=uu.user_id
+			  left join admin_dept d on t.from_deptid=d.dept_id
+			  left join admin_dept dd on t.to_depid=dd.dept_id
+			  left join mch_baseinfo m on t.from_mchcode=m.mchcode  and t.from_deptid=m.deptId
+		      left join customer_info c on t.to_mchcode=c.cuscode  and t.to_depid=c.deptId  
+		<include refid="pageConditions"/>
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="fromDeptid != null">from_deptid = #{fromDeptid},</if>
+		  	<if test="fromMchcode != null">from_mchcode = #{fromMchcode},</if>
+		  	<if test="toDepid != null">to_depid = #{toDepid},</if>
+		  	<if test="toMchcode != null">to_mchcode = #{toMchcode},</if>
+		  	<if test="zxFee != null">zx_fee = #{zxFee},</if>
+		  	<if test="transportFee != null">transport_fee = #{transportFee},</if>
+		  	<if test="otherFee != null">other_fee = #{otherFee},</if>
+		  	<if test="tsfSdate != null">tsf_sdate = #{tsfSdate},</if>
+		  	<if test="tsfEdate != null">tsf_edate = #{tsfEdate},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="others != null">others = #{others},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="createtime != null">createtime = #{createtime},</if>
+		    auditingoper = #{auditingoper},
+		  	auditingtime = #{auditingtime},
+		  	<if test="traOutOper != null">tra_out_oper = #{traOutOper},</if>
+		  	<if test="traInOper != null">tra_in_oper = #{traInOper},</if>
+		  	<if test="tradetype != null">tradetype = #{tradetype},</if>
+		  	<if test="tradeinfo != null">tradeinfo = #{tradeinfo},</if>
+		  	<if test="mchOrderNo != null">mch_orderNo = #{mchOrderNo},</if>
+		  	<if test="remark != null">remark = #{remark},</if>
+		  	<if test="carNo != null">car_no = #{carNo},</if>
+		  	<if test="carDriver != null">car_driver = #{carDriver}</if>
+			</set>
+		WHERE tsf_serialno = #{tsfSerialno}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockCenterTransfer">
+		<include refid="update_sql"/>
+	</update>	
+		
+	<select id="findBytsfSerialno" parameterType="java.lang.String" resultType="com.lq.lss.model.CStockCenterTransfer">
+		<include refid="selectColumns"/>   
+		WHERE tsf_serialno = #{tsfSerialno}
+  	</select>
+
+</mapper>

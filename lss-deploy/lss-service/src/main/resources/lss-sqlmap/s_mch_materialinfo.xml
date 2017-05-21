@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SMchMaterialinfo">
+
+	<sql id="tableName" >
+		s_mch_materialinfo
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	cuscode cuscode ,
+	deptid deptid ,
+	typeid typeid ,
+	begin_num beginNum ,
+	end_num endNum ,
+	transfer_in transferIn ,
+	transfer_out transferOut ,
+	sale_num saleNum ,
+	purchase_num purchaseNum ,
+	unit unit ,
+	settledate settledate     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.SMchMaterialinfo" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,cuscode,deptid,typeid,begin_num,end_num,transfer_in,transfer_out,sale_num,purchase_num,unit,settledate)
+		VALUES
+		(#{id} ,#{cuscode} ,#{deptid} ,#{typeid} ,#{beginNum} ,#{endNum} ,#{transferIn} ,#{transferOut} ,#{saleNum} ,#{purchaseNum} ,#{unit} ,#{settledate} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,cuscode,deptid,typeid,begin_num,end_num,transfer_in,transfer_out,sale_num,purchase_num,unit,settledate)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.cuscode} ,#{item.deptid} ,#{item.typeid} ,#{item.beginNum} ,#{item.endNum} ,#{item.transferIn} ,#{item.transferOut} ,#{item.saleNum} ,#{item.purchaseNum} ,#{item.unit} ,#{item.settledate} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteBySetDate" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE settledate = #{settledate}
+  	</delete>
+  	
+  	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE id = #{id}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.SMchMaterialinfo">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.SMchMaterialinfo" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where id = #{id}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != '' and id != null">AND t.id = #{id}</if>
+  	<if test="cuscode != '' and cuscode != null">AND t.cuscode = #{cuscode}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="typeid != null">AND t.typeid = #{typeid}</if>
+  	<if test="beginNum != null">AND t.begin_num = #{beginNum}</if>
+  	<if test="endNum != null">AND t.end_num = #{endNum}</if>
+  	<if test="transferIn != null">AND t.transfer_in = #{transferIn}</if>
+  	<if test="transferOut != null">AND t.transfer_out = #{transferOut}</if>
+  	<if test="saleNum != null">AND t.sale_num = #{saleNum}</if>
+  	<if test="purchaseNum != null">AND t.purchase_num = #{purchaseNum}</if>
+  	<if test="unit != '' and unit != null">AND t.unit = #{unit}</if>
+  	<if test="settledate != null">AND t.settledate = #{settledate}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.SMchMaterialinfo"
+		parameterType="com.lq.lss.model.SMchMaterialinfo">
+		select
+			t.id id ,
+			t.cuscode cuscode ,
+			t.deptid deptid ,
+			t.typeid typeid ,
+			t.begin_num beginNum ,
+			t.end_num endNum ,
+			t.transfer_in transferIn ,
+			t.transfer_out transferOut ,
+			t.sale_num saleNum ,
+			t.purchase_num purchaseNum ,
+			t.unit unit ,
+			t.settledate settledate,
+			c.cusname cusName,
+			d.name centerName,
+			b.name typeName     FROM 
+		    <include refid="tableName"/> t
+		    left join customer_info c on t.cuscode=c.cuscode    
+		    left join admin_dept d on t.deptid=d.dept_id
+		    left join b_material_type b on t.typeid=b.typeid
+		     <include refid="pageConditions"/>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName"/> t
+		    left join customer_info c on t.cuscode=c.cuscode    
+		    left join admin_dept d on t.deptid=d.dept_id
+		    left join b_material_type b on t.typeid=b.typeid
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="cuscode != null">cuscode = #{cuscode},</if>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="typeid != null">typeid = #{typeid},</if>
+		  	<if test="beginNum != null">begin_num = #{beginNum},</if>
+		  	<if test="endNum != null">end_num = (#{endNum}+end_num),</if>
+		  	<if test="transferIn != null">transfer_in = (#{transferIn}+transfer_in),</if>
+		  	<if test="transferOut != null">transfer_out =(#{transferOut}+transfer_out),</if>
+		  	<if test="saleNum != null">sale_num = (#{saleNum}+sale_num),</if>
+		  	<if test="purchaseNum != null">purchase_num = (#{purchaseNum}+purchase_num),</if>
+		  	<if test="unit != null">unit = #{unit},</if>
+		  	<if test="settledate != null">settledate = #{settledate}</if>
+			</set>
+		WHERE settledate = #{settledate} and 
+		      deptid = #{deptid} and 
+		      typeid = #{typeid} and cuscode = #{cuscode}
+		
+		
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.SMchMaterialinfo">
+		<include refid="update_sql"/>
+	</update>	
+	
+	
+     <select id="findBySettleDate" resultType="com.lq.lss.model.SMchMaterialinfo"
+		parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where settledate = #{settledate}
+		order by cuscode
+	</select>
+	
+	
+		 <!-- 批量 修改 -->
+    <update id="update_BATCH" parameterType="List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+				 UPDATE 
+				  <include refid="tableName"/> 
+                <set>
+		  	 end_num = (#{item.endNum}+end_num),
+		  	 transfer_in = (#{item.transferIn}+transfer_in),
+		  	 transfer_out = (#{item.transferOut}+transfer_out),
+		  	 sale_num = (#{item.saleNum}+sale_num),
+		  	 purchase_num = (#{item.purchaseNum}+purchase_num)
+                </set>
+               WHERE cuscode = #{item.cuscode} 
+		       and typeid = #{item.typeid}
+		       and deptid = #{item.deptid}
+		       and settledate = #{item.settledate}
+		 </foreach>
+	</update>
+	
+	
+				
+	<select id="findBeginFeeBySettleDate" resultType="com.lq.lss.dto.StockTransTotalflowDto" 
+	parameterType="java.lang.String">
+		SELECT
+		
+		id id,
+		
+		t.cuscode fromMchcode,
+		
+		t.deptid deptid,
+		
+		sum(begin_num * m.transfer_nprice * DAYOFMONTH(last_day(str_to_date(t.settledate, '%Y-%m-%d %H')))) beginFee,
+		
+		t.settledate settleDate
+		
+		FROM
+			<include refid="tableName"/>  t
+		INNER join b_material_type m
+		
+		on t.typeId=m.typeId
+		
+		WHERE
+			settledate = #{settledate}
+		GROUP BY t.cuscode,t.deptid,t.settledate  
+	</select>
+	
+
+</mapper>

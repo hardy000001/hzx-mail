@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockReceipt">
+
+	<sql id="tableName" >
+		c_stock_receipt
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	receipt_serialno receiptSerialno ,
+	deptid deptid ,
+	mchcode mchcode ,
+	htcode htcode ,
+	car_no carNo ,
+	car_driver carDriver ,
+	lessee lessee ,
+	renter renter ,
+	zx_fee zxFee ,
+	transport_fee transportFee ,
+	other_fee otherFee ,
+	repair_fee repairFee ,
+	status status ,
+	tradeinfo tradeinfo ,
+	receipttime receipttime ,
+	createoper createoper ,
+	createtime createtime ,
+	auditingoper auditingoper ,
+	auditingtime auditingtime ,
+	isrepair isrepair,
+	remark remark     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockReceipt" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(receipt_serialno,deptid,mchcode,htcode,car_no,car_driver,lessee,renter,zx_fee,transport_fee,other_fee,repair_fee,status,tradeinfo,receipttime,createoper,createtime,auditingoper,auditingtime,remark,isrepair)
+		VALUES
+		(#{receiptSerialno} ,#{deptid} ,#{mchcode} ,#{htcode} ,#{carNo} ,#{carDriver} ,#{lessee} ,#{renter} ,#{zxFee} ,#{transportFee} ,#{otherFee} ,#{repairFee} ,#{status} ,#{tradeinfo} ,#{receipttime} ,#{createoper} ,#{createtime} ,#{auditingoper} ,#{auditingtime} ,#{remark} ,#{isrepair} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(receipt_serialno,deptid,mchcode,htcode,car_no,car_driver,lessee,renter,zx_fee,transport_fee,other_fee,repair_fee,status,tradeinfo,receipttime,createoper,createtime,auditingoper,auditingtime,remark,isrepair)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.receiptSerialno} ,#{item.deptid} ,#{item.mchcode} ,#{item.htcode} ,#{item.carNo} ,#{item.carDriver} ,#{item.lessee} ,#{item.renter} ,#{item.zxFee} ,#{item.transportFee} ,#{item.otherFee} ,#{item.repairFee} ,#{item.status} ,#{item.tradeinfo} ,#{item.receipttime} ,#{item.createoper} ,#{item.createtime} ,#{item.auditingoper} ,#{item.auditingtime} ,#{item.remark} ,#{item.isrepair} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE receipt_serialno = #{receiptSerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockReceipt">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockReceipt" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where receipt_serialno = #{receiptSerialno}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="receiptSerialno != '' and receiptSerialno != null">AND t.receipt_serialno = #{receiptSerialno}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="mchcode != '' and mchcode != null">AND t.mchcode = #{mchcode}</if>
+  	<if test="htcode != '' and htcode != null">AND t.htcode = #{htcode}</if>
+  	<if test="carNo != '' and carNo != null">AND t.car_no = #{carNo}</if>
+  	<if test="carDriver != '' and carDriver != null">AND t.car_driver = #{carDriver}</if>
+  	<if test="lessee != '' and lessee != null">AND t.lessee = #{lessee}</if>
+  	<if test="renter != '' and renter != null">AND t.renter = #{renter}</if>
+  	<if test="zxFee != null">AND t.zx_fee = #{zxFee}</if>
+  	<if test="transportFee != null">AND t.transport_fee = #{transportFee}</if>
+  	<if test="otherFee != null">AND t.other_fee = #{otherFee}</if>
+  	<if test="repairFee != null">AND t.repair_fee = #{repairFee}</if>
+  	<if test="status != '' and status != null">AND t.status = #{status}</if>
+  	<if test="tradeinfo != '' and tradeinfo != null">AND t.tradeinfo = #{tradeinfo}</if>
+  	<if test="receipttime != null">AND t.receipttime = #{receipttime}</if>
+  	
+  	<if test="createDate != '' and  createDate != null">AND left(t.createtime,10) = #{createDate}</if>
+  	<if test="dealDate != '' and  dealDate != null">AND left(t.receipttime,10)  = #{dealDate}</if>
+  	
+  	<if test="beginTime != '' and  beginTime != null">AND left(t.createtime,10) &gt;= #{beginTime}</if>
+  	<if test="endTime != '' and  endTime != null">AND left(t.createtime,10) &lt;= #{endTime}</if>
+  	<if test="loginName != '' and loginName != null">AND u.login_name like '%${loginName}%'</if>
+  	<if test="projectName != '' and projectName != null">AND ht.project_name = #{projectName}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockReceipt"
+		parameterType="com.lq.lss.model.CStockReceipt">
+				select
+					t.receipt_serialno receiptSerialno ,
+					t.deptid deptid ,
+					t.mchcode mchcode ,
+					t.htcode htcode ,
+					t.car_no carNo ,
+					t.car_driver carDriver ,
+					t.lessee lessee ,
+					t.renter renter ,
+					t.zx_fee zxFee ,
+					t.transport_fee transportFee ,
+					t.other_fee otherFee ,
+					t.repair_fee repairFee ,
+					t.status status ,
+					if(t.status=0,10,t.status) s_status,
+					t.tradeinfo tradeinfo ,
+					t.receipttime receipttime ,
+					t.createoper createoper ,
+					t.createtime createtime ,
+					t.auditingoper auditingoper ,
+					t.auditingtime auditingtime ,
+					t.remark remark,
+					t.isrepair isrepair,
+					uu.login_name operName,
+					u.login_name loginName,
+					ht.project_name  projectName,
+					d.name centerName    FROM
+		            <include refid="tableName"/> t
+				    left join admin_user u on t.createoper=u.user_id
+				    left join admin_user uu on t.auditingoper=uu.user_id
+				    left join admin_dept d on t.deptid=d.dept_id
+				    left join c_bus_ht ht on t.htcode=ht.htcode
+				    
+		            <include refid="pageConditions"/>
+		            order by s_status ,createtime desc
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		left join admin_user u on t.createoper=u.user_id
+		left join admin_user uu on t.auditingoper=uu.user_id
+		left join admin_dept d on t.deptid=d.dept_id
+		left join c_bus_ht ht on t.htcode=ht.htcode
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="mchcode != null">mchcode = #{mchcode},</if>
+		  	<if test="htcode != null">htcode = #{htcode},</if>
+		  	<if test="carNo != null">car_no = #{carNo},</if>
+		  	<if test="carDriver != null">car_driver = #{carDriver},</if>
+		  	<if test="lessee != null">lessee = #{lessee},</if>
+		  	<if test="renter != null">renter = #{renter},</if>
+		  	<if test="zxFee != null">zx_fee = #{zxFee},</if>
+		  	<if test="transportFee != null">transport_fee = #{transportFee},</if>
+		  	<if test="otherFee != null">other_fee = #{otherFee},</if>
+		  	<if test="repairFee != null">repair_fee = #{repairFee},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="tradeinfo != null">tradeinfo = #{tradeinfo},</if>
+		  	<if test="receipttime != null">receipttime = #{receipttime},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="createtime != null">createtime = #{createtime},</if>
+		  	<if test="auditingoper != null">auditingoper = #{auditingoper},</if>
+		  	<if test="auditingtime != null">auditingtime = #{auditingtime},</if>
+		  	<if test="isrepair != null">isrepair = #{isrepair},</if>
+		  	<if test="remark != null">remark = #{remark}</if>
+			</set>
+		WHERE receipt_serialno = #{receiptSerialno}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockReceipt">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

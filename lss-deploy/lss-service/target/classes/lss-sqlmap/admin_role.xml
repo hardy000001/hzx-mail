@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AdminRole">
+
+	<sql id="tableName" >
+		admin_role
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	code code ,
+	name name ,
+	user_cnt userCnt ,
+	remark remark ,
+	create_time createTime     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.AdminRole" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,code,name,user_cnt,remark,create_time)
+		VALUES
+		(#{id} ,#{code} ,#{name} ,#{userCnt} ,#{remark} ,#{createTime} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,code,name,user_cnt,remark,create_time)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.code} ,#{item.name} ,#{item.userCnt} ,#{item.remark} ,#{item.createTime} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.Integer">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE id = #{id}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.AdminRole">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.AdminRole" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where id = #{id}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="code != '' and code != null">AND code = #{code}</if>
+  	<if test="name != '' and name != null">AND name = #{name}</if>
+  	<if test="userCnt != null">AND user_cnt = #{userCnt}</if>
+  	<if test="remark != '' and remark != null">AND remark = #{remark}</if>
+  	<if test="createTime != null">AND create_time = #{createTime}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.AdminRole"
+		parameterType="com.lq.lss.model.AdminRole">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="code != null">code = #{code},</if>
+		  	<if test="name != null">name = #{name},</if>
+		  	<if test="userCnt != null">user_cnt = #{userCnt},</if>
+		  	<if test="remark != null">remark = #{remark},</if>
+		  	<if test="createTime != null">create_time = #{createTime}</if>
+			</set>
+		WHERE id = #{id}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.AdminRole">
+		<include refid="update_sql"/>
+	</update>
+
+
+	<select id="selectUserRoles"  resultType="java.util.Map"  parameterType="java.lang.Integer">
+		select
+		t.id id ,
+		t.code code ,
+		t.name name ,
+		t.user_cnt userCnt ,
+		t.remark remark ,
+		t.create_time createTime ,
+		case when a.id is null then '0' else '1' END as checked
+		FROM
+		<include refid="tableName"/> t
+		LEFT  JOIN  admin_user_permission a on a.permission_id = t.id and a.user_id = #{userId}
+	</select>
+
+
+
+
+</mapper>

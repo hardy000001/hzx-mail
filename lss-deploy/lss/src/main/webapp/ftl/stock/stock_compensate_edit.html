@@ -1,0 +1,336 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>新增赔偿单</title> <#include "../include_head.html">
+</head>
+<body>
+	<div class="easyui-layout" data-options="fit:true" style="padding: top:10px;">
+	    <div data-options="region:'north'" style="height:35px;">
+	    		<div style="text-align: left; padding: 3px">
+						<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="save()">保 存</a>
+					    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeForm('新增发料单')">关 闭</a>
+			    </div>
+	    </div>
+		<div data-options="region:'center'">
+			<div class="easyui-panel" title="基本信息" style="width:auto;height:auto;">
+				<div style="padding: 15px 60px 20px 60px">
+					<form id="fm" method="post">
+						<div class="fitem">
+							<label>流水号:</label> <input name="compensateSerialno" id="compensateSerialno" value="${cStockCompensate.compensateSerialno!''}" readonly="readonly" class="easyui-textbox" required="true">
+							<label>材料所属中心:</label>  <input name="deptname" id="deptname" value="${adminDept.name!''}" class="easyui-combogrid" readonly="readonly">
+						</div>
+						<input  id="deptid" name="deptid" type="hidden" value="${adminDept.deptId!''}" />
+						
+						<div class="fitem">
+							<label>项目名称:</label>  <input name="htcode" id="htcode" class="easyui-combogrid" value="${cStockCompensate.htcode!''}" readonly="readonly"  required="true">
+							<label>承租经办人:</label> <input name="lessee" id="lessee" value="${cStockCompensate.lessee!''}" class="easyui-textbox" required="true" >
+							
+							
+						</div>
+
+						<div class="fitem">
+							
+							<label>出租经办人:</label> <input name="renter" id="renter" value="${cStockCompensate.renter!''}" class="easyui-textbox"  max="1000000" min="0" required="true">
+							<label>操作员:</label> <input name="createoper" id="createoper" value="${cStockCompensate.loginName!''}" readonly="readonly"  class="easyui-textbox">
+						</div>
+						<div class="fitem">
+						
+						<label>申请日期:</label> <input name="createtime" id="createtime"  value="${cStockCompensate.createtime?string('yyyy-MM-dd')}" class="Wdate" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})">
+						</div>
+						<div class="fitem">
+							<label>备注:</label> <input name="remark" id="remark"  value="${cStockCompensate.remark!''}"  class="easyui-textbox" data-options="multiline:true" style="width: 600px; height: 40px">
+						</div>
+						<input name="rows" id="rows" type="hidden">
+						<div class="fitem" style="float: left;" >
+						     <div id="tb" style="height: auto">
+								<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="accept()">保存</a> 
+							</div>
+							<div id="tbb" style="height: auto">
+								<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="accept()">保存</a> 
+							</div>
+							<table id="dgItem" class="easyui-datagrid"	style="width: 800px; height: auto;float: left;"
+								data-options="
+								singleSelect: true,
+								toolbar: '#tb',
+								footer:'#tbb',
+								showFooter: true,
+								onClickCell: onClickCell
+								">
+								
+								
+								
+							</table>
+						</div>
+						
+						
+						
+						<input name="size" id="size" type="hidden"> 
+						<input name="tradeinfo" id="tradeinfo" type="hidden" /> 
+					</form>
+
+				</div>
+			</div>
+		</div>
+	    
+	</div>
+  <script type="text/javascript">
+	
+	    var baseAction = "<@sp.ctx />/user/stock/stockcompensate.htm"
+	    var deptAction = "<@sp.ctx />/user/dept.htm"
+	    var materialAction = "<@sp.ctx />/user/stock/StockMaterial.htm"
+		var url;
+	   
+	    
+		$(document).ready(function() {
+			
+			
+			onClickRowChangeVal("${cStockCompensate.compensateSerialno!''}",'A');
+			
+		  
+		});
+	
+		function closeForm(subtitle){
+			if(confirm('确认要关闭吗？')){
+				window.parent.$('#tabs').tabs('close', subtitle);
+			}
+			
+		}
+		
+	   
+	   	
+	   
+
+	   	
+		
+	   
+
+	   	function save() {
+			var reslt=false;
+			var rows = $('#dgItem').datagrid('getRows');
+			$("#size").val(rows.length);
+			$('#fm').form('submit', {
+				 url:'<@sp.ctx />/user/stock/stockcompensateupdate.htm?method=updateStockCompensate',
+				 onSubmit : function(param) {
+				    var rows = $('#dgItem').datagrid('getRows');
+				    if (rows.length < 1) {
+						$.messager.alert('Error', "无赔偿物品");
+						return false;
+					}
+				    for (var i = 0; i < rows.length; i++) {
+						  
+						if(rows[i].price=="undefined" || rows[i].price==null  || rows[i].price==''){
+							$.messager.alert('Error', "第"+parseInt(i+1)+"行请输入单价并保存");
+							return false;
+							
+						}
+				    }
+				    var itemData = JSON.stringify(rows);
+				 
+					param.itemData = itemData;
+					
+					$("#rows").val(itemData);
+					return $(this).form('validate');
+				
+					
+				},
+				success : function(result) {
+						var a="${add!'0'}"
+						var b="${upd!'0'}"
+						var c="${del!'0'}"
+						var d="${exp!'0'}"
+						var e="${aud!'0'}"
+						var role="&a="+a+"&b="+b+"&c="+c+"&d="+d+"&e="+e;
+					var result = eval('(' + result + ')');
+					if (!result.success) {
+						$.messager.alert('Error', result.errorMsg);
+					} else {
+						$.messager.alert('提示信息', '保存成功！','info' ,function () {
+							
+							
+							window.parent.open1("赔偿单", "<@sp.ctx />/user/stock/stockcompensate.htm"+"?x="+Math.random()+role);
+							window.parent.$('#tabs').tabs('close', '修改赔偿单');
+						});
+
+					}
+				}
+			});
+		}
+	    
+	    
+	    
+		
+		
+		var editIndex = undefined;
+		function endEditing(){
+			if (editIndex == undefined){return true}
+			if ($('#dgItem').datagrid('validateRow', editIndex)){
+				$('#dgItem').datagrid('endEdit', editIndex);
+				editIndex = undefined;
+				return true;
+			} else {
+				return false;
+			}
+		}
+		var currentField='price'
+		// 双击编辑行
+		function onClickCell(index, field){
+			
+			if (endEditing()){
+				$('#dgItem').datagrid('selectRow', index).datagrid('beginEdit', index);
+				var ed = $('#dgItem').datagrid('getEditor', {index:index,field:field});
+				if (ed){
+					($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+				}
+				editIndex = index;
+			} else {
+				setTimeout(function(){
+					$('#dgItem').datagrid('selectRow', editIndex);
+				},0);
+			}
+		}
+		
+
+		  
+		  
+		 
+		  
+		  
+		 
+		   
+		
+		  
+		  
+		  function accept(){
+				if (endEditing()){
+					$('#dgItem').datagrid('acceptChanges');
+					moneyCount();
+				}
+			}
+		  
+		  
+		  
+		  function loadData(){
+			 
+			  var data = $('#dgItem').datagrid('getRows');
+			  var dataList={
+		    			rows:[],
+		    			footer:[]
+		    	}
+		    	dataList.rows=data;
+			  
+				var typeMap={};  
+		        var len = data.length;  
+		        for(var i=0;i<len;i++){
+			            if(typeMap[data[i].typeId] == undefined){
+			                var list = [];  
+			                list.push(data[i]);  
+			                typeMap[data[i].typeId] = list;  
+			            }else{  
+			            	typeMap[data[i].typeId].push(data[i]);
+			            }  
+		        }
+		        var tj=0;
+		        var aa='';
+		        for(var typeId in typeMap){
+			            var obj = typeMap[typeId];
+			            var totalS=0;
+			            var covertratio=0;
+			            footers={"itemid":"合计","materialcode":""}
+			            for(var i = 0;i < obj.length;i++){
+			            	
+			            	var num=parseFloat(obj[i].totalS);
+			            	if(!isNaN(num)){
+			            		covertratio+=num*parseFloat(obj[i].covertratio);
+			            	}
+			            	
+			            }
+			            if(isNaN(covertratio)){
+			            	
+			            	covertratio=0;
+		            	}
+			            if(tj>0){
+		            		footers.itemid="";
+		            	}
+		            	tj++;
+			            footers.materialcode=obj[0].fname+": "+covertratio.toFixed(2)+""+obj[0].accountflag;;
+			            dataList.footer.push(footers);
+			            aa+=footers.materialcode+",";
+			           
+		        } 
+		        aa=aa.substring(0,aa.length-1);
+		        $("#tradeinfo").val(aa);
+		        $('#dgItem').datagrid('loadData', dataList);
+			}
+		
+		
+		  
+		  function moneyCount(){
+				
+				var dataList=$('#dgItem').datagrid('getRows');
+				var totalM=0;
+				var totalS=0;
+				for ( var i = 0; i < dataList.length; i++) {
+					var _totalS=dataList[i].totalS;
+				    if(!isNaN(_totalS) && _totalS!='')
+				    {
+				    	totalS=totalS+parseInt(_totalS)
+				    }else{
+				    	_totalS=0;
+				    }
+				    sum=dataList[i].covertratio*_totalS;
+					updateGridData(i,sum.toFixed(2))
+				}
+				$('#totalM').textbox('setValue',totalM.toFixed(2));
+				$('#totalS').textbox('setValue',totalS.toFixed(2));
+				loadData();	
+			}
+		  
+		  
+		  
+		  function updateGridData(index,sum){
+				$('#dgItem').datagrid('updateRow',{
+					index: index,
+					row: {
+						totalM: sum
+					}
+				});
+
+			}
+		  
+		  var size=1;
+		  function onClickRowChangeVal(newVal,oldVal){
+	        	
+			  var dataUrl=baseAction+'?method=getCStockCompensateDetailList&id='+newVal
+  			
+	        	$('#dgItem').datagrid({
+	        	    url:dataUrl,    
+	        	    ctrlSelect:true,
+	        	    //onLoadSuccess:function(){ loadData()},
+	        	    columns:[[
+	        	       
+	        	        {field:'materialcode',title:'物资编码',width:120,align:'left'},
+	        	        {field:'name',title:'物资名称',width:120,align:'left'},
+	        	        {field:'totalS',title:'数量',width:120,align:'left'},
+	        	        {field:'totalM',title:'小计',width:120,align:'left'},
+	        	        {field:'unit',title:'单位',width:120,align:'left'},
+	        	        {field:'price',title:'单价',width:120,align:'left',editor:{type:'numberbox',options:{precision:4,required:true}}},
+	        	        {field:'fname',title:'隐藏的父类名称',hidden:true},
+	        	        {field:'typeId',title:'隐藏的父类id',hidden:true},
+	        	        {field:'covertratio',title:'隐藏换算系数',hidden:true},
+	        	        {field:'accountflag',title:'隐藏换算单位',hidden:true},
+	        	        ]],
+	               
+	           
+			} );
+			  
+			  setTimeout("loadData()",100);
+			  if(size==1){
+					$('#dgItem').datagrid('keyCtr');
+				  }
+				  size=2;
+		  }
+</script>
+</body>
+</html>

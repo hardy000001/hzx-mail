@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+ <title>收料单管理</title> 
+ <#include "../include_head.html">
+</head>
+<body>
+
+		    <div id="query_panel" class="easyui-panel" title="查询面板"
+		         style="height: 110px; padding: 10px; background: #fafafa;"
+		          data-options="iconCls:'icon-search',collapsible:true">
+					<form id="queryFm" method="post" novalidate>
+					    <div class="fitem">
+					        <input name="htcode" id="htcode" prompt="合同编号" class="easyui-textbox">
+					        <input name="projectName" id="projectName" prompt="项目名称" class="easyui-textbox">
+						    <input name="receiptSerialno" prompt="收料流水号" class="easyui-textbox">
+						    <select prompt="状态" class="easyui-combobox" name="status" style="width:153px;" panelHeight="auto">   
+			 							<option value=""></option>
+			 							<option value="0">正常</option>
+			 							<option value="1">等待审核</option>
+			 							<option value="2">审核未通过</option>
+			 							<option value="9">作废</option>
+			 				</select>
+<!-- 						    <input name="loginName"  prompt="操作员" class="easyui-textbox"> -->
+						    <input class="easyui-datebox" id="dealDate" name="dealDate" prompt="交易日期"   data-options="editable:false" style="width:150px">
+                            <input class="easyui-datebox" id="createDate" name="createDate" prompt="创建日期"   data-options="editable:false" style="width:150px">
+						    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
+						    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" onclick="clearQueryFm();">重置</a>
+				        </div>
+						
+					</form>
+			<!-- 这里的query是通用js,如果有特别的查询可以不引入 -->
+			<#include "../query_js_inc.html">
+		  </div>
+		  <table id="dg" title="收料单管理" class="easyui-datagrid" style="height: auto,width:auto;"
+			data-options="url:'<@sp.ctx />/user/stock/stockReceipt.htm?method=query&deptid=${deptId!''}'"
+			toolbar="#toolbar" pagination="true"
+			rownumbers="true" fitColumns="true" singleSelect="true">
+			<thead>
+				<tr>
+					<th field="receiptSerialno" width="15%" sortable="true" >收料流水号</th>
+					<th field="centerName" width="10%" >所属中心</th>
+					<th field="htcode" width="12%" >合同编号</th>
+					<th field="projectName" width="10%" >项目名称</th>
+					<th field="carNo" width="10%" >车号</th>
+					<th field="carDriver" width="10%" >司机</th>
+					<th field="lessee" width="10%" >收料人</th>
+					<th field="renter" width="10%" >发料人</th>
+					<th field="status" width="10%" formatter="formatStatus">状态</th>
+					<th field="zxFee" width="10%" >装卸费用</th>
+					<th field="transportFee" width="10%" >运输费用</th>
+					<th field="otherFee" width="10%" >杂费</th>
+					<th field="repairFee" width="10%" >维修费</th>
+					<th field="tradeinfo" width="10%" >交易汇总信息</th>
+					<th field="receipttime" width="12%">申请时间</th>
+					<th field="loginName" width="10%">操作员</th>
+					<th field="createtime" width="12%" >操作时间</th>
+					<th field="operName" width="10%">审核人</th>
+					<th field="auditingtime" width="12%" >审核时间</th>
+					<th field="remark" width="10%" >备注信息</th>
+					<th field="isrepair" width="10%" formatter="formatIsrepair">扣件</th>
+				</tr>
+			</thead>
+		 </table>
+		 <!-- 操作按钮与明细-->
+		 <div id="toolbar">
+  		    <@shiro.hasPermission name="${add}">
+		    <a id="add_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="createNewTab('新增收料单',1)">新增收料单</a>
+		    </@shiro.hasPermission>
+		    <@shiro.hasPermission name="${update}">
+		    <a id="edit_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editDg()">修改</a>
+		    </@shiro.hasPermission>
+		    <@shiro.hasPermission name="${del}">
+		    <a id="del_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyDg()">删除</a>
+	  		</@shiro.hasPermission>
+	  		<a id="view_detail"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="viewDetail_()">查看</a>
+	  		<@shiro.hasPermission name="${check}">
+	  		<a id="aud_bar"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="auditDg()">审核</a>
+	  		</@shiro.hasPermission>
+	  		<a id="print_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-print" plain="true" onclick="print()">打印</a>
+	  		<a id="size1w"    href="javascript:void(0)"  class="easyui-linkbutton"iconCls="icon-height-resize" plain="true"  onclick="rowResize(1)" >1X</a>
+	  		<a id="size2w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(2)" >2X</a>
+	  		<a id="size3w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(3)" >3X</a>
+	  		<a id="size4w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(4)" >4X</a>
+	  		<a id="size5w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(5)" >5X</a>
+         </div>
+
+         <!-- 查看详情 -->
+	     <div id="view-dlg" class="easyui-dialog" style="width:700px;height:420px;padding:10px 20px"  closed="true" buttons="#view-dlg-buttons">
+	    	<div id="view-dlg-content"></div>
+	    	<input type="hidden"  id="hide_id">
+	    	<div class="fitem">
+					 	
+				    	<table id="dgItem_detail" class="easyui-datagrid"  style="width:625px;height:auto;"
+								    data-options="rownumbers:true
+									"
+								    >
+							       
+					   </table>
+		   </div>
+	     </div>
+	      <div id="view-dlg-buttons" >
+	        <a href="javascript:void(0)" id="btn_view_ok" style="display: none" class="easyui-linkbutton"  onclick="javascript:saveAudit(0)">审核通过</a>
+	        <a href="javascript:void(0)" id="btn_view_no" style="display: none" class="easyui-linkbutton"  onclick="javascript:saveAudit(2)">审核拒绝</a>
+	        <a href="javascript:void(0)" id="btn_view_anti" style="display: none" class="easyui-linkbutton"  onclick="saveAntiAudit(1)">反审核</a>
+	    	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#view-dlg').dialog('close')">关闭</a>
+	      </div>
+	      <div id="print_text_id" style="display: none"></div>
+		 <!-- 操作按钮与明细 END -->
+		 <#include "stock_receipt_js.html">
+	
+
+</body>
+</html>

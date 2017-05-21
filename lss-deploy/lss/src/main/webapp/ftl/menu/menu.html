@@ -1,0 +1,291 @@
+<script language="javascript">
+    $(document).ready(function () {
+        var title = "系统导航";
+        var url = "<@sp.ctx />/user/main.htm?method=navigation";
+        if ($('#tabs').tabs('exists', title)) {
+            $('#tabs').tabs('select', title);
+        } else {
+            $('#tabs').tabs('add', {
+                title: title,
+                content: '<iframe scrolling="auto" frameborder="0" src="' + url + '" style="width:100%;height:100%;"></iframe>',
+                closable: false
+            });
+        }
+    });
+    function open1(title, url) {
+        if ($('#tabs').tabs('exists', title)) {
+            $('#tabs').tabs('select', title);
+        } else {
+            $('#tabs').tabs('add', {
+                title: title,
+                content: '<iframe scrolling="auto" frameborder="0" src="' + getUrl(url) + '" style="width:100%;height:100%;"></iframe>',
+                closable: true
+            });
+        }
+        tabClose();
+        tabCloseEven();
+    }
+
+
+    function tabClose() {
+
+        /*双击关闭TAB选项卡*/
+        $(".tabs-inner").dblclick(function () {
+            var subtitle = $(this).children(".tabs-closable").text();
+            $('#tabs').tabs('close', subtitle);
+        })
+
+
+    }
+    //绑定右键菜单事件
+    function tabCloseEven() {
+
+        /*为选项卡绑定右键*/
+        $(".tabs-inner").bind('contextmenu', function (e) {
+            $('#mm').menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+
+            var subtitle = $(this).children(".tabs-closable").text();
+
+            $('#mm').data("currtab", subtitle);
+            $('#tabs').tabs('select', subtitle);
+            return false;
+        });
+
+
+        //刷新
+        $('#mm-tabupdate').click(function () {
+            var currTab = $('#tabs').tabs('getSelected');
+            var url = $(currTab.panel('options').content).attr('src');
+            if (url != null && url.length > 0) {
+                $('#tabs').tabs('update', {
+                    tab: currTab,
+                    options: {
+                        content: '<iframe scrolling="auto" frameborder="0"  src="' + url + '" style="width:100%;height:100%;"></iframe>'
+                    }
+                })
+            }
+        })
+        //关闭当前
+        $('#mm-tabclose').click(function () {
+            var currtab_title = $('#mm').data("currtab");
+            $('#tabs').tabs('close', currtab_title);
+        })
+        //全部关闭
+        $('#mm-tabcloseall').click(function () {
+            $('.tabs-inner span').each(function (i, n) {
+                var t = $(n).text();
+                if (t != "系统导航")
+                    $('#tabs').tabs('close', t);
+            });
+        });
+        //关闭除当前之外的TAB
+        $('#mm-tabcloseother').click(function () {
+            $('#mm-tabcloseright').click();
+            $('#mm-tabcloseleft').click();
+        });
+        //关闭当前右侧的TAB
+        $('#mm-tabcloseright').click(function () {
+            var nextall = $('.tabs-selected').nextAll();
+            if (nextall.length == 0) {
+                //msgShow('系统提示','后边没有啦~~','error');
+                //alert('后边没有啦~~');
+                return false;
+            }
+            nextall.each(function (i, n) {
+                var t = $('a:eq(0) span', $(n)).text();
+                $('#tabs').tabs('close', t);
+            });
+            return false;
+        });
+        //关闭当前左侧的TAB
+        $('#mm-tabcloseleft').click(function () {
+            var prevall = $('.tabs-selected').prevAll();
+            if (prevall.length == 0) {
+                //alert('到头了，前边没有啦~~');
+                return false;
+            }
+            prevall.each(function (i, n) {
+                var t = $('a:eq(0) span', $(n)).text();
+                if (t != "系统导航")
+                    $('#tabs').tabs('close', t);
+            });
+            return false;
+        });
+
+    }
+
+    function closePage(url) {
+        var tab = $('#tabs').tabs('getSelected');
+        var title = tab.panel('options').title;
+        $('#tabs').tabs('close', title);
+    }
+
+    var _SESSION_ID = "${userTicket!''}";
+
+    function getUrl(url) {
+        var appName = getContextPath();
+        if (url.indexOf(appName) == 0) {
+            return url;
+        } else if (url.indexOf("/") == 0) {
+            url = appName + url;
+        }
+        return url;
+    }
+
+    function getContextPath() {
+
+        return "<@sp.ctx />";
+    }
+
+
+</script>
+
+
+<#include "menu_js.html" />
+
+
+<div class="easyui-panel" style="width:100%;height:100%;padding:6px;">
+    <ul id="tt" class="easyui-tree" data-options="animate:true,lines:true"></ul>
+</div>
+
+<div style="width: 150px" id="mm" class="easyui-menu">
+    <div id="mm-tabupdate">
+        刷新
+    </div>
+    <div class="menu-sep">
+    </div>
+    <div id="mm-tabclose">
+        关闭
+    </div>
+    <div id="mm-tabcloseall">
+        全部关闭
+    </div>
+    <div id="mm-tabcloseother">
+        关闭其他
+    </div>
+    <div class="menu-sep">
+    </div>
+    <div id="mm-tabcloseright">
+        关闭右侧全部
+    </div>
+    <div id="mm-tabcloseleft">
+        关闭左侧全部
+    </div>
+    <div class="menu-sep">
+    </div>
+
+</div>
+
+
+<div id="treeMM" class="easyui-menu" style="width:120px;">
+    <div id="actionAdd" onclick="menuAppend()" data-options="iconCls:'icon-add'">添加子菜单</div>
+    <div id="actionUpdate" onclick="menuEdit()" data-options="iconCls:'icon-edit'">修改菜单</div>
+    <div id="actionDel" onclick="menuRemove()" data-options="iconCls:'icon-remove'">删除菜单</div>
+    <div id="actionMgr" onclick="menuResource()" data-options="iconCls:'icon-edit'">操作&按钮</div>
+</div>
+
+
+<!--  资源添加 START -->
+<div id="dlgResource" class="easyui-dialog" style="width:600px;height:300px;padding:10px 20px" modal="true" closed="true"
+     buttons="#dlg-buttons">
+    <form id="fmResource" method="post">
+        <div class="fitem">
+            <label>资源ID:</label> <input name="id" id="id" style="width:140px" class="easyui-textbox" required="true"
+                                        data-options="validType:'length[0,20]'">
+            <label>资源编码:</label> <input name="code" id="code" style="width:140px" class="easyui-textbox" required="true"
+                                        prompt="大写字母、数字、下划线组成，且不能数字打头" data-options="validType:'length[0,50]'">
+        </div>
+        <div class="fitem">
+            <label>资源名称:</label> <input name="name" id="name" style="width:140px" class="easyui-textbox" required="true"
+                                        data-options="validType:'length[1,50]'">
+            <label>显示排序:</label> <input name="orderNo" id="orderNo" style="width:140px" class="easyui-numberbox" max="10000000" min="0"
+                                        required="true">
+
+        </div>
+        <div class="fitem">
+            <label>资源类型:</label>
+            <input name="type" id="type" panelMaxHeight="100px" editable="false" style="width:140px;" required="true">
+
+            <label>是否叶子菜单:</label>
+            <input name="menuLeafFlag" id="menuLeafFlag" required="true" panelMaxHeight="100px" editable="false" style="width:140px;">
+
+        </div>
+        <div class="fitem" id="menuItem">
+            <label>菜单URL:</label> <input name="menuLeafUrl" id="menuLeafUrl" style="width:140px" class="easyui-textbox"
+                                         data-options="validType:'length[0,100]'">
+            <label>菜单打开方式:</label>
+            <select class="easyui-combobox" name="menuLeafMode" id="menuLeafMode" panelMaxHeight="100px" editable="false"
+                    style="width:140px;">
+                <option value="1">tab</option>
+                <option value="2">dialogue</option>
+            </select>
+        </div>
+        <div class="fitem">
+            <label>备注说明:</label> <input name="remark" id="remark" class="easyui-textbox" multiline="true" style="width:370px;height:60px"
+                                        data-options="validType:'length[0,200]'">
+        </div>
+        <input name="pid" id="pid" type="hidden">
+        <input name="layer" id="layer" type="hidden">
+        <input name="doType" id="doType" type="hidden">
+    </form>
+</div>
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveResource()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"
+       onclick="javascript:$('#dlgResource').dialog('close')">取消</a>
+</div>
+<!-- 资源添加 end-->
+
+<!-- 资源按钮管理 start-->
+<div id="dlgAciton" class="easyui-dialog" style="width:600px;height:400px;padding:1px" modal="true" closed="true">
+    <div id="tb" style="height: auto">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="append()">添加</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="modify()">修改</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="removeit()">删除</a>
+    </div>
+    <table id="dgItem" style="width: 100%; height: auto;float: left;">
+        <thead>
+        <tr>
+            <th data-options="field:'id',width:100,align:'left'">资源ID</th>
+            <th data-options="field:'name',width:200,align:'left'">资源名称</th>
+            <th data-options="field:'code',width:200,align:'left'">资源编码</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+<div id="dlgAciton_dlg" class="easyui-dialog" style="width:400px;height:300px;padding:10px 20px" modal="true" closed="true"
+     buttons="#dlgAciton-dlg-buttons">
+    <form id="fmAction" method="post">
+        <div class="fitem">
+            <label>资源ID:</label> <input name="id" id="id" class="easyui-textbox" required="true" data-options="validType:'length[1,20]'">
+        </div>
+        <div class="fitem">
+            <label>资源编码:</label> <input name="code" id="code" class="easyui-textbox" required="true" prompt="大写字母、数字、下划线组成，且不能数字打头"
+                                        data-options="validType:'length[1,50]'">
+        </div>
+        <div class="fitem">
+            <label>资源名称:</label> <input name="name" id="name" class="easyui-textbox" required="true"
+                                        data-options="validType:'length[1,100]'">
+        </div>
+        <input name="appId" id="appId" type="hidden">
+        <input name="pid" id="pid" type="hidden">
+        <input name="type" id="type" type="hidden" value="2">
+        <input name="orderNo" id="orderNo" type="hidden" value="0">
+        <input name="doActionType" id="doActionType" type="hidden">
+    </form>
+</div>
+<div id="dlgAciton-dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveAction()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"
+       onclick="javascript:$('#dlgAciton_dlg').dialog('close')">取消</a>
+</div>
+<!-- 资源按钮管理 end-->
+
+<input type="hidden" id="_SESSION_ID" value="${userTicket!''}"/>
+
+
+
+

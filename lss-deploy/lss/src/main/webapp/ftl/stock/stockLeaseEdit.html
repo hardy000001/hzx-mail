@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>修改公司调拨单</title> <#include "../include_head.html">
+</head>
+<body>
+	<div class="easyui-layout" data-options="fit:true" style="padding: top:10px;">
+	    <div data-options="region:'north'" style="height:35px;">
+	    		<div style="text-align: left; padding: 3px">
+						<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="save()">保 存</a>
+					    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeForm('新增调拨申请单')">关 闭</a>
+			    </div>
+	    </div>
+		<div data-options="region:'center'">
+			<div class="easyui-panel" title="基本信息" style="width:auto;height:auto;">
+				<div style="padding: 15px 60px 20px 60px">
+					<form id="fm" method="post">
+						<div class="fitem">
+							<label>流水号:</label> <input name="lsSerialno"  value="${cStockLease.lsSerialno!''}" id="remSerialNo" readonly="readonly" class="easyui-textbox" required="true">
+							 <label>所属租赁公司:</label>  <input name="mchcode" id="mchcode" value="${cStockLease.mchcode!''}" class="easyui-combogrid" required="true">
+						</div>
+					
+						
+						<div class="fitem"> 
+							<label>杂费:</label> <input name="otherFee" id="otherFee" value="${cStockLease.otherFee!''}" class="easyui-numberbox"  max="1000000" min="0">
+							<label>装卸费用:</label> <input name="zxFee" id="zxFee"  value="${cStockLease.zxFee!''}" class="easyui-numberbox"  max="1000000" min="0">
+						</div>
+						<div class="fitem">	 
+							<label>运费:</label> <input name="transportFee" id="transportFee" value="${cStockLease.transportFee!''}"  class="easyui-numberbox"  max="1000000" min="0">
+							<label>申请日期:</label> <input name="createtime" id="createtime" class="Wdate" value="${cStockLease.createtime?string('yyyy-MM-dd HH:mm:ss')}" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})">
+						</div>
+						
+						<div class="fitem">
+						<label>操作员:</label> <input name="createoper" id="createoper" value="${cStockLease.loginName!''}" readonly="readonly"  class="easyui-textbox">
+						<label>审核员:</label> <input name="createoper" id="createoper" value="${cStockLease.operName!''}" readonly="readonly"  class="easyui-textbox">
+						</div>
+						<div class="fitem">
+						<label>状态:</label>  <select name="status" id="status" class="easyui-combobox" style="width:153px;" readonly="readonly" panelHeight="auto">
+							                           <option value="0">正常</option>
+							                           <option value="1">审核中</option>
+							                           <option value="2">审核未通过</option>
+							                           <option value="9">已作废</option>
+							                     </select>
+						</div>
+						<script type="text/javascript">
+						     $("#status").val('${cStockLease.status!'1'}');
+						</script>
+						<input name="rows" id="rows" type="hidden">
+						<div class="fitem" style="float: left;" >
+						     <div id="tb" style="height: auto">
+								<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="accept()">保存</a> 
+							</div>
+							<table id="dgItem" class="easyui-datagrid"	style="width: 710px; height: auto;float: left;"
+								data-options="
+								singleSelect: true,
+								showFooter: true,
+								toolbar: '#tb',
+								onClickCell: onClickCell">
+								<thead>
+									<tr>
+										<th data-options="field:'itemid',width:50,align:'left'">序号</th>
+										<th data-options="field:'materialcode',width:200,align:'left'">物资简码</th>
+										<th data-options="field:'code',width:200,align:'left'">物资名称</th>
+										<th data-options="field:'totalS',width:100,align:'left',editor:{type:'numberbox'}">数量</th>
+										<th data-options="field:'unit',width:50,align:'left'">单位</th>
+										<th data-options="field:'typeId',hidden:true">父ID</th>
+										<th data-options="field:'fname',hidden:true">父名</th>
+										<th data-options="field:'covertratio',hidden:true">换算系数</th>
+										<th data-options="field:'accountflag',hidden:true">父类单位</th>
+								</thead>
+							</table>
+						</div>
+						
+						
+						
+						<input name="size" id="size" type="hidden"> 
+					</form>
+
+				</div>
+			</div>
+		</div>
+	    <div data-options="region:'west',title:'材料选择'" style="width:220px;">
+	        <ul id="kongbai" name="kongbai" ></ul>
+	        <ul id="ttCls" name="ttCls" ></ul>
+	    </div>
+	</div>
+ <script type="text/javascript">
+	
+	    var baseAction = "<@sp.ctx />/user/stock/StockRemodelingAdd.htm"
+	    var deptAction = "<@sp.ctx />/user/adminDept.htm"
+	    var materialAction = "<@sp.ctx />/user/stock/StockMaterial.htm"
+		var url;
+	   
+	    
+		$(document).ready(function() {
+			url = baseAction + '?method=save';
+			
+		});
+	
+		function closeForm(subtitle){
+			if(confirm('确认要关闭吗？')){
+				window.parent.$('#tabs').tabs('close', subtitle);
+			}
+			
+		}
+		
+	   	$('#ttCls').tree({
+	   		url: materialAction + "?method=getMaTypeList",
+	   		checkbox:true,
+	   		method:'post',
+	   		onLoadSuccess:function(){
+	   			defaultChecked();
+	   		},
+		 	onDblClick: function(node){
+		 	   $('#ttCls').tree('collapse', node.target);
+		 	},
+		 	onCheck:function(node, checked){
+		 		getChecked();
+		 	}
+	   	}); 
+	   	
+	   	
+		function defaultChecked(){
+	   		var cId
+	   		<#list detailList as obj>
+	   		  cId=${obj.materialcode}
+	   		  var node = $('#ttCls').tree('find', cId);
+	   		  node.filed5=${obj.totalS!'0'}+","+${obj.covertratio!'0'}
+	   		  $('#ttCls').tree('check', node.target);
+	   		  $('#ttCls').tree('expandTo', node.target);
+	   		</#list>
+	   		loadData();
+	   	}
+	   	
+	   	function getChecked(){
+            // 清空之前加载的
+	   		$('#dgItem').datagrid('loadData', { total: 0, rows: [] });
+			var nodes = $('#ttCls').tree('getChecked', ['checked','indeterminate']);
+			var r = 0 ;
+			for(var i=0; i< nodes.length; i++){
+				// 添加时材料项目的选中节点
+				if(nodes[i].filed1=='1') {
+					// 追加行
+					r++;
+					var nodeFiled3=nodes[i].filed5;
+					if(nodeFiled3=='' || nodeFiled3==null){
+						filed5=['',''];
+	
+					}else{
+						filed5=nodeFiled3.split(",");
+					}
+					$('#dgItem').datagrid('appendRow',{
+			   			itemid:r,
+			   			materialcode: nodes[i].id,
+			   			code: nodes[i].text,
+			   			totalS: filed5[0],
+			   			unit:nodes[i].filed2,
+			   			typeId: nodes[i].pId,
+			   			fname:nodes[i].pText,
+			   			covertratio:nodes[i].filed3,
+			   			
+			   			accountflag:nodes[i].filed4
+			   			
+			   		});
+				}
+			}
+			loadData();
+		}
+	   	
+		
+	   
+
+		function save() {
+			var reslt=false;
+			var rows = $('#dgItem').datagrid('getRows');
+			$("#size").val(rows.length);
+			$('#fm').form('submit', {
+				 url:'<@sp.ctx />/user/stock/stockLeaseEdit.htm?method=stockLeaseupdate',
+				 onSubmit : function(param) {
+				    var rows = $('#dgItem').datagrid('getRows');
+				    if (rows.length < 1) {
+						$.messager.alert('Error', "请添加物资项目");
+						return false;
+					}
+				    for (var i = 0; i < rows.length; i++) {
+						  
+						if(rows[i].totalS=="undefined" || rows[i].totalS==null  || rows[i].totalS==''){
+							$.messager.alert('Error', "第"+parseInt(i+1)+"行请输入数量并保存");
+							return false;
+							
+						}
+				    }
+				    var itemData = JSON.stringify(rows);
+				 
+					param.itemData = itemData;
+					
+					$("#rows").val(itemData);
+					return $(this).form('validate');
+				
+					
+				},
+				success : function(result) {
+					    var a="${add!'0'}"
+						var b="${upd!'0'}"
+						var c="${del!'0'}"
+						var d="${exp!'0'}"
+						var e="${aud!'0'}"
+						var role="&a="+a+"&b="+b+"&c="+c+"&d="+d+"&e="+e;
+					var result = eval('(' + result + ')');
+					if (!result.success) {
+						$.messager.alert('Error', result.errorMsg);
+					} else {
+							$.messager.alert('提示信息', '修改成功！','info' ,function () {
+
+							window.parent.open1("租赁公司调拨管理", "<@sp.ctx />/user/stock/lease.htm"+"?x="+Math.random()+role);
+							window.parent.$('#tabs').tabs('close', '修改公司调拨单');
+						});		
+					}
+				}
+			});
+		}
+	    
+		
+		
+		var editIndex = undefined;
+		function endEditing(){
+			if (editIndex == undefined){return true}
+			if ($('#dgItem').datagrid('validateRow', editIndex)){
+				$('#dgItem').datagrid('endEdit', editIndex);
+				editIndex = undefined;
+				return true;
+			} else {
+				return false;
+			}
+		}
+		// 双击编辑行
+		function onClickCell(index, field){
+			if (endEditing()){
+				$('#dgItem').datagrid('selectRow', index).datagrid('beginEdit', index);
+				var ed = $('#dgItem').datagrid('getEditor', {index:index,field:field});
+				if (ed){
+					($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+				}
+				editIndex = index;
+			} else {
+				setTimeout(function(){
+					$('#dgItem').datagrid('selectRow', editIndex);
+				},0);
+			}
+		}
+		function accept(){
+			if (endEditing()){
+				$('#dgItem').datagrid('acceptChanges');
+				loadData();
+			}
+		}
+		
+		  $('#mchcode').combogrid({
+		        url:'<@sp.ctx />/user/stock/transfer.htm?method=getMchInfoList',
+		        idField:'mchcode',
+		        textField:'mchname',
+		        columns:[[
+		                  {field:'mchcode',title:'商户号',width:50},
+		                  {field:'mchname',title:'商户名称',width:100},
+		                 ]],
+		    	mode:'local',
+			    filter:function(q, row){
+			    	var opts = $(this).combogrid('options');
+					// 过滤拼音码，转换大写字母
+				    /* if( row.pyCode.indexOf(q.toUpperCase()) >= 0){
+				    	alert(1);
+						return row.pyCode.indexOf(q.toUpperCase()) >= 0;
+				    } */
+				    // 过滤中文名称
+			        if(row[opts.textField].indexOf(q) >= 0){
+			        	return row[opts.textField].indexOf(q) >= 0;
+			        }
+				}
+		    });
+		  
+		  
+		  $('#deptid').combotree({
+	            url: deptAction+ '?method=getDeptList&type=2',
+	            width:'144px'   		
+	        });
+		   
+		  function getNowFormatDate() {  
+		        //获取当前的日期时间 格式“yyyy-MM-dd HH:MM”  
+		        var date = new Date();  
+		        var seperator1 = "-";  
+		        var seperator2 = ":";  
+		        var month = date.getMonth() + 1;  
+		        var strDate = date.getDate();  
+		        if (month >= 1 && month <= 9) {  
+		            month = "0" + month;  
+		        }  
+		  
+		        var hour = date.getHours();  
+		        var minute = date.getMinutes();  
+		        if (parseInt(hour) < 10)  
+		            hour = "0" + hour;  
+		        if (parseInt(minute) < 10)  
+		            minute = "0" + minute;  
+		        var curT = hour + ':' + minute;  
+		  
+		        if (strDate >= 0 && strDate <= 9) {  
+		            strDate = "0" + strDate;  
+		        }  
+		        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate  
+		                + " " + curT  
+		        // + seperator2 + date.getSeconds();  
+		        return currentdate;  
+		    }  
+		
+		  
+		  
+		  
+		  function loadData(){
+				 
+			  var data = $('#dgItem').datagrid('getRows');
+			  var dataList={
+		    			rows:[],
+		    			footer:[]
+		    	}
+		    	dataList.rows=data;
+			  
+				var typeMap={};  
+		        var len = data.length;  
+		        for(var i=0;i<len;i++){
+			            if(typeMap[data[i].typeId] == undefined){
+			                var list = [];  
+			                list.push(data[i]);  
+			                typeMap[data[i].typeId] = list;  
+			            }else{  
+			            	typeMap[data[i].typeId].push(data[i]);
+			            }  
+		        }
+		        var tj=0;
+		        for(var typeId in typeMap){
+			            var obj = typeMap[typeId];
+			            var totalS=0;
+			            var covertratio=0;
+			            footers={"itemid":"合计","materialcode":""}
+			            for(var i = 0;i < obj.length;i++){
+			            	
+			            	
+			            	covertratio+=obj[i].covertratio*parseInt(obj[i].totalS);
+			            	
+			            	
+			            }
+			            if(isNaN(covertratio)){
+			            	
+			            	covertratio=0;
+		            	}
+			            if(tj>0){
+		            		footers.itemid="";
+		            	}
+		            	tj++;
+		            
+			            footers.materialcode=obj[0].fname+": "+covertratio+""+obj[0].accountflag;;
+			            dataList.footer.push(footers);
+			           
+		        }  
+		        $('#dgItem').datagrid('loadData', dataList);
+			}
+</script>
+</body>
+</html>

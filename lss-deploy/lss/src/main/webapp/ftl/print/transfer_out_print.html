@@ -1,0 +1,149 @@
+<div id="diva">
+<DIV style="LINE-HEIGHT: 30px" class=size16 align=center><STRONG><font size="4" color="#0000FF">中心内部调出单</font></STRONG></DIV>        
+<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%">
+ <TBODY>
+  <TR>
+    <TD width="40%"><font size="2.5" color="#0000FF">所属调入租赁公司：<SPAN>${cStockTransfer.toMchName!''}</SPAN></font></TD>
+    <TD width="30%"><font size="2.5" color="#0000FF">调出单号：<SPAN>${cStockTransfer.tsfSerialno!''}</SPAN></font></TD>
+    <TD width="30%"><font size="2.5" color="#0000FF">所属中心：<SPAN>${cStockTransfer.fromDeptName!''}</SPAN></font></TD></TR>
+    <TR>
+    <TD width="40%"><font color="#0000FF" size="2.5">调出经办人：<SPAN>${cStockTransfer.traOutOper!''}</SPAN></font></TD> 
+    <TD width="30%"><font color="#0000FF" size="2.5">商户经办人：<SPAN>${cStockTransfer.traInOper!''}</SPAN></font><font color="#0000FF"></font></TD>
+ 	<TD width="30%"><font color="#0000FF" size="2.5">日期：<SPAN>${(cStockTransfer.jytime?string("yyyy-MM-dd"))!''}  </SPAN></font></TD> 
+ </TR>
+ 
+    <input id="fenye" name="fenye" value="${fenye!''}" type="hidden"></input>
+ 
+ 
+ 
+</TABLE>
+</div>
+
+<#list 1..fenye as t>
+
+
+<p>----------------------div2:------------------------------------------------------------------------------------</p>
+<div id="div${t}">
+
+<TABLE border=1 cellSpacing=0 cellPadding=0 width="100%" style="border-collapse:collapse" bordercolor="#333333">
+   <tr>
+   	<td style="vertical-align: top;" > 
+   	<table width="350"  border=1 cellSpacing=0 cellPadding=0  style="border-collapse:collapse" bordercolor="#333333">
+   	<thead>
+   <TR height="25px">
+    <TD width="10%">
+      <DIV ><b><font size="2" style="letter-spacing:2px;">&nbsp;类型</font></b></DIV></TD>
+    <TD width="17%">
+      <DIV ><b><font size="2" style="letter-spacing:2px;">&nbsp;物资名称</font></b></DIV></TD>
+    <TD width="15%">
+      <DIV ><b><font size="2" style="letter-spacing:2px;">&nbsp;数量</font></b></DIV></TD>
+    <TD width="15%">
+      <DIV ><b><font size="2" style="letter-spacing:2px;">&nbsp;小计</font></b></DIV></TD>
+   </TR>
+</thead>      
+  <TBODY>    
+  
+  <#assign x='0'>
+  <#list detailList as obj>  
+ 	<#if obj_index gte 13*(t*2-2) && obj_index lt 13*(t*2-1)>
+  
+   
+  
+  <TR >
+    <#if x!=obj.typeId>
+    <TD >&nbsp;<font size="1"  style="letter-spacing:2px;">${obj.fname!''}</font></TD>
+    <#else>
+    <TD >&nbsp;</TD>
+    </#if>
+    <#assign x='${obj.typeId}'>
+
+    <TD ><font size="1"  style="letter-spacing:2px;">&nbsp;${obj.materialName!''}</font></TD>
+    <TD ><font size="1" style="letter-spacing:2px;">&nbsp;${obj.totalS!''} ${obj.unit!''}</font></TD>
+    <TD ><font size="1" style="letter-spacing:2px;">&nbsp;${(obj.totalS?number*obj.covertratio?number)?string('0.0')} ${obj.convertFlag!''}</font></TD>
+ </TR>
+    </#if>
+   </#list>
+   </TBODY>
+  
+   
+</table>
+   	</td>
+   	
+   	
+   	
+   	
+   	
+   	<td style="vertical-align: top;">   	
+   	<table width="349" border=1 cellSpacing=0 cellPadding=0  style="border-collapse:collapse" bordercolor="#333333">
+		   	
+	 <TR height="25px">
+    <TD width="10%">
+      <DIV ><b><font size="2" style="letter-spacing:2px;">&nbsp;类型</font></b></DIV></TD>
+    <TD width="17%">
+      <DIV ><b><font size="2" style="letter-spacing:2px;">&nbsp;物资名称</font></b></DIV></TD>
+    <TD width="15%">
+      <DIV ><b><font size="2" style="letter-spacing:2px;">&nbsp;数量</font></b></DIV></TD>
+    <TD width="15%">
+      <DIV ><b><font size="2" style="letter-spacing:2px;">&nbsp;小计</font></b></DIV></TD>
+   </TR>
+		   
+		  <#assign x='0'>
+		 
+		  <#list detailList as obj>  
+		  <#if obj_index gte 13*(t*2-1)	 && obj_index lt 13*(t*2)>
+	  
+	  
+		  
+		  <TR >
+		  	
+		    <#if x!=obj.typeId>
+		    <TD >&nbsp;<font size="1"  style="letter-spacing:2px;">${obj.fname!''}</font></TD>
+		    <#else>
+		    <TD >&nbsp;</TD>
+		    </#if>
+		    <#assign x='${obj.typeId}'>
+		
+		    <TD ><font style="letter-spacing:2px;" size="1">&nbsp;${obj.materialName!''}</font></TD>
+		    <TD ><font size="1" style="letter-spacing:2px;">&nbsp;${obj.totalS!''} ${obj.unit!''}</font></TD>
+		    <TD ><font size="1" style="letter-spacing:2px;">&nbsp;${(obj.totalS?number*obj.covertratio?number)?string('0.0')} ${obj.convertFlag!''}</font></TD>
+		 </TR>
+		  </#if>
+		   </#list>
+		   
+		  
+		  
+		  
+		  
+   
+</table></td>
+  
+   <tr>
+  
+  <tr>
+   
+    <TD colspan=2><b><font size="2">合计</font></b><b> 	<#list totalList as obj><font size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${obj.fname!''}:${obj.totalS?string('0.0')}${obj.convertFlag!''}</font>  </#list> </b></TD>
+    
+    
+
+
+  </tr>
+
+		   
+   <TR>
+  <TD colspan=2><font color="#0000FF" size="2">备注：<SPAN>${cStockTransfer.others!''}</SPAN></font></TD> 
+ </TR>
+</TABLE>
+</div>
+
+</#list>
+
+
+
+
+
+
+
+
+
+
+

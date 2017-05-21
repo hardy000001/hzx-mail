@@ -1,0 +1,132 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+     <#include "../include_head.html">
+    </head>
+    <body>
+	<div id="query_panel" class="easyui-panel" title="查询面板"
+		style="height: 110px; padding: 10px; background: #fafafa;"
+		data-options="iconCls:'icon-search',collapsible:true">
+		
+		
+				<form id="queryFm" method="post" novalidate>
+				
+			<div class="fitem">
+			  <input name="cuscode" prompt="客户名称" id="cuscode" class="easyui-combogrid">
+			  <input  id="settledate" name="settledate" prompt="结算日期"   style="width:150px">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" onclick="clearQueryFm();">重置</a>
+			</div>
+			
+			
+		</form>
+
+	<!-- 这里的query是通用js,如果有特别的查询可以不引入 -->
+		<#include "../query_js_inc.html">
+	</div>  
+	
+	
+    <table id="dg" title="调拨物资汇总" class="easyui-datagrid" style="height:400px"
+     data-options="url:'<@sp.ctx />/user/stock/smchmaterialinfo.htm?method=query'",showGroup:true,scrollbarSize:0
+    toolbar="#toolbar" pagination="true"
+    rownumbers="true" fitColumns="true" 
+    showFooter: true,						
+    singleSelect="true">
+    <thead>
+			<tr>
+				<th field="id" hidden="hidden">id</th>
+				<th field="cusName" width="10%">客户名称</th>
+				<th field="centerName" width="10%">中心名称</th>
+				<th field="typeName" width="10%">材料名称</th>
+				<th field="beginNum" width="10%">期初数量</th>
+				<th field="endNum" width="10%">期末数量</th>
+				<th field="transferIn" width="10%">调入数量</th>
+				<th field="transferOut" width="10%">调出数量</th>
+				<th field="saleNum" width="10%">销售数量</th>
+				<th field="purchaseNum" width="10%">采购数量</th>
+				<th field="unit" width="10%">材料单位</th>
+			    <th field="settledate" width="10%">结算月份</th>	
+			
+				
+
+
+			</tr>
+    </thead>
+    </table>
+   
+    </body>
+    <script type="text/javascript">
+    $('#cuscode').combogrid({
+        url:'<@sp.ctx />/user/stock/centertransferAdd.htm?method=getCustomerInfos',
+        idField:'cuscode',
+        textField:'cusname',
+        columns:[[
+                  {field:'cuscode',title:'商户号',width:50},
+                  {field:'cusname',title:'商户名称',width:100},
+                 ]],
+    	mode:'local',
+	    filter:function(q, row){
+	    	var opts = $(this).combogrid('options');
+			// 过滤拼音码，转换大写字母
+		    /* if( row.pyCode.indexOf(q.toUpperCase()) >= 0){
+		    	alert(1);
+				return row.pyCode.indexOf(q.toUpperCase()) >= 0;
+		    } */
+		    // 过滤中文名称
+	        if(row[opts.textField].indexOf(q) >= 0){
+	        	return row[opts.textField].indexOf(q) >= 0;
+	        }
+		}
+    });
+    
+   
+    
+    $(function () {
+        var db = $('#settledate');
+        db.datebox({
+            onShowPanel: function () {//显示日趋选择对象后再触发弹出月份层的事件，初始化时没有生成月份层
+                span.trigger('click'); //触发click事件弹出月份层
+                if (!tds) setTimeout(function () {//延时触发获取月份对象，因为上面的事件触发和对象生成有时间间隔
+                    tds = p.find('div.calendar-menu-month-inner td');
+                    tds.click(function (e) {
+                        e.stopPropagation(); //禁止冒泡执行easyui给月份绑定的事件
+                        var year = /\d{4}/.exec(span.html())[0]//得到年份
+                        , month = parseInt($(this).attr('abbr'), 10); //月份，这里不需要+1
+                        db.datebox('hidePanel')//隐藏日期对象
+                        .datebox('setValue', year + '-' + month); //设置日期的值
+                    });
+                }, 0);
+                yearIpt.unbind();//解绑年份输入框中任何事件
+            },
+            parser: function (s) {
+                if (!s) return new Date();
+                var arr = s.split('-');
+                return new Date(parseInt(arr[0], 10), parseInt(arr[1], 10) - 1, 1);
+            },
+            formatter: function (d) { 
+            	var s=d.getMonth() + 1;
+            	
+            	return d.getFullYear() + '-' + (s < 10 ? '0' + s: s);/*getMonth返回的是0开始的，忘记了。。已修正*/ }
+        });
+        var p = db.datebox('panel'), //日期选择对象
+            tds = false, //日期选择对象中月份
+            aToday = p.find('a.datebox-current'),
+            yearIpt = p.find('input.calendar-menu-year'),//年份输入框
+            //显示月份层的触发控件
+            span = aToday.length ? p.find('div.calendar-title span') ://1.3.x版本
+            p.find('span.calendar-text'); //1.4.x版本
+        if (aToday.length) {//1.3.x版本，取消Today按钮的click事件，重新绑定新事件设置日期框为今天，防止弹出日期选择面板
+           
+            aToday.unbind('click').click(function () {
+                var now=new Date();
+                db.datebox('hidePanel').datebox('setValue', now.getFullYear() + '-' + (now.getMonth() + 1));
+            });
+        }
+    });
+    
+    </script>
+    
+    
+    </html>

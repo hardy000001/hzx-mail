@@ -1,0 +1,90 @@
+<div id="div1">
+<DIV style="LINE-HEIGHT: 30px" class=size16 align=center><STRONG><font color="#0000FF">盘点单</font></STRONG></DIV>        
+<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD  width="43%"><font color="#0000FF">所属租赁公司：<SPAN>${inventory.mchname!''}</SPAN></font></TD>
+    <TD width="33%"><font color="#0000FF">盘点单号：<SPAN>${inventory.inventorySerialno!''}</SPAN></font></TD>
+    <TD><font color="#0000FF">所属中心：<SPAN>${inventory.centerName!''}</SPAN></font></TD></TR>
+  <TR>
+    <TD><font color="#0000FF">操作时间：<SPAN>${inventory.createtime!''}</SPAN></font><font color="#0000FF"></font></TD>
+    <TD><font color="#0000FF">盘点经办人：<SPAN>${inventory.inventoryoper!''}</SPAN></font></TD> 
+    <TD><font color="#0000FF">制单人：<SPAN>${inventory.loginName!''}</SPAN></font></TD> 
+ </TBODY></TABLE>
+</div>
+
+<p>----------------------div2:------------------------------------------------------------------------------------</p>
+<div id="div2">
+
+<TABLE border=1 cellSpacing=0 cellPadding=1 width="100%" style="border-collapse:collapse" bordercolor="#333333">
+<thead>
+  <TR>
+    <TD width="15%">
+      <DIV align=center><b>物资简码</b></DIV></TD>
+    <TD width="18%">
+      <DIV align=center><b>物资名称</b></DIV></TD>
+    <TD width="13%">
+      <DIV align=center><b>单位</b></DIV></TD>
+    <TD width="13%">
+      <DIV align=center><b>实际库存</b></DIV></TD>
+    <TD width="13%">
+      <DIV align=center><b>账面库存</b></DIV></TD>
+    <TD width="15%">
+      <DIV align=center><b>盘亏盘盈(-/+)</b></DIV></TD>
+    <TD width="13%">
+      <DIV align=center><b>差异率(%)</b></DIV></TD></TR>
+</thead>      
+  <TBODY>    
+  <#assign x='0'>
+  <#list totalList as obj>
+  <#if obj.materialcode!='小计'>
+  <TR align="center">
+    <TD >${obj.materialcode!''}</TD>
+    <TD >${obj.name!''}</TD>
+    <TD >${obj.unit!''}</TD>
+    <TD >${obj.realTotalS!''}</TD>
+    <TD >${obj.accTotalS!''}</TD>
+    <TD >${obj.totalM!''}</TD>
+    <TD >${obj.diffrate!''}</TD></TR>  
+  </tr>
+  <#else>
+  <TR align="center" style="background-color:#6293BB;color:#fff;font-weight:bold;">
+    <TD >${obj.materialcode!''}</TD>
+    <TD >${obj.name!''}</TD>
+    <TD >${obj.unit!''}</TD>
+    <TD >${obj.realTotalS!''}</TD>
+    <TD >${obj.accTotalS!''}</TD>
+    <TD >${obj.totalM!''}</TD>
+    <TD >${obj.diffrate!''}</TD></TR>  
+  </tr>
+  </#if>
+  </#list>
+   </TBODY>
+  
+  <tfoot>
+  
+  
+  </tfoot>
+</TABLE>
+</div>
+<p>----------------------div3:------------------------------------------------------------------------------------</p>
+<div id="div3">
+  <DIV style="LINE-HEIGHT: 60px" 
+align=center><span tdata='pageNO' format="00">(盘点单)</span></DIV>
+</div>
+<p>----------------------div4:------------------------------------------------------------------------------------</p>
+<div id="div4">
+<DIV style="LINE-HEIGHT: 30px" class=size16 align=center><STRONG><font color="#FF0000">盘点发货单-02</font></STRONG></DIV>         
+<TABLE border=0 cellSpacing=0 cellPadding=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD width="43%"><font color="#FF0000">店铺名称：<SPAN 
+      id=rpt_Pro_Order_List_ctl00_lbl_eShop_Name><b>黄阁专卖店</b></SPAN></font></TD>
+    <TD width="33%"><font color="#FF0000">物流单号：<SPAN >2011050810373</SPAN></font></TD>
+  </TR>
+  <TR>
+    <TD><font color="#FF0000">收 货 人：<SPAN >刘波</SPAN></font></TD>                                                  
+    <TD><font color="#FF0000">网店订单：<SPAN>74235823905644</SPAN></font></TD>
+  </TR>
+  </TBODY></TABLE>
+</div>

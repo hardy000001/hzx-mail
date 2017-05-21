@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="AdminAuditLog">
+
+    <sql id="tableName">
+		admin_audit_log
+	</sql>
+
+    <sql id="selectColumns">
+        select
+        t.id id ,
+        t.group_id groupId ,
+        t.ref_id refId ,
+        t.operator_id operatorId ,
+        t.create_time createTime ,
+        t.operate_type operateType ,
+        t.operate_desc operateDesc ,
+        t.key_paras keyParas ,
+        t.field1 field1 ,
+        t.field2 field2,
+        u.login_name name
+         FROM
+        <include refid="tableName"/>
+        t 
+        left join admin_user u on t.operator_id=u.user_id
+    </sql>
+
+    <!-- 添加 -->
+    <insert id="create" parameterType="com.lq.lss.model.AdminAuditLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id,group_id,ref_id,operator_id,create_time,operate_type,operate_desc,key_paras,field1,field2)
+        VALUES
+        (#{id} ,#{groupId} ,#{refId} ,#{operatorId} ,#{createTime} ,#{operateType} ,#{operateDesc} ,#{keyParas}
+        ,#{field1} ,#{field2} )
+    </insert>
+
+    <!-- 批量 添加 -->
+    <insert id="create_BATCH" parameterType="List">
+        INSERT INTO
+        <include refid="tableName"/>
+        (id,group_id,ref_id,operator_id,create_time,operate_type,operate_desc,key_paras,field1,field2)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id} ,#{item.groupId} ,#{item.refId} ,#{item.operatorId} ,#{item.createTime} ,#{item.operateType}
+            ,#{item.operateDesc} ,#{item.keyParas} ,#{item.field1} ,#{item.field2} )
+        </foreach>
+    </insert>
+
+    <delete id="deleteById" parameterType="java.lang.String">
+        DELETE FROM
+        <include refid="tableName"/>
+        WHERE id = #{id}
+    </delete>
+
+    <select id="loadAll" resultType="com.lq.lss.model.AdminAuditLog">
+        <include refid="selectColumns"/>
+    </select>
+
+    <select id="findById" resultType="com.lq.lss.model.AdminAuditLog"
+            parameterType="java.lang.String">
+        <include refid="selectColumns"/>
+        where id = #{id}
+    </select>
+
+    <sql id="pageConditions">
+        WHERE 1=1
+        <if test="id != null">AND id = #{id}</if>
+        <if test="groupId != null">AND group_id = #{groupId}</if>
+        <if test="refId != null">AND ref_id = #{refId}</if>
+        <if test="operatorId != null">AND operator_id = #{operatorId}</if>
+        <if test="createTime != null">AND create_time = #{createTime}</if>
+        <if test="operateType != null">AND operate_type = #{operateType}</if>
+        <if test="operateDesc != '' and operateDesc != null">AND operate_desc = #{operateDesc}</if>
+        <if test="keyParas != '' and keyParas != null">AND key_paras = #{keyParas}</if>
+        <if test="field1 != '' and field1 != null">AND field1 = #{field1}</if>
+        <if test="field2 != '' and field2 != null">AND field2 = #{field2}</if>
+    </sql>
+
+    <!-- 分页查询 -->
+    <select id="findPage" resultType="com.lq.lss.model.AdminAuditLog"
+            parameterType="com.lq.lss.model.AdminAuditLog">
+        <include refid="selectColumns"/>
+        <include refid="pageConditions"/>
+       
+            order by id desc
+       
+    </select>
+
+    <select id="findPage_COUNT" resultType="int">
+        select count(1) from
+        <include refid="tableName"/>
+        <include refid="pageConditions"/>
+    </select>
+
+    <sql id="update_sql">
+        UPDATE
+        <include refid="tableName"/>
+        <set>
+            <if test="groupId != null">group_id = #{groupId},</if>
+            <if test="refId != null">ref_id = #{refId},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="operateType != null">operate_type = #{operateType},</if>
+            <if test="operateDesc != null">operate_desc = #{operateDesc},</if>
+            <if test="keyParas != null">key_paras = #{keyParas},</if>
+            <if test="field1 != null">field1 = #{field1},</if>
+            <if test="field2 != null">field2 = #{field2}</if>
+        </set>
+        WHERE id = #{id}
+    </sql>
+
+    <update id="update" parameterType="com.lq.lss.model.AdminAuditLog">
+        <include refid="update_sql"/>
+    </update>
+
+
+</mapper>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <#include "../include_head.html" />
+</head>
+<body>
+<div id="query_panel" class="easyui-panel" title="查询面板"
+     style="height:110px;padding:10px;background:#fafafa;"
+     data-options="iconCls:'icon-search',collapsible:true">
+    <form id="queryFm" method="post" novalidate>
+        <div class="fitem">
+            <input name="loginName" prompt="登陆名称" class="easyui-textbox">
+            <input name="realName" prompt="真实姓名" class="easyui-textbox">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()">查询</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload" onclick="clearQueryFm();">重置</a>
+        </div>
+    </form>
+    <!-- 这里的query是通用js,如果有特别的查询可以不引入 -->
+    <#include "../query_js_inc.html" />
+</div>
+<table id="dg" class="easyui-datagrid" style="width:auto;height:auto"
+       data-options="url:'<@sp.ctx />/user/adminUser.htm?method=query'"
+       toolbar="#toolbar" pagination="true"
+       rownumbers="true" fitColumns="true" singleSelect="true">
+    <thead>
+    <tr>
+        <th field="userId" width="20">用户id</th>
+        <th field="loginName" width="50">登录名</th>
+        <th field="realName" width="50">姓名</th>
+        <th field="mobile" width="50">手机号</th>
+        <th field="email" width="50">Email</th>
+        <th field="qq" width="50">qq</th>
+        <!-- <th field="deptName" width="50">部门</th> -->
+        <th field="status" width="50" formatter="formatStatus">状态</th>
+    </tr>
+    </thead>
+</table>
+
+<div id="toolbar">
+
+
+    <@shiro.hasPermission name="${add}">
+      <a id="add_bar" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addDg()">新增</a>
+    </@shiro.hasPermission>
+    <@shiro.hasPermission name="${update}">
+      <a id="edit_bar" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editDg()">修改</a>
+    </@shiro.hasPermission>
+    <@shiro.hasPermission name="${lock}">
+      <a id="enable_bar" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="enable();">解锁</a>
+    </@shiro.hasPermission>
+    <@shiro.hasPermission name="${unlock}">
+      <a id="lock_bar" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-lock" plain="true" onclick="lock();">锁定</a>
+    </@shiro.hasPermission>
+
+</div>
+
+<div id="dlg" class="easyui-dialog" style="width:820px;height:450px;padding:10px 20px"
+     closed="true" buttons="#dlg-buttons">
+    <div style="width:400px;height:330px;padding:10px;background:#fafafa;float: left">
+        <div class="ftitle">编辑用户</div>
+        <form id="fm" method="post" novalidate style="height: 100%">
+            <div class="fitem" hidden="hidden">
+                <label>id:</label>
+                <input name="userId" class="easyui-textbox">
+            </div>
+            <div class="fitem">
+                <label>登录名:</label>
+                <input name="loginName" class="easyui-textbox" required="true">
+            </div>
+            <div class="fitem">
+                <label>登录密码:</label>
+                <input type="password" name="loginPwd" id="loginPwd" class="easyui-textbox" required="true">
+            </div>
+            <div class="fitem">
+                <label>姓名:</label>
+                <input name="realName" class="easyui-textbox" required="true">
+            </div>
+            <div class="fitem">
+                <label>所属部门:</label>
+                <input name="deptId" id="deptId" class="easyui-combotree" style="width: 140px" required="true">
+            </div>
+            <div class="fitem">
+                <label>手机号:</label>
+                <input name="mobile" class="easyui-textbox">
+            </div>
+            <div class="fitem">
+                <label>邮件:</label>
+                <input name="email" class="easyui-textbox" validType="email">
+            </div>
+            <div class="fitem">
+                <label>QQ:</label>
+                <input name="qq" class="easyui-textbox">
+            </div>
+            <div class="fitem">
+                <label>状态:</label>
+                <input name="status" type="radio" value="1">正常
+                <input name="status" type="radio" value="0">未激活
+                <input name="status" type="radio" value="-1">禁用
+            </div>
+            <input id="checkRoleIds" name="checkRoleIds" type="hidden"/>
+            <input id="actionType" name="actionType" type="hidden"/>
+        </form>
+    </div>
+    <div style="width:300px;height:330px;padding:10px;background:#fafafa;float: right">
+        <div class="ftitle">编辑角色</div>
+        <div id="roleDiv"></div>
+    </div>
+
+</div>
+
+
+<div id="dlg-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onclick="save()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+<script language="javascript">
+
+    var deptAction = "<@sp.ctx />/user/adminDept.htm"
+    var baseAction = "<@sp.ctx />/user/adminUser.htm"
+    var url;
+
+    function addDg() {
+
+
+        $('#deptId').combotree({
+            url: deptAction + '?method=getDeptList&type=2',
+            width: '144px'
+        });
+
+        $('#dlg').dialog('open').dialog('setTitle', '新增用户');
+        $('#fm').form('clear');
+
+        var html = getUserRoleList("");
+        $("#roleDiv").empty();
+        $("#roleDiv").append(html);
+
+        url = baseAction + '?method=saveOrUpdate';
+        $('#actionType').val(1);
+    }
+    function editDg() {
+
+        $('#deptId').combotree({
+            url: deptAction + '?method=getDeptList&type=2',
+            lines: true,
+            width: '144px'
+
+        });
+
+        var row = $('#dg').datagrid('getSelected');
+        if (row) {
+            $('#dlg').dialog('open').dialog('setTitle', '修改用户');
+            $('#fm').form('load', row);
+            url = baseAction + '?method=saveOrUpdate&_ajax';
+
+            var html = getUserRoleList(row.userId);
+            $("#roleDiv").empty();
+            $("#roleDiv").append(html);
+
+            $("#loginPwd").val("");
+        }
+        $('#actionType').val(2);
+    }
+    function save() {
+
+        var roleIds = "";
+        $('input[name*="item_"]:checked').each(function () {
+            if (roleIds != "") {
+                roleIds += "," + $(this).val();
+            } else {
+                roleIds += $(this).val();
+            }
+        });
+        $('#checkRoleIds').val(roleIds);
+
+        $('#fm').form('submit', {
+            "url": url,
+            onSubmit: function () {
+                return $(this).form('validate');
+            },
+            success: function (result) {
+                var result = eval('(' + result + ')');
+                if (result.errorMsg) {
+                    $.messager.alert('错误信息', result.errorMsg, "error");
+                } else {
+                    $.messager.alert('提示信息', '操作成功', 'info', function () {
+                        $('#dlg').dialog('close');
+                        $('#dg').datagrid('reload');
+                    });
+
+                }
+            }
+        });
+    }
+    function destroyDg() {
+        var row = $('#dg').datagrid('getSelected');
+        if (row) {
+            $.messager.confirm('确定删除', '确定删除选中数据吗?', function (r) {
+                if (r) {
+                    $.post(baseAction + '?method=remove', {id: row.userId,mchCode:row.mchCode}, function (result) {
+                        if (result.success) {
+                            $.messager.alert('提示信息', '操作成功', 'info', function () {
+                                $('#dg').datagrid('reload');
+                            });
+                        } else {
+                            $.messager.alert('错误信息', result.errorMsg, 'error');
+                        }
+                    }, 'json');
+                }
+            });
+        }
+    }
+    function enable() {
+        var row = $('#dg').datagrid('getSelected');
+        if (row) {
+            $.messager.confirm('确定解锁', '确定解锁选中数据吗?', function (r) {
+                if (r) {
+                    $.post(baseAction + '?method=enableUser', {id: row.userId}, function (result) {
+                        if (result.success) {
+                            $.messager.alert('提示信息', '操作成功', 'info', function () {
+                                $('#dg').datagrid('reload');
+                            });
+                        } else {
+                            $.messager.alert('错误信息', result.errorMsg, 'error');
+                        }
+                    }, 'json');
+                }
+            });
+        }
+    }
+    function lock() {
+        var row = $('#dg').datagrid('getSelected');
+        if (row) {
+            $.messager.confirm('确定锁定', '确定锁定选中数据吗?', function (r) {
+                if (r) {
+                    $.post(baseAction + '?method=lockUser', {id: row.userId}, function (result) {
+                        if (result.success) {
+                            $.messager.alert('提示信息', '操作成功', 'info', function () {
+                                $('#dg').datagrid('reload');
+                            });
+                        } else {
+                            $.messager.alert('错误信息', result.errorMsg, 'error');
+                        }
+                    }, 'json');
+                }
+            });
+        }
+    }
+
+    $(function () {
+        $("#fm .fitem").width(300);
+
+    });
+
+    function getUserRoleList(userId) {
+        var itemsList = null;
+        var htmlBody = "";
+        var url = "";
+        if (userId == "") {
+            url = '<@sp.ctx />/user/adminRole.htm?method=getRoleList';
+        } else {
+            url = '<@sp.ctx />/user/adminRole.htm?method=getUserRoleList';
+        }
+        $.ajax({
+            url: url,
+            type: "post",
+            async: false,
+            data: {userId: userId},
+            dataType: "json",
+            success: function (result) {
+                itemsList = result;
+            }
+        });
+
+        for (var j = 0; j < itemsList.length; j++) {
+            if (itemsList[j].checked == '1') {
+                htmlBody += "<input type='checkbox' checked='checked' value='" + itemsList[j].id + "'  name='item_" + itemsList[j].id + "' />" + itemsList[j].name;
+            } else {
+                htmlBody += "<input type='checkbox' value='" + itemsList[j].id + "'  name='item_" + itemsList[j].id + "' />" + itemsList[j].name;
+            }
+            if ((j + 1) % 3 == 0) {
+                htmlBody += "<br/>";
+            }
+        }
+        return htmlBody;
+    }
+
+    function formatStatus(val, row) {
+        var vResult = "";
+        if (val == '0') {
+            vResult = '<span style="color:red;">未激活</span>';
+        }
+        else if (val == '1') {
+            vResult = '<span style="color:green;">正常</span>';
+        }
+        else if (val == '-1') {
+            vResult = '<span style="color:gray;">已禁用</span>';
+        }
+        return vResult;
+    }
+
+</script>
+
+</body>
+</html>

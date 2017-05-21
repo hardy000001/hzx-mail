@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockInRepairinfo">
+
+	<sql id="tableName" >
+		c_stock_in_repairinfo
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	receipt_detail_id receiptDetailId ,
+	repair_id repairId ,
+	repair_fee repairFee ,
+	in_serialno inSerialno     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockInRepairinfo" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,receipt_detail_id,repair_id,repair_fee,in_serialno)
+		VALUES
+		(#{id} ,#{receiptDetailId} ,#{repairId} ,#{repairFee} ,#{inSerialno} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,receipt_detail_id,repair_id,repair_fee,in_serialno)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.receiptDetailId} ,#{item.repairId} ,#{item.repairFee} ,#{item.inSerialno} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		where in_serialno = #{inSerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockInRepairinfo">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockInRepairinfo" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where in_serialno = #{inSerialno}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="receiptDetailId != '' and receiptDetailId != null">AND receipt_detail_id = #{receiptDetailId}</if>
+  	<if test="repairId != '' and repairId != null">AND repair_id = #{repairId}</if>
+  	<if test="repairFee != null">AND repair_fee = #{repairFee}</if>
+  	<if test="inSerialno != '' and inSerialno != null">AND in_serialno = #{inSerialno}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockInRepairinfo"
+		parameterType="com.lq.lss.model.CStockInRepairinfo">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="receiptDetailId != null">receipt_detail_id = #{receiptDetailId},</if>
+		  	<if test="repairId != null">repair_id = #{repairId},</if>
+		  	<if test="repairFee != null">repair_fee = #{repairFee},</if>
+		  	<if test="inSerialno != null">in_serialno = #{inSerialno}</if>
+			</set>
+		where in_serialno = #{inSerialno}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockInRepairinfo">
+		<include refid="update_sql"/>
+	</update>	
+		
+	<select id="queryRepairiBySerialno" resultType="com.lq.lss.model.CStockInRepairinfo" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where in_serialno = #{inSerialno}
+	</select>
+
+</mapper>

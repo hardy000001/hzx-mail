@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockInventory">
+
+	<sql id="tableName" >
+		c_stock_inventory
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	t.inventory_serialno inventorySerialno ,
+	t.deptid deptid ,
+	t.mchcode mchcode ,
+	t.inventoryoper inventoryoper ,
+	t.createoper createoper ,
+	t.status status ,
+	t.createtime createtime ,
+	t.auditingoper auditingoper ,
+	t.auditingtime auditingtime ,
+	t.remark remark,
+	if(t.status=0,10,t.status) s_status,  
+	u.login_name loginName,
+	uu.login_name operName,
+	m.mchname mchname,
+	d.name centerName    FROM
+    <include refid="tableName"/> t
+    left join admin_user u on t.createoper=u.user_id
+    left join admin_user uu on t.auditingoper=uu.user_id
+	left join mch_baseinfo m on t.mchcode=m.mchcode and t.deptid=m.deptid
+	left join admin_dept d on t.deptid=d.dept_id
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockInventory" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(inventory_serialno,deptid,mchcode,inventoryoper,createoper,status,createtime,auditingoper,auditingtime,remark)
+		VALUES
+		(#{inventorySerialno} ,#{deptid} ,#{mchcode} ,#{inventoryoper} ,#{createoper} ,#{status} ,#{createtime} ,#{auditingoper} ,#{auditingtime} ,#{remark} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(inventory_serialno,deptid,mchcode,inventoryoper,createoper,status,createtime,auditingoper,auditingtime,remark)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.inventorySerialno} ,#{item.deptid} ,#{item.mchcode} ,#{item.inventoryoper} ,#{item.createoper} ,#{item.status} ,#{item.createtime} ,#{item.auditingoper} ,#{item.auditingtime} ,#{item.remark} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE inventory_serialno = #{inventorySerialno}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockInventory">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockInventory" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where inventory_serialno = #{inventorySerialno}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="inventorySerialno != '' and inventorySerialno != null">AND t.inventory_serialno = #{inventorySerialno}</if>
+  	<if test="deptid != null">AND t.deptid = #{deptid}</if>
+  	<if test="mchcode != '' and mchcode != null">AND t.mchcode = #{mchcode}</if>
+  	<if test="inventoryoper != '' and inventoryoper != null">AND t.inventoryoper = #{inventoryoper}</if>
+  	<if test="createoper != '' and createoper != null">AND t.createoper = #{createoper}</if>
+  	<if test="status != '' and status != null">AND t.status = #{status}</if>
+  	<if test="createtime != null">AND t.createtime = #{createtime}</if>
+  	<if test="auditingoper != '' and auditingoper != null">AND t.auditingoper = #{auditingoper}</if>
+  	<if test="auditingtime != null">AND t.auditingtime = #{auditingtime}</if>
+  	<if test="remark != '' and remark != null">AND remark = #{remark}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockInventory"
+		parameterType="com.lq.lss.model.CStockInventory">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		order by s_status ,createtime desc
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" /> t
+		<include refid="pageConditions" /> 
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		  	<if test="mchcode != null">mchcode = #{mchcode},</if>
+		  	<if test="inventoryoper != null">inventoryoper = #{inventoryoper},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="createtime != null">createtime = #{createtime},</if>
+		  	<if test="auditingoper != null">auditingoper = #{auditingoper},</if>
+		  	<if test="auditingtime != null">auditingtime = #{auditingtime},</if>
+		  	<if test="remark != null">remark = #{remark}</if>
+			</set>
+		WHERE inventory_serialno = #{inventorySerialno}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockInventory">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

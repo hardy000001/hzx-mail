@@ -1,0 +1,107 @@
+.archives-table{
+    width: 100%;
+    float: left;
+}
+.archives-table{
+    float: left;
+    width: 100%;
+    margin-top: 30px;
+}
+.archives-table table{
+    width: 100%;
+    border: solid 1px #000;
+}
+.archives-table td{
+    width: 50%;
+    padding: 5px 0;
+    font-size: 18px;
+    font-weight: bold;
+    text-indent: 5px;
+    border: solid 1px #000;
+}
+.archives-table thead td{
+    text-align: center;
+}
+.archives-overview{
+    float: left;
+    margin-top: 20px;
+    width: 100%;
+}
+.archives-span{
+    width: 18%;
+    font-size: 20px;
+    font-weight: bold;
+}
+.archives-text{
+    overflow-y: auto;
+    width: 82%;
+    height: 200px;
+    resize: none;
+}
+.line3{
+    display: inline-block;
+    width:80px ;
+    border-bottom: solid 1px #000;
+}
+.eject{
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #e3dfd7;
+}
+.eject-top>span:not(:last-child){
+    display: inline-block;
+    font-size: 16px;
+    width: 30%;
+}
+.eject-top input{
+    width: 60%;
+    border: solid 1px #b6b6b6;
+    box-shadow:inset 1px 0 1px #eaeaea,inset 0 1px 1px #eaeaea,inset -1px 0 1px #eaeaea,inset 0 -1px 1px #eaeaea, ;
+    font-size: 15px;
+    text-indent: 5px;
+}
+.eject-top>span:not(:last-child),.eject-top input{
+    margin-top: 10px;
+    height: 25px;
+    margin-left: 2%;
+}
+.eject-bottom{
+    width: 100%;
+    overflow-y: auto;
+    background-color: #FFFFE1;
+    border: solid 1px #E3E3E3;
+    box-shadow:inset 1px 0 1px #aaaaaa,inset 0 1px 1px #aaaaaa;
+    padding:5px 15px;
+    text-indent:10px;
+    overflow-x:hidden;
+}
+.result-top{
+    height: 90%;
+    background-color: #E3E3E3;
+}
+.result-bottom{
+    width: 100%;
+    height: 10%;
+    background-color: #E3E3E3;
+    position: relative;
+    padding-top: 5px;
+    bottom: 0;
+}
+.result-bottom>span:not(:first-child),.result-bottom>input{
+    float: left;
+    margin-top: 20px;
+}
+.result-bottom>input[type="text"]{
+    width: 120px;
+    height: 25px;
+    margin-top: 15px;
+    text-indent: 5px;
+    font-size: 15px;
+}
+.result-bottom>input[type="button"]{
+    padding: 5px;
+    margin-left: 5px;
+    font-size: 12px;
+    margin-top: 13px;
+}

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockFromDetail">
+
+	<sql id="tableName" >
+		c_stock_from_detail
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	id id ,
+	fro_serialno froSerialno ,
+	materialcode materialcode ,
+	total_m totalM ,
+	total_s totalS ,
+	total_t totalT ,
+	status status ,
+	price price ,
+	unit unit     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockFromDetail" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(id,fro_serialno,materialcode,total_m,total_s,total_t,status,price,unit)
+		VALUES
+		(#{id} ,#{froSerialno} ,#{materialcode} ,#{totalM} ,#{totalS} ,#{totalT} ,#{status} ,#{price} ,#{unit} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(id,fro_serialno,materialcode,total_m,total_s,total_t,status,price,unit)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id} ,#{item.froSerialno} ,#{item.materialcode} ,#{item.totalM} ,#{item.totalS} ,#{item.totalT} ,#{item.status} ,#{item.price} ,#{item.unit} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE id = #{id}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockFromDetail">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockFromDetail" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where id = #{id}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="froSerialno != '' and froSerialno != null">AND fro_serialno = #{froSerialno}</if>
+  	<if test="materialcode != '' and materialcode != null">AND materialcode = #{materialcode}</if>
+  	<if test="totalM != null">AND total_m = #{totalM}</if>
+  	<if test="totalS != null">AND total_s = #{totalS}</if>
+  	<if test="totalT != null">AND total_t = #{totalT}</if>
+  	<if test="status != '' and status != null">AND status = #{status}</if>
+  	<if test="price != null">AND price = #{price}</if>
+  	<if test="unit != '' and unit != null">AND unit = #{unit}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockFromDetail"
+		parameterType="com.lq.lss.model.CStockFromDetail">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="froSerialno != null">fro_serialno = #{froSerialno},</if>
+		  	<if test="materialcode != null">materialcode = #{materialcode},</if>
+		  	<if test="totalM != null">total_m = #{totalM},</if>
+		  	<if test="totalS != null">total_s = #{totalS},</if>
+		  	<if test="totalT != null">total_t = #{totalT},</if>
+		  	<if test="status != null">status = #{status},</if>
+		  	<if test="price != null">price = #{price},</if>
+		  	<if test="unit != null">unit = #{unit}</if>
+			</set>
+		WHERE id = #{id}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockFromDetail">
+		<include refid="update_sql"/>
+	</update>	
+		
+	
+
+</mapper>

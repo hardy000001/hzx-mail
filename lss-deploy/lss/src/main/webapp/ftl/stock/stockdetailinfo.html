@@ -1,0 +1,88 @@
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+     <#include "../include_head.html">
+    </head>
+    <body>
+   <div id="query_panel"  class="easyui-panel" title="查询面板"     
+        style="height:130px;padding:10px;background:#fafafa;"   
+        data-options="iconCls:'icon-search',collapsible:true">
+		<form id="queryFm" method="post" novalidate>
+			<div class="fitem">
+		       <label>商户名称:</label> <input name="mchcode" id="mchcode" class="easyui-combogrid"> 
+			</div>
+			<br>
+			<br>
+			<div class="fitem dlg-buttons"  style="text-align: center;">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="query()" >查询</a>
+			</div>
+		</form>
+	<!-- 这里的query是通用js,如果有特别的查询可以不引入 -->
+		<#include "../query_js_inc.html">
+	</div>  
+	
+	
+    <table id="dg" title="中心库存明细" class="easyui-datagrid" style="height:400px"
+     data-options="url:'<@sp.ctx />/user/stock/stockdetailinfo.htm?method=query'",showGroup:true,scrollbarSize:0
+    toolbar="#toolbar" pagination="true"
+    rownumbers="true" fitColumns="true" 
+    showFooter: true,						
+    singleSelect="true">
+    <thead>
+			<tr>
+				<th field="id" hidden="hidden">id</th>
+				<th field="deptname" width="10%">中心名称</th>
+				<th field="mchcode" width="10%">商户代码</th>
+				<th field="mchcodename" width="10%">商户名称</th>
+				<th field="materialcode" width="10%">材料编码</th>
+				<th field="materialname" width="10%">材料名称</th>
+				<th field="totalS" width="10%">总数量</th>
+				<th field="unit" width="10%">材料单位</th>
+			    <th field="ctotal" width="10%">总量</th>
+				<th field="cunit" width="10%">材料单位</th>		
+				<th field="modifytime" width="20%">最后更新时间</th>
+				
+				<th data-options="field:'typeId',hidden:true">父ID</th>
+				<th data-options="field:'fname',hidden:true">父名</th>
+
+			</tr>
+    </thead>
+    </table>
+   
+    </body>
+    
+    <script type="text/javascript">
+    
+	
+    $('#mchcode').combogrid({
+        url:'<@sp.ctx />/user/sys/mchBaseinfo.htm?method=getMchInfAndCustomerinfoList',
+        idField:'mchcode',
+        textField:'mchname',
+        columns:[[
+                  {field:'mchcode',title:'商户号',width:50},
+                  {field:'mchname',title:'商户名称',width:100},
+                 ]],
+    	mode:'local',
+	    filter:function(q, row){
+	    	var opts = $(this).combogrid('options');
+			// 过滤拼音码，转换大写字母
+		    if( row.pyCode.indexOf(q.toUpperCase()) >= 0){
+				return row.pyCode.indexOf(q.toUpperCase()) >= 0;
+		    } 
+		    // 过滤中文名称
+	        if(row[opts.textField].indexOf(q) >= 0){
+	        	return row[opts.textField].indexOf(q) >= 0;
+	        }
+		}
+    });
+    
+    
+    
+    
+  
+    
+	</script>
+    
+    </html>

@@ -1,0 +1,853 @@
+<div id="toolbar">
+		<@shiro.hasPermission name="${add}">
+	    <a id="add_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="addDg()">新增</a>
+	    </@shiro.hasPermission>
+	    <@shiro.hasPermission name="${update}">
+	    <a id="edit_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editDg()">修改</a>
+	    </@shiro.hasPermission>
+	    <@shiro.hasPermission name="${del}">
+	    <a id="del_bar"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyDg()">删除</a>
+  		</@shiro.hasPermission>
+  		<a id="view_detail"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="viewDetail_()">查看</a>
+  		<@shiro.hasPermission name="${check}">
+  		<a id="aud_bar"   href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="auditDg()">审核</a>
+  		</@shiro.hasPermission>
+  		<a id="size1w"    href="javascript:void(0)"  class="easyui-linkbutton"iconCls="icon-height-resize" plain="true"  onclick="rowResize(1)" >1X</a>
+  		<a id="size2w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(2)" >2X</a>
+  		<a id="size3w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(3)" >3X</a>
+  		<a id="size4w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(4)" >4X</a>
+  		<a id="size5w"    href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-height-resize" plain="true"  onclick="rowResize(5)" >5X</a>
+  </div>
+  <div id="dlg-export" class="easyui-dialog" style="width:400px;height:250px;padding:10px 20px"
+    closed="true" buttons="#dlg-export-buttons">
+    <div class="ftitle">导出文件</div>
+    <form id="fm-export" name="fm-export" method="post" novalidate  >
+	    
+	    <div class="fitem">
+	    <label>导出类型:</label>
+	    <input name="fileSuffix" type="text" class="easyui-validatebox" style="color: #999" value=".xls" required="true" size="10" readonly="readonly" >
+	    </div>
+	    
+	     <div class="fitem">
+	    <label>开始索引:</label>
+	    <input name="startIndex" type="number" class="easyui-validatebox" size="10"  value="0" required="true" >
+	    </div>
+	    <div class="fitem">
+	    <label>结束索引:</label>
+	    <input name="lastIndex" type="number" class="easyui-validatebox" size="10"  value="-1" required="true">MAX=60000,-1
+	    </div>
+	     <div class="fitem">
+	    <label>日期格式:</label>
+	    <select  class="easyui-combobox" name="dataFmt" >
+						<option value="yyyy-MM-dd HH:mm:ss">yyyy-MM-dd HH:mm:ss</option>
+						<option value="yyyy-MM-dd HH:mm">yyyy-MM-dd HH:mm</option>
+						<option value="yyyy/MM/dd HH:mm:ss">yyyy/MM/dd HH:mm:ss</option>
+						<option value="yyyy/MM/dd HH:mm">yyyy/MM/dd HH:mm</option>                
+					   	<option value="yyyy-MM-dd">yyyy-MM-dd</option>
+					   	<option value="yyyy/MM/dd">yyyy/MM/dd</option> 
+				</select>   
+	    </div>
+	    
+	    
+	     
+		<input name="titles" id="fm-export-titles" type="hidden"  >
+	     <input name="props" id="fm-export-props" type="hidden"  >
+    </form>
+    </div>
+     <div id="dlg-export-buttons">
+	    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-download" onclick="exportFile()">导出</a>
+	    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg-export').dialog('close')">取消</a>
+    	<iframe  id="exportFrame" name="exportFrame" width=0 height=0 style="display:none" frameborder=0 src="about:blank"></iframe>  
+    </div>
+    
+    
+    
+    <!-- 查看详情 -->
+     <div id="view-dlg" class="easyui-dialog" style="width:700px;height:440px;padding:10px 20px"  closed="true" buttons="#view-dlg-buttons">
+    	<div id="view-dlg-content"></div>
+    	<input type="hidden"  id="hide_id">
+    	<input type="hidden"  id="hide_cuscode">
+    	<div class="fitem">
+					 	
+				    	<table id="dgItem_detail" class="easyui-datagrid"  style="width:635px;height: auto;"
+								    data-options="rownumbers:true
+									"
+								    >
+							       
+					   </table>
+		</div>
+    </div>
+    <div id="view-dlg-buttons" >
+        <a href="javascript:void(0)" id="btn_view_ok" style="display: none;" class="easyui-linkbutton"  onclick="javascript:saveAudit(0)">审核通过</a>
+	    <a href="javascript:void(0)" id="btn_view_no" style="display: none" class="easyui-linkbutton"  onclick="javascript:saveAudit(2)">审核拒绝</a>
+    	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#view-dlg').dialog('close')">关闭</a>
+    </div>
+    
+    <script type="text/javascript">
+    
+        var baseAction = "<@sp.ctx />/user/sys/customerRentinfo.htm"
+        var addBaseAction = "<@sp.ctx />/user/sys/customerRentinfoAdd.htm"
+        var updateBaseAction="<@sp.ctx />/user/sys/customerRentinfoUpdate.htm"
+        var materialAction = "<@sp.ctx />/user/bus/busMaterial.htm"
+        var repairAction="<@sp.ctx />/user/sys/repairInfo.htm";
+        var customerAction = "<@sp.ctx />/user/sys/customerInfo.htm"
+        	
+        var staticHref="<@sp.upfile_dir />/";   //本地:upfile_dir 七牛:upfile
+        var url;
+      
+        function addDg(){
+        	createNewTab('新增调拨客户',1)
+        }
+
+		
+        function createNewTab(title,type) {
+        	
+			var a="${add!'0'}"
+			var b="${upd!'0'}"
+			var c="${del!'0'}"
+			var d="${exp!'0'}"
+			var e="${aud!'0'}"
+			var role="&a="+a+"&b="+b+"&c="+c+"&d="+d+"&e="+e;
+			switch (type) {
+			case 0:
+				window.parent.open1(title, baseAction+"?x="+Math.random()+role);
+				break;
+			case 1:
+				window.parent.open1(title, addBaseAction+"?x="+Math.random()+role);
+				window.parent.$('#tabs').tabs('close', '调拨客户信息维护');
+				break;
+            case 2:
+            	var row = $('#dg').datagrid('getSelected');
+    			if (row) {
+    				window.parent.open1(title, updateBaseAction+"?id="+row.cuscode+"&loginName="+row.loginName+role);
+    				window.parent.$('#tabs').tabs('close', '调拨客户信息维护');
+    			}
+				break;
+			}
+			
+		}
+		
+		function selectHtTab(title){
+		    $('#ht_tab').tabs('select', title);
+	    }
+        function isCurrentTab(index){
+        	var tab_ = $('#ht_tab').tabs('getSelected');
+        	var index_ = $('#ht_tab').tabs('getTabIndex',tab_);
+        	if(index==index_){
+        		return true;
+        	}
+        	return false;
+        }
+        
+        function closeForm(subtitle){
+			if(confirm('确认要关闭吗？')){
+				window.parent.$('#tabs').tabs('close', subtitle);
+			}
+			
+		}
+        var editIndex = undefined;
+		function endEditing(){
+			if (editIndex == undefined){return true}
+			if ($('#dgItem').datagrid('validateRow', editIndex)){
+				var ed = $('#dgItem').datagrid('getEditor', {index:editIndex,field:'typeid'});
+				var name = $(ed.target).combobox('getText');
+				$('#dgItem').datagrid('getRows')[editIndex]['name'] = name;
+				$('#dgItem').datagrid('endEdit', editIndex);
+				editIndex = undefined;
+				return true;
+			} else {
+				return false;
+			}
+		}
+		// 点击编辑行
+		function onClickCell(index, field){
+			if (endEditing()){
+				$('#dgItem').datagrid('selectRow', index).datagrid('beginEdit', index);
+				var ed = $('#dgItem').datagrid('getEditor', {index:index,field:field});
+				if (ed){
+					($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+				}
+				editIndex = index;
+			} else {
+				setTimeout(function(){
+					$('#dgItem').datagrid('selectRow', editIndex);
+				},0);
+			}
+		}
+		var editIndexDown = undefined;
+		function endEditingDown(){
+			if (editIndexDown == undefined){return true}
+			if ($('#dgItemDown').datagrid('validateRow', editIndexDown)){
+				var ed = $('#dgItemDown').datagrid('getEditor', {index:editIndexDown,field:'id'});
+				var name = $(ed.target).combobox('getText');
+				$('#dgItemDown').datagrid('getRows')[editIndexDown]['tName'] = name;
+				$('#dgItemDown').datagrid('endEdit', editIndexDown);
+				editIndexDown = undefined;
+				return true;
+			} else {
+				return false;
+			}
+		}
+		// 点击编辑行
+		function onClickCellDown(index, field){
+			if (endEditingDown()){
+				$('#dgItemDown').datagrid('selectRow', index).datagrid('beginEdit', index);
+				var ed = $('#dgItemDown').datagrid('getEditor', {index:index,field:field});
+				if (ed){
+					($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+				}
+				editIndexDown = index;
+			} else {
+				setTimeout(function(){
+					$('#dgItemDown').datagrid('selectRow', editIndexDown);
+				},0);
+			}
+		}
+		
+		function setEditing(rowIndex){
+			
+			var editors = $('#dgItem').datagrid('getEditors', rowIndex);
+			
+			var nameEditor = editors[1];
+			
+			nameEditor.target.bind('change', function(){
+				alert('1')
+			});
+			nameEditor.target.bind('blur', function(){
+				alert('2')
+			});
+			
+		}
+		
+		/**
+		 *租费费修改后保存表格数据 （界面上保存）
+		 **/
+		function acceptUp(){
+			if (endEditing()){
+				$('#dgItem').datagrid('acceptChanges');
+			}
+		}
+		/**
+		 *维修费修改后保存表格数据 （界面上保存）
+		 **/
+		function acceptDown(){
+			if (endEditingDown()){
+				$('#dgItemDown').datagrid('acceptChanges');
+			}
+		}
+		//添加
+		function appendUp(){
+			if (endEditing()){
+				$('#dgItem').datagrid('appendRow',{
+					                                "rentalDay":1,
+					                                "quantity":1000,
+					                                "tonQantity":0});
+				editIndex = $('#dgItem').datagrid('getRows').length -1;
+				$('#dgItem').datagrid('selectRow', editIndex).datagrid('beginEdit', editIndex);
+		    }
+		}
+		function appendDown(){
+			if (endEditingDown()){
+				$('#dgItemDown').datagrid('appendRow',{});
+				editIndexDown = $('#dgItemDown').datagrid('getRows').length -1;
+				$('#dgItemDown').datagrid('selectRow', editIndexDown).datagrid('beginEdit', editIndexDown);
+		    }
+		}
+		//移除
+		function removeUp(){
+			if (editIndex == undefined){return}
+			removeJoinData();
+			$('#dgItem').datagrid('cancelEdit', editIndex).datagrid('deleteRow', editIndex);
+			editIndex = undefined; 
+			acceptUp();
+			
+		}
+		function removeDown(){
+			if (editIndexDown == undefined){return}
+			$('#dgItemDown').datagrid('cancelEdit', editIndexDown).datagrid('deleteRow', editIndexDown);
+			editIndexDown = undefined;
+		}
+		//删除下面关联数据
+		function removeJoinData(){
+			var row=$('#dgItem').datagrid('getSelected')
+			recursionDel(row);
+			//删除数据后自动保存界面修改数据
+			acceptDown();
+		}
+		//由于删除一条数据后索引会变化,需要重新获取数据对象然后一条条删除
+		function recursionDel(row){
+			var rows=$('#dgItemDown').datagrid('getRows')
+			for ( var i = 0; i < rows.length; i++) {
+				if(row.typeid==rows[i].typeid){
+					var del_index=$('#dgItemDown').datagrid('getRowIndex',rows[i])
+					$('#dgItemDown').datagrid('cancelEdit', del_index).datagrid('deleteRow', del_index);
+					editIndexDown = undefined;
+					return recursionDel(row);
+				}
+			}
+			
+		}
+        function editDg(){
+            var row = $('#dg').datagrid('getSelected');
+			
+	        if (row.status != '1') {
+	            $.messager.alert('错误信息', "不能修改已经审核客户");
+	            return false;
+	        }
+	        if (row) {
+	        	createNewTab('修改调拨客户',2)
+	        }
+//         	url = baseAction+'?method=updateInfo&_ajax';
+        	
+//         	var row = $('#dg').datagrid('getSelected');
+        	
+//         	//文件类型数据会影响数据填充所有置为空
+//         	row.mchlicence="";
+//         	row.contracturl="";
+    	   
+//     	    if (row){
+//     		    $('#status_id').show();
+//     		    $('#dlg').dialog('open').dialog('setTitle','修改客户信息');
+//     		    $('#fm').form('clear');
+//     		    $('#fm').form('load',row);
+
+//     	    }
+    	    
+    	    
+        }
+        var dataPara={
+        		id:'',
+        		status:'',
+        		cuscode:'',
+        }
+        function saveAudit(status){
+        	var id=$("#hide_id").val();
+        	var cuscode=$("#hide_cuscode").val();
+        	dataPara.status=status;
+        	dataPara.id=id;
+        	dataPara.cuscode=cuscode;
+        	url = updateBaseAction+'?method=auditInfo';
+        	$.ajax({
+				url: url,
+				type: 'POST',
+				data:dataPara,
+				dataType: 'json',
+				//timeout: 1000,
+				error: function(){
+					$.messager.alert('失败提示', '提交数据失败，请联系管理员。');
+				},
+				success: function(result){
+					
+					if (result.success) {
+						$.messager.alert('提示信息', '保存成功！','info' ,function () {
+							 $('#view-dlg').dialog('close'); // close the dialog
+		    				 $('#dg').datagrid('reload'); // reload the user data
+						});
+					} else {
+						$.messager.alert('错误信息', result.errorMsg);
+					}
+					
+				}
+			});
+        }
+        
+        /**
+		 *校验提交参数
+		 **/
+	    function checkSubmitParam(){
+        	
+        	var tabIndex=0; //调拨客户资料
+	    	var cusnameObj=$("#cusname");
+	    	var custype=$("#custype");
+	    	var custypeVal=custype.combobox('getValue');
+		    if(!isCurrentTab(0)){
+			    	
+			    	if(cusnameObj.val()==""){
+						$.messager.alert('提示信息', '客户名称不能为空！','info' ,function () {
+							selectHtTab(tabIndex);
+							cusnameObj.textbox('textbox').focus();	
+						});
+						return false;
+					}
+					if(custypeVal==""){
+						$.messager.alert('提示信息', '客户类型不能为空！','info' ,function () {
+							selectHtTab(tabIndex);
+							custype.textbox('textbox').focus();	
+						});
+						return false;
+					}
+					
+		    }else{
+			    	if(cusnameObj.val()=="")
+			    	{
+						return false;
+					}
+					if(custypeVal=="")
+					{
+						return false;
+					}
+					
+		    }
+		    
+		    tabIndex=1;//租修标准
+		    if(!isCurrentTab(tabIndex))
+		    {
+			    	var rows = $('#dgItem').datagrid('getRows');
+			    	
+				    for (var i = 0; i < rows.length; i++) {
+						if(rows[i].rentalDay=="undefined" || rows[i].rentalDay==null  || rows[i].rentalDay=='' ){
+							$.messager.alert('提示', "请输入日租金并保存");
+							selectHtTab(tabIndex);
+							return false;
+						}
+						if(rows[i].quantity=="undefined" || rows[i].quantity==null  || rows[i].quantity=='' ){
+							$.messager.alert('提示', "请输入约租量并保存");
+							selectHtTab(tabIndex);
+							return false;
+						}
+						if(rows[i].tonQantity=="undefined" || rows[i].tonQantity==null  || rows[i].tonQantity=='' ){
+							$.messager.alert('提示', "请输入每吨数量并保存");
+							selectHtTab(tabIndex);
+							return false;
+						}
+					}
+				   
+				    var rows2 = $('#dgItemDown').datagrid('getRows');
+				    for (var i = 0; i < rows2.length; i++) {
+						if(rows2[i].price=="undefined" || rows2[i].price==null  || rows2[i].price=='' ){
+							$.messager.alert('提示', "请输入单价并保存");
+							selectHtTab(tabIndex);
+							return false;
+						}
+					}
+		    }else{
+			    	var rows = $('#dgItem').datagrid('getRows');
+				    
+				    for (var i = 0; i < rows.length; i++) {
+						if(rows[i].rentalDay=="undefined" || rows[i].rentalDay==null  || rows[i].rentalDay=='' ){
+							selectHtTab(tabIndex);
+							return false;
+						}
+						if(rows[i].quantity=="undefined" || rows[i].quantity==null  || rows[i].quantity=='' ){
+							selectHtTab(tabIndex);
+							return false;
+						}
+						if(rows[i].tonQantity=="undefined" || rows[i].tonQantity==null  || rows[i].tonQantity=='' ){
+							selectHtTab(tabIndex);
+							return false;
+						}
+					}
+				   
+				    var rows2 = $('#dgItemDown').datagrid('getRows');
+				    for (var i = 0; i < rows2.length; i++) {
+						if(rows2[i].price=="undefined" || rows2[i].price==null  || rows2[i].price=='' ){
+							selectHtTab(tabIndex);
+							return false;
+						}
+					}
+		    }
+		    return true;
+	    }
+        
+        function destroyDg(){
+            var row = $('#dg').datagrid('getSelected');
+			
+	        if (row.status != '1') {
+	            $.messager.alert('错误信息', "不能删除已经审核客户");
+	            return false;
+	        }
+	        
+    	    if (row){
+    	   		 $.messager.confirm('确定删除','确定删除选中数据吗?',function(r){
+    	    if (r){
+    	    	$.post(customerAction+'?method=remove',{id:row.cuscode},function(result){
+    			    if (result.success){
+    			    	$('#dg').datagrid('reload'); // reload the user data
+    			    } else {
+    			    	  $.messager.alert('错误信息',result.errorMsg
+    			    		 );
+    		        }
+              },'json');
+            }
+           });
+           }
+        }
+        
+        function formatHref(val, row){
+        	 
+        	 var  vResult = "";
+        	 
+        	 var  httpVal=staticHref+"/"+val;
+        	 
+             if(val!=null && val.length>10)
+             {
+            	  vResult = '<a style="color:blue;" href="'+httpVal+'">'+val+'</span>';
+             }
+             
+     	     return vResult;
+        }
+        
+        function formatCustype(val, row) {
+    	    
+        	var vResult = "";
+    	    
+    	    if (val == '1') 
+    	    {
+    	        vResult = '<span style="color:green;">调拨客户</span>';
+    	    }
+    	    else if(val == '2')
+    	    {
+    	    	vResult = '<span style="color:green;">供应商</span>';
+    	    }
+    	    else if(val == '3')
+    	    {
+    	    	vResult = '<span style="color:green;">采购商</span>';
+    	    }
+    	    else if (val == '4') 
+    	    {
+    	        vResult = '<span style="color:green;">担保公司</span>';
+    	    }
+    	    else if (val == '5') 
+    	    {
+    	        vResult = '<span style="color:green;">项目客户</span>';
+    	    }
+    	    return vResult;
+    	}
+        function formatStatus(val, row) {
+    	    
+        	var vResult = "";
+    	    
+    	    if (val == '1') 
+    	    {
+    	        vResult = '<span style="color:dodgerblue;">开户申请</span>';
+    	    }
+    	    else if(val == '2')
+    	    {
+    	    	vResult = '<span style="color:red;">已拒绝</span>';
+    	    }
+    	    else if(val == '9')
+    	    {
+    	    	vResult = '<span style="color:red;">停用</span>';
+    	    }
+    	    else if (val == '0') {
+    	        vResult = '<span style="color:green;">正常</span>';
+    	    }
+    	    return vResult;
+    	}
+        
+        var materialList=[]
+		var materialListDown=[]
+		/**
+		 *初始化物质信息
+		 **/
+		function initMaterial(){
+			var dataUrl=materialAction+'?method=getMaterialType';
+			$.post(dataUrl,{},
+			    function(msg){
+				materialList=eval("("+msg+")");
+				initDgItem()
+			 })
+// 			dataUrl=repairAction+'?method=getRepairInfo'
+// 			$.post(dataUrl,{},
+// 				function(msg){
+// 				materialListDown=eval("("+msg+")");
+// 				initDgItemDown()
+// 			})
+		}
+		
+		/**
+		 *初始化租费列表
+		 **/
+		function initDgItem(){
+			var loadUrl="";
+			<#if cuscode??>
+			loadUrl=baseAction+'?method=getRentinfoList'+"&id="+"${cuscode!''}";
+			</#if>
+        	$('#dgItem').datagrid({
+        		url:loadUrl,
+        	    ctrlSelect:true,
+        	    columns:[[
+        	        {field:'typeid',title:'物资名称',width:150,align:'left',
+						formatter:function(value,row){
+							return row.name;
+						},
+						editor:{
+							type:'combogrid',
+							options:{
+								idField:'typeid',
+								textField:'name',
+								data:materialList,
+								required:true,
+								onClickRow:onClickRowChangeVal,
+								columns:[[    
+							                {field:'name',title:'物资名称',width:60},    
+							                {field:'accountFlag',title:'单位',width:100}
+							            ]],
+							    loadFilter: function(data){
+							        		
+							        		var dataNew=[]
+							        		for ( var i = 0; i < data.length; i++) {
+							        			if(data[i].parentid!="0" && data[i].status!="9"){
+							        				dataNew.push(data[i]);
+							        			}
+											}
+							    return dataNew;
+							    }
+
+							}
+						}},  
+        	        {field:'rentalDay',title:'日租金',width:100,align:'left',editor:{type:'numberbox',options:{precision:4,required:true}}},
+        	        {field:'quantity',title:'约租量',width:100,align:'left',editor:{type:'numberbox',options:{required:true}}},
+        	        {field:'tonQantity',title:'每吨数量',width:100,align:'left',editor:{type:'numberbox',options:{required:true}}},
+        	        {field:'unit',title:'单位',width:100,align:'left'},
+        	        {field:'materialcode',title:'隐藏的code',hidden:true},
+        	    ]]    
+        	}); 
+
+		}
+		//加载明细
+        function loadDetailData(dataId){
+        	
+        	var detailUrl=baseAction+'?method=getRentinfoList&id='+dataId
+        	
+        	$('#dgItem_detail').datagrid({    
+        	    url:detailUrl,    
+        	    ctrlSelect:true,
+        	    columns:[[
+        	        {field:'name',title:'物资名称',width:150,align:'left'}, 
+        	        {field:'rentalDay',title:'日租费',width:100,align:'left'},
+        	        {field:'quantity',title:'约租量',width:100,align:'left'},
+        	        {field:'tonQantity',title:'每吨数量',width:100,align:'left'},
+        	        {field:'unit',title:'单位',width:100,align:'left'},
+        	    ]]    
+        	});  
+
+        }
+		/**
+		 *点击租费选项，数据改变
+		 **/
+        function onClickRowChangeVal(index,row){
+        	
+            var rowData=$('#dgItem').datagrid('getSelected');
+            
+            rowData.materialcode=row.typeid
+            rowData.unit=row.accountFlag
+			acceptUp()  //保存数据
+			//当前选中行索引
+			editIndex = $('#dgItem').datagrid('getRowIndex',rowData);
+            //选中当前行打开编辑
+			$('#dgItem').datagrid('selectRow', editIndex).datagrid('beginEdit', editIndex);
+            
+			//if(!checkDataExist())
+        	//loadRepairInfo(row.typeid)
+		}
+        /**
+         *当前物资的维修费是否存在
+         **/
+		function checkDataExist(){
+			var row=$('#dgItem').datagrid('getSelected');
+			var rows=$('#dgItemDown').datagrid('getRows')
+			for ( var i = 0; i < rows.length; i++) {
+				if(row.typeid==rows[i].typeid){
+					return true;
+				}
+			}
+			return false;
+		}
+    
+    	function showOptDetail(){
+    		var hurl = location.href+"";
+        	var start_ = hurl.indexOf("_rs=");
+        	if(start_!=-1){
+        		var d = (hurl.substr(start_+4,5))+"" ;
+        		var queF =  1;//查  必须有权限 
+        		var addF =  d.substr(1,1)*1;
+        		var ediF =  d.substr(2,1)*1;
+        		var delF =  d.substr(3,1)*1;
+        		var expF =  d.substr(4,1)*1;
+        		if(addF){
+        			$("#add_bar").show();
+        		}
+        		if(ediF){
+        			$("#edit_bar").show();
+        		}
+        		if(delF){
+        			$("#del_bar").show();
+        		}
+        		if(expF){
+        			$("#exp_bar").show();
+        		}
+        	}
+    	}
+    	function exportDg(){
+    		$('#dlg-export').dialog('open').dialog('setTitle','导出设置');
+    	}
+    	
+    	 function exportFile(){
+    	    	var props = $("th","#dg");
+    	    	var propStr = "";
+    	    	var propTiles = "";
+    	    	for(var i=0;i<props.length;i++){
+    	    		propStr += ($(props[i]).attr("field"));
+    	    		propTiles += ($(props[i]).text());
+    	    		if(i!=props.length-1){
+    	    			propStr+=",";
+    	    			propTiles+=",";
+    	    		}
+    	    	}
+    	    	var startIndex = $("#fm-export").find(":input[name=startIndex]").val();
+    	    	var lastIndex = $("#fm-export").find(":input[name=lastIndex]").val();
+    	    	var regNum = /^(\-)?\d{1,}$/;
+    	    	if(!(regNum.test(startIndex) &&  regNum.test(lastIndex))){
+    	    		$.messager.alert('Error',"索引必须都是数字");
+    	    		return ;
+    	    	}
+    	    	if(lastIndex*1!=-1 && lastIndex*1<startIndex*1){
+    	    		$.messager.alert('Error',"结束索引不能小于开始索引");
+    	    		return ;
+    	    	}
+    	    	
+    	    	$("#fm-export-titles").val(propTiles);
+    	    	$("#fm-export-props").val(propStr);
+    	    	var prms = $('#queryFm').serialize();
+    	    	var exportUrl  = baseAction+"?method=export&"+prms;
+    	    	$("#fm-export").attr("action",exportUrl);
+    	    	location.href = exportUrl;
+    	    	$('#dlg-export').dialog('close');
+    		    $('#fm-export').submit();
+    		  }
+    	 
+    	 
+    	 
+    	 	//详情查看 
+    		var dg_views_init = false;
+    	 	var dg_titles_arr  ;
+    	 	var dg_props_arr  ;
+    	 	function initDgView(){
+    	 		dg_titles_arr = [];
+    	 		dg_props_arr = [];
+    	 		var props = $("th","#dg");
+    	 		for(var i=0;i<props.length;i++){
+    	 			dg_props_arr.push($(props[i]).attr("field"));
+    	 			dg_titles_arr.push($(props[i]).text());
+    	 		}
+    	 		dg_views_init = true;
+    	 	}
+    		
+    		$(function(){
+        		showOptDetail();
+        		//dbclick open view
+        		
+        	});
+    		function comm_view(title,audit){
+    			var row = $('#dg').datagrid('getSelected');
+    			if (!row) {
+					return;
+				}
+ 				if(! dg_views_init){
+ 					initDgView();
+ 				}
+ 				$('#view-dlg').dialog('open').dialog('setTitle',title);
+    			var newHtml = "";
+ 				for(var i=0;i<dg_props_arr.length;i++){
+ 					var ti = dg_titles_arr[i];
+ 					var va = row[dg_props_arr[i]];
+ 					if(!va && va!=0){
+ 						va = "&nbsp;"
+ 					}
+ 					var sty = "border-bottom: solid 1px #fff;padding: 4px;margin:0px;" ;
+ 					if(i%2 == 0){
+ 						sty += "background-color:#F0F0F0;";
+ 					}else{
+ 						sty += "background-color:#ECF5FF;";
+ 					}
+ 					
+ 					var propertyId=dg_props_arr[i];
+ 					
+ 					var  httpVal=staticHref+"/"+va;
+ 					
+ 					var  selectStatus
+ 					
+ 					if(propertyId=="id"){
+ 						$("#hide_id").val(va);
+ 					}
+ 					var dataId
+ 					if(propertyId=="cuscode"){
+ 						dataId=va;
+ 						$("#hide_cuscode").val(va);
+ 					}
+ 					
+ 					if(!(propertyId=="id" || propertyId=="cuscode"))
+ 					{
+ 						if((va!=null && va.length>10) && (propertyId=="cuslicence" || propertyId=="contracturl"))
+ 						{
+ 							//链接显示
+ 							newHtml+="<div class=\"fitem\" style=\""+sty+"\"><label style=\"width: 100px;text-align:right\">"+ti+":</label> <a style=\"width: 200px;\" href=\""+httpVal+"\">"+va+"</a></div>"
+ 						}else
+ 						{
+ 							
+					    	if(propertyId=="status"){
+					    		selectStatus=va
+					    		va = formatStatus(va,'')
+					    	}
+					    	if(propertyId=="custype"){
+					    		va = formatCustype(va,'')
+					    	}
+						    //文本显示
+	 						newHtml+="<div class=\"fitem\" style=\""+sty+"\"><label style=\"width: 100px;text-align:right\">"+ti+":</label> <label style=\"width: 200px;\">"+va+"</label></div>"
+ 						    
+ 						}
+ 					}
+ 				}
+ 				
+ 				$('#view-dlg-content').html(newHtml);
+ 				
+ 				var openStatus=1; //是开户状态
+ 				if(selectStatus!=openStatus){
+ 					$("#btn_view_ok").hide();
+					$("#btn_view_no").hide();
+ 				}
+ 				//获取明细
+				loadDetailData(dataId);
+    		}
+    		function viewDetail_(){
+    			$("#btn_view_ok").hide();
+				$("#btn_view_no").hide();
+ 				comm_view('详情',false);
+ 			}
+    		function auditDg(){
+    			$("#btn_view_ok").show();
+				$("#btn_view_no").show();
+    			comm_view('审核',true);
+    			
+    		}
+    		
+    		//上传文件结果给子页面调用 
+    		function uploadResult(result,msg){
+    			if( result!='true'){
+    				 $.messager.alert('Error',  msg);
+    			}else{
+    				$.messager.confirm("上传成功","上传成功，关闭窗口？",function(r){    
+    				    if (r){    
+    				    	$('#dlg').dialog('close');
+    				    }   
+    				    query();
+    			 });
+    			}
+    		}
+    		
+    		
+    		function rowResize(sizeType){
+    			var baseHeight = 150;
+    			var newpageSize = sizeType *10; 
+    			
+    			  $("#dg").datagrid('resize', {
+    				   height : baseHeight + (250 * sizeType)
+    				  });
+    			  $('#dg').datagrid({ 
+      				"pageSize":newpageSize 
+      				}); 
+    		}
+    		
+    		
+    </script>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="CStockFlow">
+
+	<sql id="tableName" >
+		c_stock_flow
+	</sql>
+	
+	<sql id="selectColumns">
+	select
+	mchcode mchcode ,
+	id id ,
+	htcode htcode ,
+	deptid deptid ,
+	materialcode materialcode ,
+	amt amt ,
+	order_no orderNo ,
+	order_type orderType ,
+	remark remark ,
+	creattime creattime ,
+	depot_id depotId ,
+	createoper createoper ,
+	change_type changeType     FROM 
+    <include refid="tableName"/> t
+  	</sql>
+  	
+  	<!-- 添加 -->
+	<insert id="create" parameterType="com.lq.lss.model.CStockFlow" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO <include refid="tableName"/> 
+		(mchcode,htcode,id,deptid,materialcode,amt,order_no,order_type,remark,creattime,depot_id,createoper,change_type)
+		VALUES
+		(#{mchcode},#{htcode} ,#{id} ,#{deptid} ,#{materialcode} ,#{amt} ,#{orderNo} ,#{orderType} ,#{remark} ,#{creattime} ,#{depotId} ,#{createoper} ,#{changeType} )
+	</insert>
+	
+	<!-- 批量 添加 -->
+	<insert id="create_BATCH"  parameterType="List" >
+		INSERT INTO <include refid="tableName"/> 
+		(mchcode,htcode,id,deptid,materialcode,amt,order_no,order_type,remark,creattime,depot_id,createoper,change_type)
+		VALUES 
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.mchcode} ,#{item.htcode} ,#{item.id} ,#{item.deptid} ,#{item.materialcode} ,#{item.amt} ,#{item.orderNo} ,#{item.orderType} ,#{item.remark} ,#{item.creattime} ,#{item.depotId} ,#{item.createoper} ,#{item.changeType} )
+		</foreach>
+	</insert>
+	
+	<delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM 
+		<include refid="tableName"/> 
+		WHERE order_no = #{orderNo}
+  	</delete>
+	
+	<select id="loadAll" resultType="com.lq.lss.model.CStockFlow">
+		<include refid="selectColumns" />
+	</select>
+	
+	<select id="findById" resultType="com.lq.lss.model.CStockFlow" 
+	parameterType="java.lang.String">
+		<include refid="selectColumns"/>   
+		where mchcode = #{mchcode}
+	</select>
+	
+	<sql id="pageConditions">
+		WHERE 1=1
+  	<if test="mchcode != '' and mchcode != null">AND mchcode = #{mchcode}</if>
+  	<if test="id != null">AND id = #{id}</if>
+  	<if test="deptid != null">AND deptid = #{deptid}</if>
+  	<if test="materialcode != '' and materialcode != null">AND materialcode = #{materialcode}</if>
+  	<if test="amt != null">AND amt = #{amt}</if>
+  	<if test="orderNo != '' and orderNo != null">AND order_no = #{orderNo}</if>
+  	<if test="orderType != '' and orderType != null">AND order_type = #{orderType}</if>
+  	<if test="remark != '' and remark != null">AND remark = #{remark}</if>
+  	<if test="creattime != null">AND creattime = #{creattime}</if>
+  	<if test="depotId != null">AND depot_id = #{depotId}</if>
+  	<if test="createoper != '' and createoper != null">AND createoper = #{createoper}</if>
+  	<if test="changeType != '' and changeType != null">AND change_type = #{changeType}</if>
+	</sql>
+	
+	<!-- 分页查询 -->
+	<select id="findPage" resultType="com.lq.lss.model.CStockFlow"
+		parameterType="com.lq.lss.model.CStockFlow">
+		<include refid="selectColumns"/> 
+		<include refid="pageConditions"/>
+		<if test="orderStr != '' and orderStr != null">
+				order by ${orderStr}
+		</if>
+	</select>
+	
+	<select id="findPage_COUNT" resultType="int">
+		select count(1) from
+		<include refid="tableName" />
+		<include refid="pageConditions" />
+	</select>
+	
+	<sql id="update_sql">
+		UPDATE 
+		<include refid="tableName"/> 
+		<set>
+		  	<if test="id != null">id = #{id},</if>
+		  	<if test="deptid != null">deptid = #{deptid},</if>
+		    <if test="htcode != null">htcode = #{htcode},</if>
+		  	<if test="materialcode != null">materialcode = #{materialcode},</if>
+		  	<if test="amt != null">amt = #{amt},</if>
+		  	<if test="orderNo != null">order_no = #{orderNo},</if>
+		  	<if test="orderType != null">order_type = #{orderType},</if>
+		  	<if test="remark != null">remark = #{remark},</if>
+		  	<if test="creattime != null">creattime = #{creattime},</if>
+		  	<if test="depotId != null">depot_id = #{depotId},</if>
+		  	<if test="createoper != null">createoper = #{createoper},</if>
+		  	<if test="changeType != null">change_type = #{changeType}</if>
+			</set>
+		WHERE mchcode = #{mchcode}
+	</sql>
+		
+	<update id="update" parameterType="com.lq.lss.model.CStockFlow">
+		<include refid="update_sql"/>
+	</update>	
+		
+	<select id="findStockFlowListById" resultType="com.lq.lss.dto.CStockFlowDto" 
+	parameterType="java.lang.String">
+		select
+			t.mchcode mchcode ,
+			t.id id ,
+			t.deptid deptid ,
+			t.htcode htcode ,
+			t.materialcode materialcode ,
+			t.amt amt ,
+			t.order_no orderNo ,
+			t.order_type orderType ,
+			t.remark remark ,
+			t.creattime creattime ,
+			t.depot_id depotId ,
+			t.createoper createoper ,
+			t.change_type changeType,
+			mi.covert_ratio covertRatio,
+            mi.typeId typeid FROM
+		    <include refid="tableName"/> t 
+		    left join b_material_info mi on t.materialcode=mi.code
+		    where t.order_no = #{orderNo}
+	</select>
+
+</mapper>
